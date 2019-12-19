@@ -10,7 +10,7 @@ library(shinydashboard)
 library(leaflet)
 library(sf)
 library(raster)
-source('data.R')
+source('./R/data.R')
 
 
 
