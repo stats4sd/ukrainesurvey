@@ -1,0 +1,15 @@
+---
+default:
+  db: "ukraine"
+  host: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "MyAwesomePassword"
+
+nico:
+  db: "ukraine"
+  host: "127.0.0.1"
+  port: 3307
+  user: "root"
+  password: "NicoPassword"
+---
