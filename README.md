@@ -7,7 +7,7 @@ Clone this project to a local folder:
 
 ## Create config file
 
-Rename the file called `config.yml.exemple` into `config.yml`, and change the information in this file according to your own connection parameters. Note that this is a [YAML file](https://learnxinyminutes.com/docs/yaml/), so indentations and spaces are important
+Rename the file called `config.yml.exemple` into `config.yml`, and change the information in this file according to your own connection parameters. Note that this is a [YAML file](https://learnxinyminutes.com/docs/yaml/), so indentations and spaces are important!
 
 ## Get Setup with R:
 

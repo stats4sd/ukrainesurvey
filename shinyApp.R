@@ -97,7 +97,7 @@ server <- function(input, output, session) {
   if(cluste_id=="all clusters"){
     shapeFilter<-shape_json
   }else{
-    shapeFilter<-subset(shape_json, id==input$cluster)
+    shapeFilter<-subset(shape_json, name==input$cluster)
   }
   })
 

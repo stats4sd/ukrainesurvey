@@ -1,15 +1,17 @@
 library(DBI)
 library(shinydashboard)
 library(leaflet)
+library(rgdal)
 
-#get shape from json file
-
-#shape_json = rgdal::readOGR("Data/shapes.geojson")
-#point_json = rgdal::readOGR("Data/points.geojson")
+#get shape and points from json file
+#shape_json = readOGR("Data/shapes.geojson")
+#point_json = readOGR("Data/points.geojson")
 #save(list(shape_json, point_json), file = "./Data/shapes.Rdata")
 #load("./Data/points.Rdata")
 load("./Data/shapes.Rdata")
 
+# filter to get only the districts we want - to be modified to put all the districts
+shape_json <- subset(shape_json, name %in% c(530621, 530538, 530333, 530633, 530950, 530330, 530934, 531188, 531189))
 ##Retrieve config parameters from the config.tml file
 db_param <- config::get()
 
