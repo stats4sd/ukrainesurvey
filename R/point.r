@@ -1,6 +1,4 @@
-library(geojsonR)
-library(geojsonio)
-library(rgdal)
+# was used to create the geojson points data file
 setwd("~/Ukraine_shape_point_files")
 
 shapes_points_names <- list.files()

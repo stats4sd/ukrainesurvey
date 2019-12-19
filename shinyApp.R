@@ -1,18 +1,5 @@
 
-#install.packages("shinydashboard")
-#install.packages("sf")
-#install.packages("DBI")
-#install.packages("RMySQL")
-#install.packages("odbc")
-library(shiny)
-library(sf)
-library(shinydashboard)
-library(leaflet)
-library(sf)
-library(raster)
-source('./R/data.R')
-
-
+source('./R/load_data.R')
 
 ui <- dashboardPage(
   dashboardHeader(title = "Ukraine"),

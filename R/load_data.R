@@ -1,22 +1,26 @@
 library(DBI)
-library(DT)
-library("readxl")
-library(geojsonR)
-
+library(shinydashboard)
+library(leaflet)
 
 #get shape from json file
 
-#shape_json = rgdal::readOGR("C:/Users/LuciaFalcinelli/Dropbox (SSD)/ukraine tools/R/feature_collection1.geojson")
-load("C:/Users/LuciaFalcinelli/Dropbox (SSD)/ukraine tools/R/shapes.Rdata")
+#shape_json = rgdal::readOGR("Data/shapes.geojson")
+#point_json = rgdal::readOGR("Data/points.geojson")
+#save(list(shape_json, point_json), file = "./Data/shapes.Rdata")
+#load("./Data/points.Rdata")
+load("./Data/shapes.Rdata")
+
+##Retrieve config parameters from the config.tml file
+db_param <- config::get()
 
 ##Create the connection with database 
 con <- dbConnect(RMySQL::MySQL(),
-                 dbname = "ukraine",
-                 host ='127.0.0.1', 
-                 port = 3306,
-                 user = 'root',
-                 password = "Logoslogos88"
-                 )
+                 dbname = db_param$db,
+                 host =db_param$host,
+                 port = db_param$port,
+                 user = db_param$user,
+                 password = db_param$password
+)
 
 
 dbSendQuery(con,"SET NAMES utf8mb4")

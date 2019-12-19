@@ -1,6 +1,4 @@
-library(geojsonR)
-library(geojsonio)
-library(rgdal)
+# was used to create the geojson shapes data file
 setwd("~/Ukraine_shape_point_files")
 
 shapes_points_names <- list.files()
@@ -18,17 +16,6 @@ for(i in shapes_names[-1]){
 }
 
 x <- paste0(x, "]}")
-writeLines(x, "shapes2.geojson")
+writeLines(x, "shapes.geojson")
 
 
-
-
-
-
-y <- readLines(shapes_names[1])
-y <- sub('\\]\\}$', '', x)
-y2 <- sub('^\\{"type":"FeatureCollection","features":\\[', '', sub('\\]\\}$', '', y2))
-y <- paste(y, y2, sep=",")
-
-y <- paste0(y, "]}")
-writeLines(y, "blub2.txt")

@@ -1,4 +1,7 @@
 ---
+# in R:
+# config::get() will retrieve the default info
+# config::get(config="xxx") will retrieve xxx's info 
 default:
   db: "ukraine"
   host: "127.0.0.1"
@@ -6,10 +9,12 @@ default:
   user: "root"
   password: "MyAwesomePassword"
 
-nico:
+
+lukeskywalker:
   db: "ukraine"
   host: "127.0.0.1"
   port: 3307
-  user: "root"
-  password: "NicoPassword"
+  user: "jedi"
+  password: "SuperForce"
+
 ---

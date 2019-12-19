@@ -1,2 +1,4 @@
 # list of files ignored by git (neither pulled nor pushed)
 *.yml
+packrat/lib*/
+.Rproj.user
