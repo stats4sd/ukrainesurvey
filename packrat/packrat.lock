@@ -135,8 +135,8 @@ Requires: MASS, digest, gtable, lazyeval, mgcv, reshape2, rlang,
 
 Package: glue
 Source: CRAN
-Version: 1.2.0
-Hash: a67e2a3c57a78e10c948416f07a9a33a
+Version: 1.3.1
+Hash: 660bbbe3803c7cf7c9489a7d99a9c0ed
 
 Package: gridExtra
 Source: CRAN
