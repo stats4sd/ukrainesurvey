@@ -11,39 +11,40 @@ library(leaflet)
 load("./Data/shapes.Rdata")
 
 cluster <- read.csv("./Data/sampled_clusters.csv", encoding="UTF-8")
+country_shape <- readr::read_file("./Data/ukraine.kml")
 
 
 
 # filter to get only the districts we want - to be modified to put all the districts
 shape_json <- subset(shape_json, name %in% cluster$electoral_id)
 ##Retrieve config parameters from the config.tml file
-db_param <- config::get()
-
-##Create the connection with database 
-con <- dbConnect(RMySQL::MySQL(),
-                 dbname = db_param$db,
-                 host =db_param$host,
-                 port = db_param$port,
-                 user = db_param$user,
-                 password = db_param$password
-)
-
-
-dbSendQuery(con,"SET NAMES utf8mb4")
-#clusters table
-clusters_table<-dbGetQuery(con,"SELECT * FROM clusters") # your query, normal
-clusters_table$cluster_description<-as.character(clusters_table$cluster_description) #force variable to be of class character instead of factor
-Encoding(clusters_table$cluster_description)<- "UTF-8" # say R the encoding should be UTF-8
-
-#district table 
-district_table<-dbGetQuery(con, "SELECT * FROM districts")
-district_table$description_district_boundaries<-as.character(district_table$description_district_boundaries)
-Encoding(district_table$description_district_boundaries)<- "UTF-8"
-
-buildings_table<-dbGetQuery(con,'
-  select *
-  from buildings
-  group by id
-           ')
-
-dbDisconnect(con)
+# db_param <- config::get()
+# 
+# ##Create the connection with database 
+# con <- dbConnect(RMySQL::MySQL(),
+#                  dbname = db_param$db,
+#                  host =db_param$host,
+#                  port = db_param$port,
+#                  user = db_param$user,
+#                  password = db_param$password
+# )
+# 
+# 
+# dbSendQuery(con,"SET NAMES utf8mb4")
+# #clusters table
+# clusters_table<-dbGetQuery(con,"SELECT * FROM clusters") # your query, normal
+# clusters_table$cluster_description<-as.character(clusters_table$cluster_description) #force variable to be of class character instead of factor
+# Encoding(clusters_table$cluster_description)<- "UTF-8" # say R the encoding should be UTF-8
+# 
+# #district table 
+# district_table<-dbGetQuery(con, "SELECT * FROM districts")
+# district_table$description_district_boundaries<-as.character(district_table$description_district_boundaries)
+# Encoding(district_table$description_district_boundaries)<- "UTF-8"
+# 
+# buildings_table<-dbGetQuery(con,'
+#   select *
+#   from buildings
+#   group by id
+#            ')
+# 
+# dbDisconnect(con)
