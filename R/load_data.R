@@ -10,8 +10,12 @@ library(leaflet)
 #load("./Data/points.Rdata")
 load("./Data/shapes.Rdata")
 
+cluster <- read.csv("./Data/sampled_clusters.csv", encoding="UTF-8")
+
+
+
 # filter to get only the districts we want - to be modified to put all the districts
-shape_json <- subset(shape_json, name %in% c(530621, 530538, 530333, 530633, 530950, 530330, 530934, 531188, 531189))
+shape_json <- subset(shape_json, name %in% cluster$electoral_id)
 ##Retrieve config parameters from the config.tml file
 db_param <- config::get()
 
