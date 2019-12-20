@@ -1,7 +1,7 @@
 library(DBI)
 library(shinydashboard)
 library(leaflet)
-library(rgdal)
+#library(rgdal)
 
 #get shape and points from json file
 #shape_json = readOGR("Data/shapes.geojson")
