@@ -13,100 +13,95 @@
 
 
 -- Dumping database structure for ukraine
-CREATE DATABASE IF NOT EXISTS `ukraine` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */;
+DROP DATABASE `ukraine`;
+CREATE DATABASE IF NOT EXISTS `ukraine` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
 USE `ukraine`;
+
+# Setup location levels
+# Regions
+# - name;
+# Districts
+# - number (SMD)
+# Clusters
+# - unique_id
+# - electoral_id
+# - urban/rural
+# - description of boundaries
+# - num_voters
+
+CREATE TABLE IF NOT EXISTS `regions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `section` varchar(10) NOT NULL,
+  `name_en` varchar(255) NOT NULL,
+  `name_ru` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE IF NOT EXISTS `clusters` (
+  `id` int(11) NOT NULL COMMENT 'unique id from sample frame',
+  `region_id` int(11) DEFAULT NULL,
+  `electoral_id` int(11) DEFAULT NULL,
+  `boundaries_en` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `boundaries_ru` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `shape` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `cluster_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `type` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `electoral_id` (`electoral_id`),
+  KEY `link_regions_clusters` (`region_id`),
+  CONSTRAINT `link_regions_clusters` FOREIGN KEY (`region_id`) REFERENCES `regions` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping structure for table ukraine.buildings
 CREATE TABLE IF NOT EXISTS `buildings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `clusters_id` int(11) DEFAULT NULL,
-  `start` datetime DEFAULT NULL,
-  `end` datetime DEFAULT NULL,
-  `today` date DEFAULT NULL,
-  `structure_number` int(11) DEFAULT NULL,
-  `_building_gps_latitude` decimal(10,0) DEFAULT NULL,
-  `_building_gps_longitude` decimal(10,0) DEFAULT NULL,
-  `_building_gps_altitude` decimal(10,0) DEFAULT NULL,
-  `_building_gps_precision` decimal(10,0) DEFAULT NULL,
-  `building_address` varchar(200) DEFAULT NULL,
-  `kobo_uuid` varchar(100) DEFAULT NULL,
-  `_submission_time` datetime DEFAULT NULL,
-  `_validation_status` varchar(100) DEFAULT NULL,
+  `cluster_id` int(11) NOT NULL,
+  `structure_number` int(11) NOT NULL,
+  `num_dwellings` int(11) NOT NULL DEFAULT 0,
+  `latitude` decimal(10,0) DEFAULT NULL,
+  `longitude` decimal(10,0) DEFAULT NULL,
+  `altitude` decimal(10,0) DEFAULT NULL,
+  `precision` decimal(10,0) DEFAULT NULL,
+  `address` text DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `kobo_uuid` (`kobo_uuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `link_clusters_buildings` (`cluster_id`),
+  CONSTRAINT `link_clusters_buildings` FOREIGN KEY (`cluster_id`) REFERENCES `clusters` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table ukraine.buildings: ~0 rows (approximately)
-/*!40000 ALTER TABLE `buildings` DISABLE KEYS */;
-/*!40000 ALTER TABLE `buildings` ENABLE KEYS */;
-
--- Dumping structure for table ukraine.clusters
-CREATE TABLE IF NOT EXISTS `clusters` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `start` datetime DEFAULT NULL,
-  `end` datetime DEFAULT NULL,
-  `district_id` int(11) DEFAULT NULL,
-  `station_number` int(11) DEFAULT NULL,
-  `cluster_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `today` date DEFAULT NULL,
-  `shape` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `cluster_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-  `kobo_uuid` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `_submission_time` datetime DEFAULT NULL,
-  `_validation_status` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `kobo_uuid` (`kobo_uuid`),
-  KEY `link_district_clusters` (`district_id`),
-  CONSTRAINT `link_district_clusters` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Dumping data for table ukraine.clusters: ~4 rows (approximately)
-/*!40000 ALTER TABLE `clusters` DISABLE KEYS */;
-INSERT INTO `clusters` (`id`, `start`, `end`, `district_id`, `station_number`, `cluster_description`, `today`, `shape`, `cluster_name`, `kobo_uuid`, `_submission_time`, `_validation_status`) VALUES
-	(1, NULL, NULL, 1, 531188, 'м.Полтава – вул.Анатолія Кукоби: 1А–1Б, 5–7, 11–13, 15–15/1, 17/2, 27–47; вул.Інститутський проріз: 34, 36, 36А, 36Б, 40, 42, 44, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 70А, 72, 72Б, 74, 76; вул.Картинна, вул.Мазурівська, вул.Небесної Сотні: 45, 45А, 47, 49, 51, 53, 55, 55А, 56, 57/1, 57/1Б, 58, 59/2, 62, 66, 70, 74; вул.Художня, пров.Ломаний: 1А–11А; пров.Мазурівський, пров.Родини Іваненків, пров.ХТЗ, просп.Першотравневий: 26;', '2019-12-16', NULL, NULL, NULL, NULL, NULL),
-	(2, NULL, NULL, 1, 531189, 'м.Полтава – вул.Анатолія Кукоби: 4, 8, 14–14А, 16, 18–26; вул.Вузька, вул.Небесної Сотні: 61, 65, 67, 68, 76, 78, 78Б, 86, 86А, 88, 90, 92, 96, 98, 100; пров.Кооперативний, пров.Петра Ротача: 3А–9, 10;	', NULL, 'HJAS SDCSNJ', NULL, NULL, NULL, NULL);
-/*!40000 ALTER TABLE `clusters` ENABLE KEYS */;
-
--- Dumping structure for table ukraine.districts
-CREATE TABLE IF NOT EXISTS `districts` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `description_district_boundaries` text,
-  `Oblast` text,
-  `smd` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- Dumping data for table ukraine.districts: ~0 rows (approximately)
-/*!40000 ALTER TABLE `districts` DISABLE KEYS */;
-INSERT INTO `districts` (`id`, `description_district_boundaries`, `Oblast`, `smd`) VALUES
-	(1, 'Подільський, Шевченківський райони міста Полтави', 'Poltava Oblast ', 144),
-	(2, 'Київський район міста Полтави, Котелевський, Полтавський райони', 'Poltava Oblast ', 145),
-	(3, 'частина Автозаводського району (виборчі дільниці № 531040 – 531085, 531099, 531100), Крюківський район міста Кременчука', 'Poltava Oblast ', 146),
-	(4, 'місто Миргород, Диканський, Зіньківський, Миргородський, Решетилівський, Шишацький райони', 'Poltava Oblast ', 147),
-	(5, 'місто Лубни, Великобагачанський, Оржицький, Семенівський, Хорольський райони, частина Лубенського району (виборчі дільниці № 530474 – 530487, 530489 – 530494, 530504 – 530506, 530522 – 530531)', 'Poltava Oblast ', 148),
-	(6, 'Карлівський, Кобеляцький, Козельщинський, Машівський, Новосанжарський, Чутівський райони', 'Poltava Oblast ', 149),
-	(7, 'місто Горішні Плавні, частина Автозаводського району міста Кременчук (виборчі дільниці № 531086 – 531098), Глобинський, Кременчуцький райони', 'Poltava Oblast ', 150),
-	(8, 'місто Гадяч, Гадяцький, Гребінківський, Лохвицький, Пирятинський, Чорнухинський райони, частина Лубенського району (виборчі дільниці № 530495 – 530503, 530507 – 530518, 530520, 530521)', 'Poltava Oblast ', 151);
-/*!40000 ALTER TABLE `districts` ENABLE KEYS */;
 
 -- Dumping structure for table ukraine.dwellings
 CREATE TABLE IF NOT EXISTS `dwellings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `buildings_id` int(11) DEFAULT NULL,
-  `start` datetime DEFAULT NULL,
-  `end` datetime DEFAULT NULL,
-  `today` date DEFAULT NULL,
-  `dwellings_number` int(11) DEFAULT NULL,
-  `kobo_uuid` varchar(100) DEFAULT NULL,
-  `_submission_time` datetime DEFAULT NULL,
-  `_validation_status` varchar(100) DEFAULT NULL,
+  `building_id` int(11) DEFAULT NULL,
+  `dwelling_number` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `kobo_uuid` (`kobo_uuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `link_buildings_dwellings` (`building_id`),
+  CONSTRAINT `link_buildings_dwellings` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table ukraine.dwellings: ~0 rows (approximately)
-/*!40000 ALTER TABLE `dwellings` DISABLE KEYS */;
-/*!40000 ALTER TABLE `dwellings` ENABLE KEYS */;
+CREATE TABLE IF NOT EXISTS `submissions` (
+  `id` int(11) NOT NULL COMMENT '_id from kobotools',
+  `uuid` varchar(255) NOT NULL,
+  `form_id` varchar(255) NOT NULL,
+  `version` varchar(255) NOT NULL,
+  `start` timestamp NOT NULL,
+  `end` timestamp NOT NULL,
+  `today` date NOT NULL,
+  `submission_time` timestamp NOT NULL,
+  `submitted_by` varchar(255) NOT NULL,
+  `submission` json NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `link_forms_submissions` (`form_id`),
+  CONSTRAINT `link_forms_submissions` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `forms` (
+  `id` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `xform_id` varchar(255) NOT NULL COMMENT 'For xlsform string',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;

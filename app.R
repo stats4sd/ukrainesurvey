@@ -3,12 +3,12 @@ library(leaflet.extras)
 source('./R/load_data.R')
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Ukraine"),
+  dashboardHeader(title = "Ukraine Iodine Survey"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"))
-      # menuItem("Clusters", tabName = "clusters", icon = icon("th")),
-      # menuItem("Building", tabName = "buildings", icon = icon("th"))
+      menuItem("Cluster Data", tabName = "clusters", icon = icon("th")),
+      menuItem("Building Data", tabName = "buildings", icon = icon("th"))
     )
   ),
   dashboardBody(
@@ -22,7 +22,7 @@ ui <- dashboardPage(
                #     selectInput("district", "District",
                #                 c(unique(as.character(district_table$description_district_boundaries))),
                #                 verbatimTextOutput("selected_district")
-               #
+
                #     ),
                #     textOutput("district_selected")
                #     ),
@@ -38,22 +38,22 @@ ui <- dashboardPage(
 
           box(width = NULL, solidHeader = TRUE, height = "90vh",
 
-              leafletOutput("mymap", height="80vh")
+              leafletOutput("mymap", height="85vh")
           )
         )
 
       )
     )
-    # # Cluster Table
-    # tabItem(tabName = "clusters",
-    #         h2("Clusters Table"),
-    #         fluidRow(column(12, dataTableOutput('cluster')))
-    #   ),
-    # # Building Table
-    # tabItem(tabName = 'buildings',
-    #         h2("Building Table"),
-    #         fluidRow(column(12, dataTableOutput('buildings')))
-    #    )
+    # Cluster Table
+    tabItem(tabName = "clusters",
+            h2("Clusters Table"),
+            fluidRow(column(12, dataTableOutput('cluster')))
+      ),
+    # Building Table
+    tabItem(tabName = 'buildings',
+            h2("Building Table"),
+            fluidRow(column(12, dataTableOutput('buildings')))
+       )
 
     )
   )
@@ -119,7 +119,7 @@ server <- function(input, output, session) {
   output$mymap <- renderLeaflet({
 
     leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
-      setView(lng = 31.165580, lat = 48.379433, zoom = 7) %>%
+  setView(lng = 31.165580, lat = 48.379433, zoom = 6) %>%
       # addAwesomeMarkers(data = shape_json, icon = icons, lng = 31.165580, lat = 48.379433) %>%
       addPolygons(data = shape_json , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",shapeFilter$name,"</strong></h5>",
                                                                                   "<b>Id:</b>", shapeFilter$id)) %>%
