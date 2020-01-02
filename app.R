@@ -2,11 +2,13 @@ library(leaflet.extras)
 
 source('./R/load_data.R')
 
+regions_list <- setNames(regions$id,as.character(regions$name_en))
+
 ui <- dashboardPage(
   dashboardHeader(title = "Ukraine Iodine Survey"),
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"))
+      menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Cluster Data", tabName = "clusters", icon = icon("th")),
       menuItem("Building Data", tabName = "buildings", icon = icon("th"))
     )
@@ -18,23 +20,12 @@ ui <- dashboardPage(
     tabItem(tabName = "dashboard",
       fluidRow(
         column(width = 12,
-               # div(style="display: inline-block;vertical-align:top; width: 200px;",
-               #     selectInput("district", "District",
-               #                 c(unique(as.character(district_table$description_district_boundaries))),
-               #                 verbatimTextOutput("selected_district")
-
-               #     ),
-               #     textOutput("district_selected")
-               #     ),
-               # div(style="display: inline-block;vertical-align:top; width: 200px;",
-               #     selectInput("cluster", "Station Numbers",
-               #                 choices = c('all clusters', unique(as.character(clusters_table$station_number))),
-               #                 verbatimTextOutput("selected_cluster")
-               #     ),
-               #     textOutput("cluster_selected")
-               #     ),
-
-
+               div(style="display: inline-block;vertical-align:top; width: 200px;",
+                   selectInput("region", "Filter by Region",regions_list)
+               ),
+               div(style="display: inline-block;vertical-align:top; width: 300px;",
+                   textOutput("region"))
+                  ,
 
           box(width = NULL, solidHeader = TRUE, height = "90vh",
 
@@ -43,16 +34,16 @@ ui <- dashboardPage(
         )
 
       )
-    )
+    ),
     # Cluster Table
     tabItem(tabName = "clusters",
             h2("Clusters Table"),
-            fluidRow(column(12, dataTableOutput('cluster')))
+            fluidRow(column(width=12, DT::dataTableOutput('clusters')))
       ),
     # Building Table
     tabItem(tabName = 'buildings',
             h2("Building Table"),
-            fluidRow(column(12, dataTableOutput('buildings')))
+            fluidRow(column(12, DT::dataTableOutput('buildings')))
        )
 
     )
@@ -61,26 +52,38 @@ ui <- dashboardPage(
 
 
 server <- function(input, output, session) {
-  #Clusters Table
-  # output$cluster<-DT::renderDataTable(DT::datatable(clusters_table,
-  #                                                extensions = 'Buttons',
-  #                                                options = list(
-  #                                                               dom = 'Blfrtip',
-  #                                                               buttons = c('csv')
-  #                                                               ),
-  #                                                class = "display"
-  #                                                  )
-  #   )
-  # #Building Table
-  # output$buildings<-DT::renderDataTable(DT::datatable(buildings_table,
-  #                                                   extensions = 'Buttons',
-  #                                                   options = list(
-  #                                                     dom = 'Blfrtip',
-  #                                                     buttons = c('csv')
-  #                                                   ),
-  #                                                   class = "display"
-  #                                                   )
-  #)
+  output$clusters<-DT::renderDataTable(DT::datatable(clusters,
+                                                     extensions = 'Buttons',
+                                                     filter = 'top',
+                                                     options = list(
+                                                       pageLength = 100,
+                                                       dom = 'Blfrtip',
+                                                       buttons = list(
+                                                         list(
+                                                           extend = "csv",
+                                                           text = "Download as CSV file"
+                                                           )
+                                                         )
+                                                      ),
+                                                    class = "display"
+                                                  ))
+  
+  #Building Table
+  output$buildings<-DT::renderDataTable(DT::datatable(buildings,
+                                                      extensions = 'Buttons',
+                                                      filter = 'top',
+                                                      options = list(
+                                                        pageLength = 100,
+                                                        dom = 'Blfrtip',
+                                                        buttons = list(
+                                                          list(
+                                                            extend = "csv",
+                                                            text = "Download as CSV file"
+                                                          )
+                                                        )
+                                                      ),
+                                                      class = "display"
+  ))
 
   #Filter cluster by district
 
@@ -92,45 +95,30 @@ server <- function(input, output, session) {
   #  paste()
   # })
   #Filter shape from cluster selected
-  shapeFilter<-shape_json
-  # cluster_selected <-reactive({
-  # cluste_id<-input$cluster
-  # if(cluste_id=="all clusters"){
-  #   shapeFilter<-shape_json
-  # }else{
-  #   shapeFilter<-subset(shape_json, name==input$cluster)
-  # }
-  # })
-
-
-
-
-
-  #Map
-
-  icons <- awesomeIcons(
-    icon = 'building',
-    iconColor = 'black',
-    markerColor = "blue",
-    library = 'fa'
-  )
-
+  filtered_shapes <- shape_json
+  filtered_points <- point_json
+  
+  region <- reactive({
+    if(input$region==""){
+      filtered_shapes<-shape_json
+    }else{
+      filtered_clusters <- subset(clusters, region_id==input$region)
+      filtered_shapes <- subset(shape_json, name %in% filtered_clusters$electoral_id)
+      filtered_points <- subset(point_json, name %in% filtered_clusters$electoral_id)
+    }
+  })
 
   output$mymap <- renderLeaflet({
-
+    
     leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
-  setView(lng = 31.165580, lat = 48.379433, zoom = 6) %>%
-      # addAwesomeMarkers(data = shape_json, icon = icons, lng = 31.165580, lat = 48.379433) %>%
-      addPolygons(data = shape_json , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",shapeFilter$name,"</strong></h5>",
-                                                                                  "<b>Id:</b>", shapeFilter$id)) %>%
-      addKML(country_shape, fillColor = "green", fillOpacity = 0)
+      setView(lng = 31.165580, lat = 48.379433, zoom = 6) %>%
+      addPolygons(data = filtered_shapes , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",filtered_shapes$name,"</strong></h5>",
+                                                                                  "<b>Id:</b>", filtered_shapes$id)) %>%
+      addAwesomeMarkers(data = filtered_points, popup = paste("<h5>",filtered_points$name, "</h5>")) %>%
+      addKML(country_shape, fillOpacity = 0)
     })
 
-  ####
-
-
-  ####
-
+  output$region <- renderText({ paste("Selected Region: ", input$region) })
 
 }
 
