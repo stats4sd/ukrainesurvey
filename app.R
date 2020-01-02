@@ -14,7 +14,7 @@ ui <- dashboardPage(
   dashboardBody(
     #Boxes need to be put in a row (or column)
     tabItems(
-    # First Tab content 
+    # First Tab content
     tabItem(tabName = "dashboard",
       fluidRow(
         column(width = 12,
@@ -22,7 +22,7 @@ ui <- dashboardPage(
                #     selectInput("district", "District",
                #                 c(unique(as.character(district_table$description_district_boundaries))),
                #                 verbatimTextOutput("selected_district")
-               # 
+               #
                #     ),
                #     textOutput("district_selected")
                #     ),
@@ -33,15 +33,15 @@ ui <- dashboardPage(
                #     ),
                #     textOutput("cluster_selected")
                #     ),
-                   
-              
+
+
 
           box(width = NULL, solidHeader = TRUE, height = "90vh",
-              
+
               leafletOutput("mymap", height="80vh")
           )
         )
-        
+
       )
     )
     # # Cluster Table
@@ -54,7 +54,7 @@ ui <- dashboardPage(
     #         h2("Building Table"),
     #         fluidRow(column(12, dataTableOutput('buildings')))
     #    )
-            
+
     )
   )
 )
@@ -62,7 +62,7 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
   #Clusters Table
-  # output$cluster<-DT::renderDataTable(DT::datatable(clusters_table, 
+  # output$cluster<-DT::renderDataTable(DT::datatable(clusters_table,
   #                                                extensions = 'Buttons',
   #                                                options = list(
   #                                                               dom = 'Blfrtip',
@@ -72,7 +72,7 @@ server <- function(input, output, session) {
   #                                                  )
   #   )
   # #Building Table
-  # output$buildings<-DT::renderDataTable(DT::datatable(buildings_table, 
+  # output$buildings<-DT::renderDataTable(DT::datatable(buildings_table,
   #                                                   extensions = 'Buttons',
   #                                                   options = list(
   #                                                     dom = 'Blfrtip',
@@ -81,9 +81,9 @@ server <- function(input, output, session) {
   #                                                   class = "display"
   #                                                   )
   #)
- 
+
   #Filter cluster by district
- 
+
   # output$district_selected<-reactive({
   #   district_filter<-subset(district_table, district_table$description_district_boundaries ==input$district)
   #   clusters_table<-subset(clusters_table, clusters_table$district_id==district_filter$id)
@@ -101,37 +101,37 @@ server <- function(input, output, session) {
   #   shapeFilter<-subset(shape_json, name==input$cluster)
   # }
   # })
-  
 
 
 
-  
+
+
   #Map
-  
+
   icons <- awesomeIcons(
     icon = 'building',
     iconColor = 'black',
     markerColor = "blue",
     library = 'fa'
   )
-  
-  
+
+
   output$mymap <- renderLeaflet({
-   
+
     leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
-      setView(lng = 31.165580, lat = 48.379433, zoom = 7) %>% 
-      # addAwesomeMarkers(data = shape_json, icon = icons, lng = 31.165580, lat = 48.379433) %>% 
+      setView(lng = 31.165580, lat = 48.379433, zoom = 7) %>%
+      # addAwesomeMarkers(data = shape_json, icon = icons, lng = 31.165580, lat = 48.379433) %>%
       addPolygons(data = shape_json , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",shapeFilter$name,"</strong></h5>",
-                                                                                  "<b>Id:</b>", shapeFilter$id)) %>% 
+                                                                                  "<b>Id:</b>", shapeFilter$id)) %>%
       addKML(country_shape, fillColor = "green", fillOpacity = 0)
     })
-  
+
   ####
- 
-  
+
+
   ####
-  
-  
+
+
 }
 
 shinyApp(ui = ui, server = server)

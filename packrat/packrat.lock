@@ -49,8 +49,8 @@ Requires: DBI
 
 Package: Rcpp
 Source: CRAN
-Version: 1.0.1
-Hash: 390ed5b5da840cec3e6f5c90c6ab23f7
+Version: 1.0.3
+Hash: 99f6a1855b2f9434e1399d565d2ed9df
 
 Package: assertthat
 Source: CRAN
@@ -157,9 +157,9 @@ Requires: pkgconfig, rlang, vctrs
 
 Package: htmltools
 Source: CRAN
-Version: 0.3.6
-Hash: ca2f9fb001880f32b8b9b550ab3da404
-Requires: Rcpp, digest
+Version: 0.4.0
+Hash: ede066c0aec518db9acda803c6b94503
+Requires: Rcpp, digest, rlang
 
 Package: htmlwidgets
 Source: CRAN
@@ -243,8 +243,8 @@ Requires: Matrix, nlme
 
 Package: mime
 Source: CRAN
-Version: 0.5
-Hash: 463550cf44fb6f0a2359368f42eebe62
+Version: 0.8
+Hash: e4b20f5b8c6b3563adb7e914a52b6400
 
 Package: munsell
 Source: CRAN
