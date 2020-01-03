@@ -45,7 +45,14 @@ response = requests.get('%s/%s/data' % (data_url,form_uid),
                         );
 
 if response.status_code == 200:
-    data = json.loads(response.content.decode('utf-8'))
+
+    #####################################
+    # temporarily load data from test-file instead of pulling from Kobo
+    # data = json.loads(response.content.decode('utf-8'))
+    #####################################
+    with open('test-buildings.json') as test_file:
+        data = json.load(test_file)
+    #####################################
 
     with open('form_data.json', '+w') as outfile:
 
@@ -64,28 +71,28 @@ if response.status_code == 200:
                                    )
 
     mycursor = mydb.cursor()
-    # sql_submissions = "INSERT IGNORE INTO submissions (`id`, `uuid`, `form_id`, `version`, `start`, `end`, `today`, `submission_time`, `submitted_by`, `submission`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    sql_submissions = "INSERT IGNORE INTO submissions (`id`, `uuid`, `form_id`, `version`, `start`, `end`, `today`, `submission_time`, `submitted_by`, `submission`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
-    # val_submissions = []
+    val_submissions = []
 
-    # for building in buildings:
-    #     entry = (
-    #              building['_id'],
-    #              building['_uuid'],
-    #              building['_xform_id_string'],
-    #              building['__version__'],
-    #              to_mysql_date_time(building['start']),
-    #              to_mysql_date_time(building['end']),
-    #              building['today'],
-    #              to_mysql_date_time(building['_submission_time']),
-    #              building['_submitted_by'],
-    #              json.dumps(building)
-    #              )
-    #     val_submissions.append(entry)
+    for building in buildings:
+        entry = (
+                 building['_id'],
+                 building['_uuid'],
+                 building['_xform_id_string'],
+                 building['__version__'],
+                 to_mysql_date_time(building['start']),
+                 to_mysql_date_time(building['end']),
+                 building['today'],
+                 to_mysql_date_time(building['_submission_time']),
+                 building['_submitted_by'],
+                 json.dumps(building)
+                 )
+        val_submissions.append(entry)
 
-    # mycursor.executemany(sql_submissions, val_submissions)
+    mycursor.executemany(sql_submissions, val_submissions)
 
-    # mydb.commit()
+    mydb.commit()
 
     # #####################################
     # # Insert into Buildings table
