@@ -1,5 +1,5 @@
 library(leaflet.extras)
-
+library(dplyr)
 source('./R/load_data.R')
 
 regions_list <- setNames(regions$id,as.character(regions$name_en))
@@ -21,11 +21,16 @@ ui <- dashboardPage(
       fluidRow(
         column(width = 12,
                div(style="display: inline-block;vertical-align:top; width: 200px;",
-                   selectInput("region", "Filter by Region",regions_list)
+                   selectizeInput(
+                     "region", 
+                     "Filter by Region",
+                     regions_list, 
+                     options = list(
+                       placeholder = "Select a region", 
+                       onInitialize = I('function() { this.setValue(""); }')
+                       )
+                     )
                ),
-               div(style="display: inline-block;vertical-align:top; width: 300px;",
-                   textOutput("region"))
-                  ,
 
           box(width = NULL, solidHeader = TRUE, height = "90vh",
 
@@ -67,7 +72,7 @@ server <- function(input, output, session) {
                                                       ),
                                                     class = "display"
                                                   ))
-  
+
   #Building Table
   output$buildings<-DT::renderDataTable(DT::datatable(buildings,
                                                       extensions = 'Buttons',
@@ -85,40 +90,55 @@ server <- function(input, output, session) {
                                                       class = "display"
   ))
 
-  #Filter cluster by district
-
-  # output$district_selected<-reactive({
-  #   district_filter<-subset(district_table, district_table$description_district_boundaries ==input$district)
-  #   clusters_table<-subset(clusters_table, clusters_table$district_id==district_filter$id)
-  #   updateSelectInput(session, "cluster",
-  #                   choices = c('all clusters',clusters_table$station_number))
-  #  paste()
-  # })
   #Filter shape from cluster selected
   filtered_shapes <- shape_json
   filtered_points <- point_json
   
+  zoom_to <- reactive({
+    if(input$region==""){
+      return(data.frame(longitude = 31.165580, latitude = 48.379433, zoom = 6))
+    }else{
+      return(select(filter(regions, id == input$region), c(longitude,latitude,zoom)))
+    }
+  })
+
   filter_shapes <- reactive({
     if(input$region==""){
       return(shape_json)
     }else{
       filtered_clusters <- subset(clusters, region_id==input$region)
-      return(subset(shape_json, name %in% filtered_clusters$electoral_id))
+      return(subset(shape_json, name %in% filtered_clusters$id))
     }
   })
 
-  output$mymap <- renderLeaflet({
-    regions <- filter_shapes()
-    leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
-      setView(lng = 31.165580, lat = 48.379433, zoom = 6) %>%
-      addPolygons(data = regions , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",regions$name,"</strong></h5>",
-                                                                                  "<b>Id:</b>", regions$id)) %>%
-      # addAwesomeMarkers(data = filtered_points, popup = paste("<h5>",filtered_points$name, "</h5>")) %>%
-      addKML(country_shape, fillOpacity = 0)
+  filter_points <- reactive({
+    if(input$region==""){
+        return(point_json)
+    }else{
+        filtered_clusters <- subset(clusters, region_id==input$region)
+        return(subset(point_json, name %in% filtered_clusters$id))
+    }
     })
 
-  output$region <- renderText({ paste("Selected Region: ", input$region) })
+  output$mymap <- renderLeaflet({
+    cluster_shapes <- filter_shapes()
+    cluster_points <- filter_points()
+    zoom_point <- zoom_to()
+    print(zoom_point)
+    leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
+      setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom) %>%
+      addPolygons(data = cluster_shapes , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",cluster_shapes$name,"</strong></h5>",
+                                                                                  "<b>Id:</b>", cluster_shapes$id)) %>%
+      addAwesomeMarkers(data = cluster_points, popup = paste("<h5>",cluster_points$name, "</h5>")) %>%
+      addKML(country_shape, fillOpacity = 0) %>% 
+      addMiniMap(
+        tiles = providers$Esri.WorldStreetMap,
+        toggleDisplay = TRUE
+      )
+    })
+  
 
+  
 }
 
 shinyApp(ui = ui, server = server)

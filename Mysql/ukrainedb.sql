@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS `regions` (
   `sector` varchar(10) NOT NULL,
   `name_en` varchar(255) NOT NULL,
   `name_uk` varchar(255) NOT NULL,
+  `latitude` decimal(9,6) DEFAULT NULL,
+  `longitude` decimal(9,6) DEFAULT NULL
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

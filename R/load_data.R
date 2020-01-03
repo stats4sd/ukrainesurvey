@@ -5,9 +5,8 @@ library(leaflet)
 load("./Data/shapes.Rdata")
 
 country_shape <- readr::read_file("./Data/ukraine.kml")
-
 #Retrieve config parameters from the config.yml file
-db_param <- config::get('mysql')
+db_param <- config::get(config='mysql')
 
 ##Create the connection with database
 con <- dbConnect(RMySQL::MySQL(),
@@ -21,7 +20,7 @@ con <- dbConnect(RMySQL::MySQL(),
 dbSendQuery(con,"SET NAMES utf8mb4")
 
 buildings<-dbGetQuery(con,
-                            "SELECT
+    "SELECT
         regions.name_en as region_name_en,
         regions.name_uk as region_name_uk,
         buildings.cluster_id,
