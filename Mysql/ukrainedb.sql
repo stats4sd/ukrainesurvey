@@ -31,19 +31,19 @@ USE `ukraine`;
 
 CREATE TABLE IF NOT EXISTS `regions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `section` varchar(10) NOT NULL,
+  `sector` varchar(10) NOT NULL,
   `name_en` varchar(255) NOT NULL,
-  `name_ru` varchar(255) NOT NULL,
+  `name_uk` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE IF NOT EXISTS `clusters` (
-  `id` int(11) NOT NULL COMMENT 'unique id from sample frame',
+  `id` varchar(255) NOT NULL COMMENT 'electoral_id',
   `region_id` int(11) DEFAULT NULL,
-  `electoral_id` int(11) DEFAULT NULL,
+  `sample_id` int(11) DEFAULT NULL COMMENT 'from sample frame doc',
   `boundaries_en` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `boundaries_ru` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `boundaries_uk` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `shape` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `cluster_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `type` varchar(20) NOT NULL,
@@ -59,10 +59,10 @@ CREATE TABLE IF NOT EXISTS `buildings` (
   `cluster_id` int(11) NOT NULL,
   `structure_number` int(11) NOT NULL,
   `num_dwellings` int(11) NOT NULL DEFAULT 0,
-  `latitude` decimal(10,0) DEFAULT NULL,
-  `longitude` decimal(10,0) DEFAULT NULL,
-  `altitude` decimal(10,0) DEFAULT NULL,
-  `precision` decimal(10,0) DEFAULT NULL,
+  `latitude` decimal(9,6) DEFAULT NULL,
+  `longitude` decimal(9,6) DEFAULT NULL,
+  `altitude` decimal(6,3) DEFAULT NULL,
+  `precision` decimal(6,2) DEFAULT NULL,
   `address` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `link_clusters_buildings` (`cluster_id`),

@@ -6,7 +6,7 @@ regions <-dbGetQuery(con,
                      "SELECT
                      regions.id,
                      regions.name_en,
-                     regions.name_ru
+                     regions.name_uk
                      FROM regions;")
 
 #clusters table
@@ -15,7 +15,7 @@ clusters<-dbGetQuery(con,
                      clusters.id as id,
                      clusters.region_id as region_id,
                      regions.name_en as region_name_en,
-                     regions.name_ru as region_name_ru,
+                     regions.name_uk as region_name_uk,
                      clusters.electoral_id,
                      clusters.type,
                      clusters.locality_type,
@@ -26,7 +26,7 @@ clusters<-dbGetQuery(con,
                      ") # your query, normal
 
 clusters$region_name_en <- as.factor(clusters$region_name_en)
-clusters$region_name_ru <- as.factor(clusters$region_name_ru)
+clusters$region_name_uk <- as.factor(clusters$region_name_uk)
 clusters$type <- as.factor(clusters$type)
 clusters$smd_id <- as.factor(clusters$smd_id)
 
