@@ -98,23 +98,22 @@ server <- function(input, output, session) {
   filtered_shapes <- shape_json
   filtered_points <- point_json
   
-  region <- reactive({
+  filter_shapes <- reactive({
     if(input$region==""){
-      filtered_shapes<-shape_json
+      return(shape_json)
     }else{
       filtered_clusters <- subset(clusters, region_id==input$region)
-      filtered_shapes <- subset(shape_json, name %in% filtered_clusters$electoral_id)
-      filtered_points <- subset(point_json, name %in% filtered_clusters$electoral_id)
+      return(subset(shape_json, name %in% filtered_clusters$electoral_id))
     }
   })
 
   output$mymap <- renderLeaflet({
-    
+    regions <- filter_shapes()
     leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
       setView(lng = 31.165580, lat = 48.379433, zoom = 6) %>%
-      addPolygons(data = filtered_shapes , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",filtered_shapes$name,"</strong></h5>",
-                                                                                  "<b>Id:</b>", filtered_shapes$id)) %>%
-      addAwesomeMarkers(data = filtered_points, popup = paste("<h5>",filtered_points$name, "</h5>")) %>%
+      addPolygons(data = regions , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",regions$name,"</strong></h5>",
+                                                                                  "<b>Id:</b>", regions$id)) %>%
+      # addAwesomeMarkers(data = filtered_points, popup = paste("<h5>",filtered_points$name, "</h5>")) %>%
       addKML(country_shape, fillOpacity = 0)
     })
 
