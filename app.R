@@ -121,22 +121,87 @@ server <- function(input, output, session) {
     })
 
   output$mymap <- renderLeaflet({
-    cluster_shapes <- filter_shapes()
-    cluster_points <- filter_points()
-    zoom_point <- zoom_to()
-    print(zoom_point)
     leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
-      setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom) %>%
-      addPolygons(data = cluster_shapes , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",cluster_shapes$name,"</strong></h5>",
-                                                                                  "<b>Id:</b>", cluster_shapes$id)) %>%
-      addAwesomeMarkers(data = cluster_points, popup = paste("<h5>",cluster_points$name, "</h5>")) %>%
       addKML(country_shape, fillOpacity = 0) %>% 
       addMiniMap(
         tiles = providers$Esri.WorldStreetMap,
         toggleDisplay = TRUE
       )
     })
+
+  ####################################
+  # Dynamically Add cluster shapes and points based on chosen region
+  ####################################
+  observe({
   
+    
+    cluster_shapes <- filter_shapes()
+    cluster_points <- filter_points()
+    zoom_point <- zoom_to()
+    
+    leafletProxy("mymap") %>%
+      clearShapes() %>%
+      clearMarkers() %>%
+      setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom) %>%
+      addPolygons(layerId = cluster_shapes$name, data = cluster_shapes , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",cluster_shapes$name,"</strong></h5>",
+                                                                                       "<b>Id:</b>", cluster_shapes$id)) %>%
+      addAwesomeMarkers(layerId = cluster_shapes$name, data = cluster_points, popup = paste("<h5>",cluster_points$name, "</h5>"))
+  })
+  
+  ####################################
+  # Dynamically add buildings based on chosen cluster
+  ####################################
+  zoom_to_cluster <- reactive({
+    selected_cluster <- input$mymap_marker_click
+    
+    print(selected_cluster)
+    return(selected_cluster)
+  })
+  
+  zoom_to_cluster_by_shape <- reactive({
+    selected_cluster <- input$mymap_shape_click
+    
+    print(selected_cluster)
+    return(selected_cluster)
+  })
+  
+  observe({
+    selected_cluster <- zoom_to_cluster()
+    if(!is.null(selected_cluster)) {
+      filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
+
+      if(nrow(filtered_buildings) > 0) {
+          leafletProxy("mymap") %>%
+            setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
+            clearMarkers() %>%
+            addAwesomeMarkers(layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>")
+      } else {
+        leafletProxy("mymap") %>%
+          setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
+      }
+    }
+  })
+
+
+  
+  observe({
+    selected_cluster <- zoom_to_cluster_by_shape()
+    if(!is.null(selected_cluster)) {
+      filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
+      
+      if(nrow(filtered_buildings) > 0) {
+        leafletProxy("mymap") %>%
+          setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
+          clearMarkers() %>%
+          addAwesomeMarkers(layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>")  
+      } else {
+        leafletProxy("mymap") %>%
+          setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
+      }
+      
+    }
+    
+    })
 
   
 }
