@@ -13,9 +13,9 @@
 
 
 -- Dumping database structure for ukraine
-DROP DATABASE `ukraine`;
-CREATE DATABASE IF NOT EXISTS `ukraine` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
-USE `ukraine`;
+-- DROP DATABASE `ukraine_test`;
+CREATE DATABASE IF NOT EXISTS `ukraine_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
+USE `ukraine_test`;
 
 # Setup location levels
 # Regions
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `regions` (
   `name_en` varchar(255) NOT NULL,
   `name_uk` varchar(255) NOT NULL,
   `latitude` decimal(9,6) DEFAULT NULL,
-  `longitude` decimal(9,6) DEFAULT NULL
+  `longitude` decimal(9,6) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `clusters` (
   `cluster_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `type` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `electoral_id` (`electoral_id`),
+  UNIQUE KEY `sample_id` (`sample_id`),
   KEY `link_regions_clusters` (`region_id`),
   CONSTRAINT `link_regions_clusters` FOREIGN KEY (`region_id`) REFERENCES `regions` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `clusters` (
 -- Dumping structure for table ukraine.buildings
 CREATE TABLE IF NOT EXISTS `buildings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `cluster_id` int(11) NOT NULL,
+  `cluster_id` varchar(255) NOT NULL,
   `structure_number` int(11) NOT NULL,
   `num_dwellings` int(11) NOT NULL DEFAULT 0,
   `latitude` decimal(9,6) DEFAULT NULL,
