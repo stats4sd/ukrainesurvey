@@ -1,6 +1,5 @@
 # list of files ignored by git (neither pulled nor pushed)
 *.yml
-*.yml.txt
 packrat/lib*/
 packrat/src*/
 .Rhistory
