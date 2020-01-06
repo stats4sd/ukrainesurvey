@@ -9,12 +9,10 @@ default:
   user: "root"
   password: "MyAwesomePassword"
 
-
-lukeskywalker:
+mysql:
   db: "ukraine"
   host: "127.0.0.1"
-  port: 3307
-  user: "jedi"
-  password: "SuperForce"
-
+  port: 3306
+  user: "Ciara"
+  password: "baileyPIP1118"
 ---
