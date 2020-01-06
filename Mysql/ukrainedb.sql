@@ -13,9 +13,9 @@
 
 
 -- Dumping database structure for ukraine
--- DROP DATABASE `ukraine_test`;
-CREATE DATABASE IF NOT EXISTS `ukraine_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
-USE `ukraine_test`;
+DROP DATABASE IF EXISTS `ukraine`;
+CREATE DATABASE IF NOT EXISTS `ukraine` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
+USE `ukraine`;
 
 # Setup location levels
 # Regions
