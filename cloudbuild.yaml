@@ -1,3 +1,3 @@
 steps:
 - name: 'gcr.io/cloud-builders/gcloud'
-  args:  [compute, ssh, ukraine-survey, --project=ukraine-iodine-survey, --zone=europe-west4-a, --command, "cd /var/www/ukraine-dev && sudo ./deployment/deploy-staging.sh"]
+  args:  [compute, ssh, ukraine-survey, --project=ukraine-iodine-survey, --zone=europe-west4-a, --command, "/var/www/ukraine-dev/deployment/deploy-staging.sh"]
