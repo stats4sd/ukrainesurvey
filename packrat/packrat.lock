@@ -105,6 +105,13 @@ Source: CRAN
 Version: 0.6.12
 Hash: e53fb8c58673df868183697e39a6a4d6
 
+Package: dplyr
+Source: CRAN
+Version: 0.8.3
+Hash: bb4bf9f5839fa33d228e63bb925cfe69
+Requires: BH, R6, Rcpp, assertthat, glue, magrittr, pkgconfig, plogr,
+    rlang, tibble, tidyselect
+
 Package: ellipsis
 Source: CRAN
 Version: 0.3.0
@@ -274,6 +281,11 @@ Source: CRAN
 Version: 2.0.3
 Hash: 5ff5f2361851a49534c96caa2a8071c7
 
+Package: plogr
+Source: CRAN
+Version: 0.2.0
+Hash: 81a8008a5e7858552503935f1abe48aa
+
 Package: plyr
 Source: CRAN
 Version: 1.8.4
@@ -290,6 +302,12 @@ Source: CRAN
 Version: 1.1.0
 Hash: f1222b421044640cfd8274001354a1f8
 Requires: R6, Rcpp, later, magrittr, rlang
+
+Package: purrr
+Source: CRAN
+Version: 0.3.3
+Hash: d4f497f8a97ef6c7182a87b2476748d1
+Requires: magrittr, rlang
 
 Package: raster
 Source: CRAN
@@ -367,6 +385,12 @@ Source: CRAN
 Version: 2.1.3
 Hash: f59680d81ddc45fa3fcb8c07686d1d89
 Requires: cli, crayon, fansi, pillar, pkgconfig, rlang
+
+Package: tidyselect
+Source: CRAN
+Version: 0.2.5
+Hash: 5cbca8a84b427f46bea4ee5c6c7fe36e
+Requires: Rcpp, glue, purrr, rlang
 
 Package: utf8
 Source: CRAN
