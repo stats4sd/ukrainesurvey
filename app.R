@@ -174,8 +174,8 @@ server <- function(input, output, session) {
           leafletProxy("mymap") %>%
             setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
             clearMarkers() %>%
-            addAwesomeMarkers(layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>")
-      } else {
+            addCircleMarkers(clusterOptions = markerClusterOptions(disableClusteringAtZoom = 16, spiderfyOnMaxZoom = FALSE), layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>", radius =6, color = "blue", stroke = FALSE, fillOpacity = 0.5)
+           } else {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
       }
@@ -193,7 +193,7 @@ server <- function(input, output, session) {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
           clearMarkers() %>%
-          addAwesomeMarkers(layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>")  
+          addCircleMarkers(clusterOptions = markerClusterOptions(disableClusteringAtZoom = 16, spiderfyOnMaxZoom = FALSE), layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>", radius =6, color = "blue", stroke = FALSE, fillOpacity = 0.5)
       } else {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
