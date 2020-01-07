@@ -1,25 +1,14 @@
 library(DBI)
 library(shinydashboard)
 library(leaflet)
-#library(rgdal)
 
-#get shape and points from json file
-#shape_json = readOGR("Data/shapes.geojson")
-#point_json = readOGR("Data/points.geojson")
-#save(list(shape_json, point_json), file = "./Data/shapes.Rdata")
-#load("./Data/points.Rdata")
 load("./Data/shapes.Rdata")
 
-cluster <- read.csv("./Data/sampled_clusters.csv", encoding="UTF-8")
+country_shape <- readr::read_file("./Data/ukraine.kml")
+#Retrieve config parameters from the config.yml file
+db_param <- config::get(config='mysql')
 
-
-
-# filter to get only the districts we want - to be modified to put all the districts
-shape_json <- subset(shape_json, name %in% cluster$electoral_id)
-##Retrieve config parameters from the config.tml file
-db_param <- config::get()
-
-##Create the connection with database 
+##Create the connection with database
 con <- dbConnect(RMySQL::MySQL(),
                  dbname = db_param$db,
                  host =db_param$host,
@@ -28,22 +17,27 @@ con <- dbConnect(RMySQL::MySQL(),
                  password = db_param$password
 )
 
-
 dbSendQuery(con,"SET NAMES utf8mb4")
-#clusters table
-clusters_table<-dbGetQuery(con,"SELECT * FROM clusters") # your query, normal
-clusters_table$cluster_description<-as.character(clusters_table$cluster_description) #force variable to be of class character instead of factor
-Encoding(clusters_table$cluster_description)<- "UTF-8" # say R the encoding should be UTF-8
 
-#district table 
-district_table<-dbGetQuery(con, "SELECT * FROM districts")
-district_table$description_district_boundaries<-as.character(district_table$description_district_boundaries)
-Encoding(district_table$description_district_boundaries)<- "UTF-8"
+buildings<-dbGetQuery(con,
+    "SELECT
+        regions.name_en as region_name_en,
+        regions.name_uk as region_name_uk,
+        buildings.cluster_id,
+        buildings.structure_number,
+        buildings.num_dwellings,
+        buildings.latitude,
+        buildings.longitude,
+        buildings.altitude,
+        buildings.precision,
+        buildings.address
+    FROM buildings
+    LEFT JOIN clusters on clusters.id = buildings.cluster_id
+    LEFT JOIN regions on regions.id = clusters.region_id;
+    ")
 
-buildings_table<-dbGetQuery(con,'
-  select *
-  from buildings
-  group by id
-           ')
+buildings$region_name_en <- as.factor(buildings$region_name_en)
+buildings$region_name_uk <- as.factor(buildings$region_name_uk)
+buildings$cluster_id <- as.factor(buildings$cluster_id)
 
 dbDisconnect(con)
