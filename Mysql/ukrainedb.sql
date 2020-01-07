@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS `regions` (
   `name_uk` varchar(255) NOT NULL,
   `latitude` decimal(9,6) DEFAULT NULL,
   `longitude` decimal(9,6) DEFAULT NULL,
+  `zoom` INT(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -49,6 +50,9 @@ CREATE TABLE IF NOT EXISTS `clusters` (
   `shape` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `cluster_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
   `type` varchar(20) NOT NULL,
+  `locality_type` INT(11) DEFAULT NULL,
+  `num_voters` INT(11) DEFAULT NULL,
+  `smd_id` INT(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sample_id` (`sample_id`),
   KEY `link_regions_clusters` (`region_id`),
