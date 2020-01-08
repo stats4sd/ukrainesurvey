@@ -10,7 +10,9 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Cluster Data", tabName = "clusters", icon = icon("th")),
-      menuItem("Building Data", tabName = "buildings", icon = icon("th"))
+      menuItem("Building Data", tabName = "buildings", icon = icon("th")),
+      menuItem("Dwelling Data", tabName = "dwellings", icon = icon("th")),
+      menuItem("Sampling", tabName = "sampling", icon = icon("th"))
     )
   ),
   dashboardBody(
@@ -47,9 +49,19 @@ ui <- dashboardPage(
       ),
     # Building Table
     tabItem(tabName = 'buildings',
-            h2("Building Table"),
+            h2("Building Table"),            
             fluidRow(column(12, DT::dataTableOutput('buildings')))
-       )
+       ),
+    tabItem(tabName = 'dwellings',
+            h2("Dwelling Table"),
+            selectInput("cluster.id", label = "Select Cluster ID for Sampling", choices = clusters$id),
+            fluidRow(column(12, DT::dataTableOutput('dwellings')))
+    ),
+    tabItem(tabName = 'sampling',
+            h2("Sample Table"),
+            selectInput("cluster.id", label = "Select Cluster ID for Sampling", choices = clusters$id),
+            downloadLink("downloadSample", "Download Sample of Dwellings")
+    )
 
     )
   )
@@ -74,7 +86,7 @@ server <- function(input, output, session) {
                                                   ))
 
   #Building Table
-  output$buildings<-DT::renderDataTable(DT::datatable(buildings,
+  output$buildings<-DT::renderDataTable(DT::datatable(buildingsX,
                                                       extensions = 'Buttons',
                                                       filter = 'top',
                                                       options = list(
@@ -90,6 +102,41 @@ server <- function(input, output, session) {
                                                       class = "display"
   ))
 
+  output$dwellings<-DT::renderDataTable(DT::datatable(dwellings,
+                                                      extensions = 'Buttons',
+                                                      filter = 'top',
+                                                      options = list(
+                                                        pageLength = 100,
+                                                        dom = 'Blfrtip',
+                                                        buttons = list(
+                                                          list(
+                                                            extend = "csv",
+                                                            text = "Download as CSV file"
+                                                          )
+                                                        )
+                                                      ),
+                                                      class = "display"
+  ))
+  
+  sampleDwellings<-reactive({
+    sampleDwellings<-data.frame(Ukraine_sampling(dwellings, input$cluster.id))
+  })
+  
+  
+  
+  output$downloadSample<- downloadHandler(
+    
+    filename = function() {
+      paste(input$cluster.id,'-', Sys.Date(), '.csv', sep='')
+    },
+    
+    
+    content = function(con) {
+      write.csv(sampleDwellings(), con,row.names=FALSE)
+    }
+  )
+  
+  
   #Filter shape from cluster selected
   filtered_shapes <- shape_json
   filtered_points <- point_json

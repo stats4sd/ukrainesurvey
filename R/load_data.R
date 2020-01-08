@@ -6,7 +6,7 @@ load("./Data/shapes.Rdata")
 
 country_shape <- readr::read_file("./Data/ukraine.kml")
 #Retrieve config parameters from the config.yml file
-db_param <- config::get(config='mysql')
+db_param <- config::get(config='default')
 
 ##Create the connection with database
 con <- dbConnect(RMySQL::MySQL(),
