@@ -54,7 +54,6 @@ ui <- dashboardPage(
        ),
     tabItem(tabName = 'dwellings',
             h2("Dwelling Table"),
-            selectInput("cluster.id", label = "Select Cluster ID for Sampling", choices = clusters$id),
             fluidRow(column(12, DT::dataTableOutput('dwellings')))
     ),
     tabItem(tabName = 'sampling',
@@ -121,7 +120,6 @@ server <- function(input, output, session) {
   sampleDwellings<-reactive({
     sampleDwellings<-data.frame(Ukraine_sampling(dwellings, input$cluster.id))
   })
-  
   
   
   output$downloadSample<- downloadHandler(
