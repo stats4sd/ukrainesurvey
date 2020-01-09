@@ -78,5 +78,4 @@ Ukraine_sampling<-function(df, cluster.id=NULL){
   dwellings.s<<-data.frame(dwellings)
 }
 
-rm(dwellings)
 Ukraine_sampling(dwellings, cluster.id = "140580")

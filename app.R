@@ -1,6 +1,7 @@
 library(leaflet.extras)
 library(dplyr)
 source('./R/load_data.R')
+source('sample_dwelllings.R')
 
 regions_list <- setNames(regions$id,as.character(regions$name_en))
 
@@ -214,17 +215,18 @@ server <- function(input, output, session) {
   selected_sample_cluster <- reactive({
     selected_sample_cluster <- input$mymap_marker_click
     
-    print(selected_cluster$id)
+    print(selected_sample_cluster)
   })
   
-  values<-reactiveValues()
-  values$id<-observe({selected_sample_cluster()})
+  observe({
+  selected_sample_cluster<-selected_sample_cluster()
   
   updateSelectInput(session, 
                     "cluster.id",
                     label = "Select Cluster ID for Sampling",
                     choices = clusters$id,
-                    selected=values$id)
+                    selected=clusters$id[clusters$id==selected_sample_cluster['id']])
+  })
   
   zoom_to_cluster_by_shape <- reactive({
     selected_cluster <- input$mymap_shape_click
