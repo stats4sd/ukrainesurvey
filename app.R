@@ -169,18 +169,15 @@ server <- function(input, output, session) {
     selected_cluster <- zoom_to_cluster()
     if(!is.null(selected_cluster)) {
       filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
-      #filtered_sampled_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & sampled==1)
-      #filtered_replacement_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & replacement==1))
-      #filtered_dwellings_data_collected <- subset(dwellings, cluster_id==selected_cluster['id'] & data_collected==1)
+      filtered_buildings_sample <- subset(buildings,cluster_id==selected_cluster['id'] & sum_sampled>0)
+      filtered_buildings_not_sample <- subset(buildings,cluster_id==selected_cluster['id'] & (sum_sampled==0 | is.na(sum_sampled)))
       
       if(nrow(filtered_buildings) > 0) {
           leafletProxy("mymap") %>%
             setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
             clearMarkers() %>%
-            addCircleMarkers(clusterOptions = markerClusterOptions(disableClusteringAtZoom = 18, spiderfyOnMaxZoom = FALSE), layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>", radius =6, color = "blue", stroke = FALSE, fillOpacity = 0.5)
-            #addCircleMarkers(clusterOptions= markerClusterOptions(disableClusteringatZoom = 16, spiderfyOnMaxZoom = TRUE), layerId = filtered_sampled_dwellings$id, lng = filtered_sampled_dwellings$longitude, lat = filtered_sampled_dwellings$latitude, popup = paste("<h5>Dwelling No.: ", filtered_sampled_dwellings$dwelling_number),  "</h5>", radius =6, color = "blue", stroke = FALSE, fillOpacity = 0.5)
-            #addCircleMarkers(clusterOptions= markerClusterOptions(disableClusteringatZoom = 16, spiderfyOnMaxZoom = TRUE), layerId = filtered_replacement_dwellings$id, lng = filtered_replacement_dwellings$longitude, lat = filtered_replacement_dwellings$latitude, popup = paste("<h5>Dwelling No.: ", filtered_replacement_dwellings$dwelling_number),  "</h5>", radius =6, color = "blue", stroke = FALSE, fillOpacity = 0.5)
-            #addCircleMarkers(clusterOptions= markerClusterOptions(disableClusteringatZoom = 16, spiderfyOnMaxZoom = TRUE), layerId = filtered_dwellings_data_collected$id, lng = filtered_dwellings_data_collected$longitude, lat = filtered_dwellings_data_collected$latitude, radius =6, color = "blue", stroke = FALSE, fillOpacity = 0.5)
+          addCircleMarkers(layerId = filtered_buildings_not_sample$id, lng = filtered_buildings_not_sample$longitude, lat = filtered_buildings_not_sample$latitude, radius =5, stroke=FALSE, color = "grey", fillOpacity = 0.4, popup = paste("<h5>Structure No.: ", filtered_buildings_not_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_not_sample$num_dwellings, "</h5>")) %>%
+          addCircleMarkers(layerId = filtered_buildings_sample$id, lng = filtered_buildings_sample$longitude, lat = filtered_buildings_sample$latitude, radius =5, color = "blue", stroke = FALSE, fillOpacity = 0.6, popup = paste("<h5>Structure No.: ", filtered_buildings_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_sample$num_dwellings, "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text))
         
       } else {
         leafletProxy("mymap") %>%
@@ -189,33 +186,26 @@ server <- function(input, output, session) {
     }
   })
 
-
   
   observe({
     selected_cluster <- zoom_to_cluster_by_shape()
     if(!is.null(selected_cluster)) {
       filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
-      filtered_sampled_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & sampled==1)
-      filtered_replacement_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & replacement==1)
-      #filtered_dwellings_data_collected <- subset(dwellings, cluster_id==selected_cluster['id'] & data_collected==1)
-
+      filtered_buildings_sample <- subset(buildings,cluster_id==selected_cluster['id'] & sum_sampled>0)
+      filtered_buildings_not_sample <- subset(buildings,cluster_id==selected_cluster['id'] & (sum_sampled==0 | is.na(sum_sampled)))
+      
       if(nrow(filtered_buildings) > 0) {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
           clearMarkers() %>%
-          addCircleMarkers(layerId = filtered_buildings$id, lng = filtered_buildings$longitude, lat = filtered_buildings$latitude, popup = paste("<h5>Structure No.: ", filtered_buildings$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings$num_dwellings), "</h5>", radius =5, stroke=FALSE, color = "grey", fillOpacity = 0.3) %>%
-          addCircleMarkers(layerId = filtered_sampled_dwellings$id, lng = filtered_sampled_dwellings$longitude, lat = filtered_sampled_dwellings$latitude, popup = paste("<h5>Dwelling No.: ", filtered_sampled_dwellings$dwelling_number),  "</h5>", radius =3, color = "blue", stroke = FALSE, fillOpacity = 0.5)
-        #addCircleMarkers(clusterOptions= markerClusterOptions(disableClusteringatZoom = 14, spiderfyOnMaxZoom = FALSE, spiderLegPolylineOptions = list(weight=3, opactiy=1)), layerId = filtered_sampled_dwellings$id, lng = filtered_sampled_dwellings$longitude, lat = filtered_sampled_dwellings$latitude, popup = paste("<h5>Dwelling No.: ", filtered_sampled_dwellings$dwelling_number),  "</h5>", radius =6, color = "red", stroke = FALSE, fillOpacity = 0.5)
-          #addCircleMarkers(clusterOptions= markerClusterOptions(disableClusteringatZoom = 12, spiderfyOnMaxZoom = TRUE), layerId = filtered_replacement_dwellings$id, lng = filtered_replacement_dwellings$longitude, lat = filtered_replacement_dwellings$latitude, popup = paste("<h5>REPLACEMENT. Dwelling No.: ", filtered_replacement_dwellings$dwelling_number),  "</h5>", radius =3, color = "red", stroke = FALSE, fillOpacity = 0.5)
-          #addCircleMarkers(clusterOptions= markerClusterOptions(disableClusteringatZoom = 16, spiderfyOnMaxZoom = TRUE), layerId = filtered_dwellings_data_collected$id, lng = filtered_dwellings_data_collected$longitude, lat = filtered_dwellings_data_collected$latitude, radius =6, color = "blue", stroke = FALSE, fillOpacity = 0.5)
-    
+          addCircleMarkers(layerId = filtered_buildings_not_sample$id, lng = filtered_buildings_not_sample$longitude, lat = filtered_buildings_not_sample$latitude, radius =5, stroke=FALSE, color = "grey", fillOpacity = 0.4, popup = paste("<h5>Structure No.: ", filtered_buildings_not_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_not_sample$num_dwellings, "</h5>")) %>%
+          addCircleMarkers(layerId = filtered_buildings_sample$id, lng = filtered_buildings_sample$longitude, lat = filtered_buildings_sample$latitude, radius =5, color = "blue", stroke = FALSE, fillOpacity = 0.6, popup = paste("<h5>Structure No.: ", filtered_buildings_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_sample$num_dwellings, "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text))
+
       } else {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
       }
-      
     }
-    
  })
 
   
