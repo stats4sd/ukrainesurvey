@@ -40,4 +40,5 @@ buildings$region_name_en <- as.factor(buildings$region_name_en)
 buildings$region_name_uk <- as.factor(buildings$region_name_uk)
 buildings$cluster_id <- as.factor(buildings$cluster_id)
 
+
 dbDisconnect(con)
