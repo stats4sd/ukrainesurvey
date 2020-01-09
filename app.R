@@ -36,7 +36,7 @@ ui <- dashboardPage(
                ),
                
           div(style="display: inline-block;float:right;padding:12px; font-size:100%",
-              actionButton("create_sample", "Create Sample of Selected Cluster")),
+              actionButton("create_sample", "Create Sample for Selected Cluster")),
 
           box(width = NULL, solidHeader = TRUE, height = "90vh",
 
