@@ -72,5 +72,13 @@ dwellings$cluster_id <- as.factor(dwellings$cluster_id)
 dwellings$dwelling_id <- as.factor(dwellings$dwelling_id)
 
 
+dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number, ifelse(dwellings$replacement==1," Replacement ",""), ifelse(dwellings$data_collected==1," Data Collected ",""))
+
+dwellings_with_text_col <- dwellings %>% group_by(structure_number) %>%
+    summarise(sum_sampled=sum(sampled), text=paste0(dwelling_text, "</h5>", collapse="\n"))
+
+buildings <- left_join(buildings, dwellings_with_text_col, by="structure_number")
+
+
 dbDisconnect(con)
 
