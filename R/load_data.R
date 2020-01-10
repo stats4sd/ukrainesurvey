@@ -36,11 +36,16 @@ buildings<-dbGetQuery(con,
     LEFT JOIN regions on regions.id = clusters.region_id;
     ")
 
-
 buildings$region_name_en <- as.factor(buildings$region_name_en)
 buildings$region_name_uk <- as.factor(buildings$region_name_uk)
 buildings$cluster_id <- as.factor(buildings$cluster_id)
 
+#sum_sampled <- as.numeric(replace(buildings$sum_sampled,is.na(buildings$sum_sampled),0))
+
+##boolean variable for checking if the cluster is completed 
+
+#cluster_completed <- as.factor(sum(sum_sampled)/count(buildings)>= 16)
+#clusters$completed <- cluster_completed
 
 dwellings<-dbGetQuery(con,
     "SELECT
