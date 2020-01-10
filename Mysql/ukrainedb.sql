@@ -13,7 +13,7 @@
 
 
 -- Dumping database structure for ukraine
-CREATE DATABASE IF NOT EXISTS `ukraine` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+CREATE DATABASE IF NOTukraineukrainedwellings EXISTS `ukraine` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `ukraine`;
 
 -- Dumping structure for table ukraine.buildings
@@ -616,6 +616,7 @@ CREATE TABLE IF NOT EXISTS `submissions` (
   `id` int(11) NOT NULL COMMENT '_id from kobotools',
   `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `form_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `dwellings_id` int(11) NOT NULL,
   `version` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `start` timestamp NOT NULL,
   `end` timestamp NOT NULL,

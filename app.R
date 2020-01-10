@@ -1,6 +1,7 @@
 library(leaflet.extras)
 library(dplyr)
 source('./R/load_data.R')
+source('./R/filter_cluster.R')
 
 regions_list <- setNames(regions$id,as.character(regions$name_en))
 
@@ -20,6 +21,7 @@ ui <- dashboardPage(
     tabItem(tabName = "dashboard",
       fluidRow(
         column(width = 12,
+               ##Filter by Region
                div(style="display: inline-block;vertical-align:top; width: 200px;",
                    selectizeInput(
                      "region", 
@@ -30,6 +32,18 @@ ui <- dashboardPage(
                        onInitialize = I('function() { this.setValue(""); }')
                        )
                      )
+               ),
+                ##Filter Cluster by Completeness
+                div(style="display: inline-block;vertical-align:top; width: 200px;",
+                   selectizeInput(
+                     "region", 
+                     "Filter Cluster by Status",
+                     c('Not Completed', 'Completed'), 
+                     options = list(
+                       placeholder = "Select status", 
+                       onInitialize = I('function() { this.setValue(""); }')
+                     )
+                   )
                ),
 
           box(width = NULL, solidHeader = TRUE, height = "90vh",
@@ -134,7 +148,6 @@ server <- function(input, output, session) {
   ####################################
   observe({
   
-    
     cluster_shapes <- filter_shapes()
     cluster_points <- filter_points()
     zoom_point <- zoom_to()
@@ -143,9 +156,15 @@ server <- function(input, output, session) {
       clearShapes() %>%
       clearMarkers() %>%
       setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom) %>%
-      addPolygons(layerId = cluster_shapes$name, data = cluster_shapes , weight = 2, fillColor = "yellow", popup =paste("<h5><strong>",cluster_shapes$name,"</strong></h5>",
-                                                                                       "<b>Id:</b>", cluster_shapes$id)) %>%
-      addAwesomeMarkers(layerId = cluster_shapes$name, data = cluster_points, popup = paste("<h5>",cluster_points$name, "</h5>"))
+      addPolygons(layerId = cluster_shapes$name, data = cluster_shapes , weight = 2, fillColor = "yellow", 
+                  popup =paste("<h5><strong>",cluster_shapes$name,"</strong></h5>",                                                          
+                               "<b>Oblast:</b>",'ghf',"</br>",                                       
+                               "<b>Cluster Id:</b>", cluster_shapes$id,"</br>",                                              
+                               "<b>Building Completed:</b>",'10',"</br>",                                         
+                               "<b>Building Not Completed:</b>",'10',"</br>",                                                   
+                               "<b>Building Total:</b>",'10',"</br>"
+                               )) #%>%
+     # addAwesomeMarkers(layerId = cluster_shapes$name, data = cluster_points, popup = paste("<h5>",cluster_points$name, "</h5>"))
   })
   
   ####################################
@@ -169,6 +188,7 @@ server <- function(input, output, session) {
     selected_cluster <- zoom_to_cluster()
     if(!is.null(selected_cluster)) {
       filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
+      
       #filtered_sampled_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & sampled==1)
       #filtered_replacement_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & replacement==1))
       #filtered_dwellings_data_collected <- subset(dwellings, cluster_id==selected_cluster['id'] & data_collected==1)
@@ -198,7 +218,7 @@ server <- function(input, output, session) {
       filtered_sampled_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & sampled==1)
       filtered_replacement_dwellings <- subset(dwellings, cluster_id==selected_cluster['id'] & replacement==1)
       #filtered_dwellings_data_collected <- subset(dwellings, cluster_id==selected_cluster['id'] & data_collected==1)
-
+   
       if(nrow(filtered_buildings) > 0) {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
@@ -222,4 +242,4 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server)
-# adm@polygons[[1]]
+
