@@ -1,13 +1,25 @@
 ---
 # in R:
 # config::get() will retrieve the default info
-# config::get(config="xxx") will retrieve xxx's info 
+# config::get(config="xxx") will retrieve xxx's info
 default:
   db: "ukraine"
   host: "127.0.0.1"
   port: 3306
   user: "root"
   password: "MyAwesomePassword"
+
+mysql:
+  db: "ukraine"
+  host: "127.0.0.1"
+  port: 3306
+  user: "root"
+  password: "MyAwesomePassword"
+
+kobo:
+  user: ""
+  password: ""
+  building_form_uid: ""
 
 
 lukeskywalker:
