@@ -7,7 +7,7 @@ load("./Data/shapes.Rdata")
 
 country_shape <- readr::read_file("./Data/ukraine.kml")
 #Retrieve config parameters from the config.yml file
-db_param <- config::get(config='mysql')
+db_param <- config::get(config='default')
 
 ##Create the connection with database
 con <- dbConnect(RMySQL::MySQL(),
@@ -41,6 +41,7 @@ buildings$region_name_en <- as.factor(buildings$region_name_en)
 buildings$region_name_uk <- as.factor(buildings$region_name_uk)
 buildings$cluster_id <- as.factor(buildings$cluster_id)
 
+<<<<<<< HEAD
 #sum_sampled <- as.numeric(replace(buildings$sum_sampled,is.na(buildings$sum_sampled),0))
 
 dwellings<-dbGetQuery(con,
@@ -86,6 +87,8 @@ buildings$sum_sampled <- buildings$sum_sampled %>% replace(is.na(buildings$sum_s
 clusters_process <- buildings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(sum_sampled)/count(buildings) >= 16)
 #buildings process
 buildings_process <- dwellings %>% group_by(building_id, cluster_id) %>% summarise('building_completed' = sum(sampled)/16 >= 16)
+=======
+>>>>>>> origin/dev-alex
 
 dbDisconnect(con)
 
