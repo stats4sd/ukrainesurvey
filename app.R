@@ -239,7 +239,7 @@ server <- function(input, output, session) {
   })
   
   selected_sample_cluster <- reactive({
-    selected_sample_cluster <- input$mymap_marker_click
+    selected_sample_cluster <- input$mymap_shape_click
     
     print(selected_sample_cluster)
   })
