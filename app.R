@@ -1,7 +1,7 @@
 library(leaflet.extras)
 library(dplyr)
 source('./R/load_data.R')
-source('./R/filter_cluster.R')
+
 
 regions_list <- setNames(regions$id,as.character(regions$name_en))
 
@@ -151,15 +151,16 @@ server <- function(input, output, session) {
     oblast_seleted <- subset(regions, id==input$region)
     cluster_shapes <- filter_shapes()
     ## filter clusters completed and not completed
-    filtered_clusters_completed <- subset(clusters, region_id %in% c(1, 2, 3, 4 ))
+    clusters_process_completed<-subset(clusters_process, cluster_completed == TRUE)
+    filtered_clusters_completed <- subset(clusters, id %in% clusters_process_completed$cluster_id)
     cluster_shapes_completed<- subset(shape_json, name %in% filtered_clusters_completed$id)
-    filtered_clusters_not_completed <- subset(clusters, region_id %in% c(5, 6, 7, 8 ))
-    cluster_shapes_not_completed<- subset(shape_json, name %in% filtered_clusters_not_completed$id)
+    filtered_clusters_not_completed <- subset(clusters, !(id %in% clusters_process_completed$cluster_id))
+    cluster_shapes_not_completed <- subset(shape_json, name %in% filtered_clusters_not_completed$id)
 
       
     cluster_points <- filter_points()
     zoom_point <- zoom_to()
-
+    
     leafletProxy("mymap") %>%
       clearShapes() %>%
       clearMarkers() %>%
@@ -168,13 +169,13 @@ server <- function(input, output, session) {
                   popup =paste("<h5><strong>",cluster_shapes_completed$name,"</strong></h5>",                                                          
                                "<b>Oblast:</b>",oblast_seleted$name_en,"</br>",                                       
                                "<b>Cluster Id:</b>", cluster_shapes_completed$id,"</br>",                                              
-                               "<b>Building Completed:</b>","AS","</br>",                                         
+                               "<b>Building Completed:</b>",'10',"</br>",                                         
                                "<b>Building Not Completed:</b>",'10',"</br>",                                                   
                                "<b>Building Total:</b>",'10',"</br>"
                                )) %>%
       addPolygons(layerId = cluster_shapes_not_completed$name, data = cluster_shapes_not_completed , weight = 1, fillColor = "red", 
-                  popup =paste("<h5><strong>",cluster_shapes_not_completed$name,"</strong></h5>",                                                          
-                               "<b>Oblast:</b>",oblast_seleted$name_en,"</br>",                                       
+                  popup =paste("<h5><strong>", cluster_shapes_not_completed$name,"</strong></h5>",                                                          
+                               "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",                                       
                                "<b>Cluster Id:</b>", cluster_shapes_not_completed$id,"</br>",                                              
                                "<b>Building Completed:</b>","AS","</br>",                                         
                                "<b>Building Not Completed:</b>",'10',"</br>",                                                   

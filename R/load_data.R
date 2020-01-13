@@ -2,6 +2,7 @@ library(DBI)
 library(shinydashboard)
 library(leaflet)
 
+
 load("./Data/shapes.Rdata")
 
 country_shape <- readr::read_file("./Data/ukraine.kml")
@@ -42,11 +43,6 @@ buildings$cluster_id <- as.factor(buildings$cluster_id)
 
 #sum_sampled <- as.numeric(replace(buildings$sum_sampled,is.na(buildings$sum_sampled),0))
 
-##boolean variable for checking if the cluster is completed 
-
-#cluster_completed <- as.factor(sum(sum_sampled)/count(buildings)>= 16)
-#clusters$completed <- cluster_completed
-
 dwellings<-dbGetQuery(con,
     "SELECT
         dwellings.id as dwelling_id,
@@ -55,6 +51,7 @@ dwellings<-dbGetQuery(con,
         dwellings.replacement,
         dwellings.replacement_order_number,
         dwellings.data_collected,
+        dwellings.building_id,
         regions.name_en as region_name_en,
         regions.name_uk as region_name_uk,
         buildings.cluster_id,
@@ -75,7 +72,7 @@ dwellings$region_name_en <- as.factor(dwellings$region_name_en)
 dwellings$region_name_uk <- as.factor(dwellings$region_name_uk)
 dwellings$cluster_id <- as.factor(dwellings$cluster_id)
 dwellings$dwelling_id <- as.factor(dwellings$dwelling_id)
-
+dwellings$building_id <- as.factor(dwellings$building_id)
 
 dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number, ifelse(dwellings$replacement==1," Replacement ",""), ifelse(dwellings$data_collected==1," Data Collected ",""))
 
@@ -84,6 +81,11 @@ dwellings_with_text_col <- dwellings %>% group_by(structure_number) %>%
 
 buildings <- left_join(buildings, dwellings_with_text_col, by="structure_number")
 
+#clusters process
+buildings$sum_sampled <- buildings$sum_sampled %>% replace(is.na(buildings$sum_sampled), 0)
+clusters_process <- buildings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(sum_sampled)/count(buildings) >= 16)
+#buildings process
+buildings_process <- dwellings %>% group_by(building_id, cluster_id) %>% summarise('building_completed' = sum(sampled)/16 >= 16)
 
 dbDisconnect(con)
 
