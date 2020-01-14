@@ -98,7 +98,7 @@ server <- function(input, output, session) {
                                                   ))
 
   #Building Table
-  output$buildings<-DT::renderDataTable(DT::datatable(buildingsX,
+  output$buildings<-DT::renderDataTable(DT::datatable(buildings,
                                                       extensions = 'Buttons',
                                                       filter = 'top',
                                                       options = list(
@@ -196,36 +196,41 @@ server <- function(input, output, session) {
     cluster_shapes <- filter_shapes()
     ## filter clusters completed and not completed
     clusters_process_completed<-subset(clusters_process, cluster_completed == TRUE)
+    clusters_process_not_completed<-subset(clusters_process, cluster_completed == FALSE)
     filtered_clusters_completed <- subset(clusters, id %in% clusters_process_completed$cluster_id)
-    cluster_shapes_completed<- subset(shape_json, name %in% filtered_clusters_completed$id)
-    filtered_clusters_not_completed <- subset(clusters, !(id %in% clusters_process_completed$cluster_id))
-    cluster_shapes_not_completed <- subset(shape_json, name %in% filtered_clusters_not_completed$id)
 
+    cluster_shapes_completed<- subset(shape_json, name %in% filtered_clusters_completed$id)
+    
+    filtered_clusters_not_completed <- subset(clusters, id %in% clusters_process_not_completed$cluster_id)
+    cluster_shapes_not_completed <- subset(shape_json, name %in% filtered_clusters_not_completed$id)
       
     cluster_points <- filter_points()
     zoom_point <- zoom_to()
+    selected_cluster <- zoom_to_cluster()
+    info_cluster_completed<-subset(clusters_process_completed, cluster_id==cluster_shapes_completed$name)
+    info_cluster_not_completed<-subset(clusters_process_not_completed, cluster_id==cluster_shapes_not_completed$name)
     
     leafletProxy("mymap") %>%
       clearShapes() %>%
       clearMarkers() %>%
       setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom) %>%
+      addPolygons(layerId = cluster_shapes$name, data = cluster_shapes , weight = 1, fillColor = "blue") %>% 
       addPolygons(layerId = cluster_shapes_completed$name, data = cluster_shapes_completed , weight = 1, fillColor = "green", 
-                  popup =paste("<h5><strong>",cluster_shapes_completed$name,"</strong></h5>",                                                          
-                               "<b>Oblast:</b>",oblast_seleted$name_en,"</br>",                                       
-                               "<b>Cluster Id:</b>", cluster_shapes_completed$id,"</br>",                                              
-                               "<b>Building Completed:</b>",'10',"</br>",                                         
-                               "<b>Building Not Completed:</b>",'10',"</br>",                                                   
-                               "<b>Building Total:</b>",'10',"</br>"
+                  popup =paste("<h5><strong>Cluster Completed</strong></h5>",                                                          
+                               "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",                                       
+                               "<b>Cluster Id:</b>", cluster_shapes_completed$name,"</br>",                                              
+                               "<b>Dwellings Completed:</b>", info_cluster_completed$dwellings_completed,"</br>",                                         
+                               "<b>Dwellings Not Completed:</b>",info_cluster_completed$dwellings_not_completed,"</br>",                                                   
+                               "<b>Dwellings Total:</b>",info_cluster_completed$tot_dwellings,"</br>"
                                )) %>%
       addPolygons(layerId = cluster_shapes_not_completed$name, data = cluster_shapes_not_completed , weight = 1, fillColor = "red", 
-                  popup =paste("<h5><strong>", cluster_shapes_not_completed$name,"</strong></h5>",                                                          
+                  popup =paste("<h5><strong>Cluster not Completed</strong></h5>",                                                          
                                "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",                                       
-                               "<b>Cluster Id:</b>", cluster_shapes_not_completed$id,"</br>",                                              
-                               "<b>Building Completed:</b>","AS","</br>",                                         
-                               "<b>Building Not Completed:</b>",'10',"</br>",                                                   
-                               "<b>Building Total:</b>",'10',"</br>"
+                               "<b>Cluster Id:</b>", cluster_shapes_not_completed$name,"</br>",                                              
+                               "<b>Dwellings Completed:</b>", info_cluster_not_completed$dwellings_completed,"</br>",                                         
+                               "<b>Dwellings Not Completed:</b>",info_cluster_not_completed$dwellings_not_completed,"</br>",                                                   
+                               "<b>Dwellings Total:</b>",info_cluster_not_completed$tot_dwellings,"</br>"
                   )) #%>%
-     # addAwesomeMarkers(layerId = cluster_shapes$name, data = cluster_points, popup = paste("<h5>",cluster_points$name, "</h5>"))
   })
   
   ####################################
@@ -279,9 +284,18 @@ server <- function(input, output, session) {
           
           leafletProxy("mymap") %>%
             setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
-            clearMarkers() %>%
-          addCircleMarkers(layerId = filtered_buildings_not_sample$id, lng = filtered_buildings_not_sample$longitude, lat = filtered_buildings_not_sample$latitude, radius =5, stroke=FALSE, color = "grey", fillOpacity = 0.4, popup = paste("<h5>Structure No.: ", filtered_buildings_not_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_not_sample$num_dwellings, "</h5>")) %>%
-          addCircleMarkers(layerId = filtered_buildings_sample$id, lng = filtered_buildings_sample$longitude, lat = filtered_buildings_sample$latitude, radius =5, color = "blue", stroke = FALSE, fillOpacity = 0.6, popup = paste("<h5>Structure No.: ", filtered_buildings_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_sample$num_dwellings, "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text))
+            #clearMarkers() %>%
+          addCircleMarkers(layerId = filtered_buildings_not_sample$id, lng = filtered_buildings_not_sample$longitude, 
+                            lat = filtered_buildings_not_sample$latitude, radius =5, stroke=FALSE, color = "grey", 
+                            fillOpacity = 0.4, popup = paste("<h5>Structure No.: ", 
+                            filtered_buildings_not_sample$structure_number,"</h5><h5> # of Dwellings: ", 
+                            filtered_buildings_not_sample$num_dwellings, "</h5>")) %>%
+          addCircleMarkers(layerId = filtered_buildings_sample$id, lng = filtered_buildings_sample$longitude, 
+                            lat = filtered_buildings_sample$latitude, radius =5, color = "blue", stroke = FALSE, 
+                            fillOpacity = 0.6, popup = paste("<h5>Structure No.: ", 
+                            filtered_buildings_sample$structure_number,"</h5><h5> # of Dwellings: ", 
+                            filtered_buildings_sample$num_dwellings, "</h5><h5>-----------", "<h5>", 
+                            filtered_buildings_sample$text))
         
       } else {
         leafletProxy("mymap") %>%
@@ -308,8 +322,13 @@ server <- function(input, output, session) {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12) %>%
           clearMarkers() %>%
-          addCircleMarkers(layerId = filtered_buildings_not_sample$id, lng = filtered_buildings_not_sample$longitude, lat = filtered_buildings_not_sample$latitude, radius =5, stroke=FALSE, color = "grey", fillOpacity = 0.4, popup = paste("<h5>Structure No.: ", filtered_buildings_not_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_not_sample$num_dwellings, "</h5>")) %>%
-          addCircleMarkers(layerId = filtered_buildings_sample$id, lng = filtered_buildings_sample$longitude, lat = filtered_buildings_sample$latitude, radius =5, color = "blue", stroke = FALSE, fillOpacity = 0.6, popup = paste("<h5>Structure No.: ", filtered_buildings_sample$structure_number,"</h5><h5> # of Dwellings: ", filtered_buildings_sample$num_dwellings, "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text))
+          addCircleMarkers(layerId = filtered_buildings_not_sample$id, lng = filtered_buildings_not_sample$longitude, lat = filtered_buildings_not_sample$latitude, 
+                           radius =5, stroke=FALSE, color = "grey", fillOpacity = 0.4, popup = paste("<h5>Structure No.: ", filtered_buildings_not_sample$structure_number,
+                                                                                                     "</h5><h5> # of Dwellings: ", filtered_buildings_not_sample$num_dwellings, "</h5>")) %>%
+          addCircleMarkers(layerId = filtered_buildings_sample$id, lng = filtered_buildings_sample$longitude, lat = filtered_buildings_sample$latitude, 
+                           radius =5, color = "blue", stroke = FALSE, fillOpacity = 0.6, popup = paste("<h5>Structure No.: ", filtered_buildings_sample$structure_number,
+                                                                                                       "</h5><h5> # of Dwellings: ", filtered_buildings_sample$num_dwellings, 
+                                                                                                       "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text))
 
       } else {
         leafletProxy("mymap") %>%

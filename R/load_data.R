@@ -74,7 +74,9 @@ dwellings$cluster_id <- as.factor(dwellings$cluster_id)
 dwellings$dwelling_id <- as.factor(dwellings$dwelling_id)
 dwellings$building_id <- as.factor(dwellings$building_id)
 
-dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number, ifelse(dwellings$replacement==1," Replacement ",""), ifelse(dwellings$data_collected==1," Data Collected ",""))
+dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number, 
+                                ifelse(dwellings$replacement==1," Replacement ",""), 
+                                ifelse(dwellings$data_collected==1," Data Collected ",""))
 
 dwellings_with_text_col <- dwellings %>% group_by(structure_number) %>%
     summarise(sum_sampled=sum(sampled), text=paste0(dwelling_text, "</h5>", collapse="\n"))
@@ -82,10 +84,16 @@ dwellings_with_text_col <- dwellings %>% group_by(structure_number) %>%
 buildings <- left_join(buildings, dwellings_with_text_col, by="structure_number")
 
 #clusters process
-buildings$sum_sampled <- buildings$sum_sampled %>% replace(is.na(buildings$sum_sampled), 0)
-clusters_process <- buildings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(sum_sampled)/count(buildings) >= 16)
-#buildings process
-buildings_process <- dwellings %>% group_by(building_id, cluster_id) %>% summarise('building_completed' = sum(sampled)/16 >= 16)
+#buildings$sum_sampled <- buildings$sum_sampled %>% replace(is.na(buildings$sum_sampled), 0)
+
+clusters_process <- dwellings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(sampled) >= 16, 
+                                                                     'dwellings_completed' = as.numeric(sum(sampled)), 
+                                                                     'dwellings_not_completed' = as.numeric(sum(sampled==0)),
+                                                                     'tot_dwellings' = as.numeric(sum(sampled)+sum(sampled==0))
+                                                                     ) 
+
+                                                                        
+                                                                     
 
 dbDisconnect(con)
 
