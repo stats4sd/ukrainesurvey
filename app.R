@@ -214,7 +214,7 @@ server <- function(input, output, session) {
     cluster_points <- filter_points()
     zoom_point <- zoom_to()
 
-    info_cluster_not_completed<-subset(clusters_process_not_completed, cluster_id==cluster_shapes_not_completed$name)
+    info_cluster_not_completed<-subset(clusters_process_not_completed, cluster_id %in% cluster_shapes_not_completed$name)
     clusters_process_completed<-subset(clusters_process, cluster_completed == TRUE)
 
     if(nrow(clusters_process_completed) > 0) {
@@ -245,7 +245,14 @@ server <- function(input, output, session) {
     }else {
         leafletProxy("mymap") %>%
           setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom) %>%
-          addPolygons(layerId = cluster_shapes$name, data = cluster_shapes , weight = 1, fillColor = "blue") 
+          addPolygons(layerId = cluster_shapes_not_completed$name, data = cluster_shapes_not_completed , weight = 1, fillColor = "red", 
+                  popup =paste("<h5><strong>Cluster", cluster_shapes_not_completed$name," not Completed</strong></h5>",                                                          
+                               "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",                                       
+                               "<b>Cluster Id:</b>", cluster_shapes_not_completed$name,"</br>",                                              
+                               "<b>Dwellings Completed:</b>", info_cluster_not_completed$dwellings_completed,"</br>",                                         
+                               "<b>Dwellings Not Completed:</b>",info_cluster_not_completed$dwellings_not_completed,"</br>",                                                   
+                               "<b>Dwellings Total:</b>",info_cluster_not_completed$tot_dwellings,"</br>"
+                  ))
       }
     
   })

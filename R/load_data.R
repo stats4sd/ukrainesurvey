@@ -17,7 +17,7 @@ con <- dbConnect(RMySQL::MySQL(),
                  password = db_param$password
 )
 
-dbSendQuery(con,"SET NAMES utf8mb4")
+dbSendQuery(con,"set character set 'utf8mb4'")
 
 buildings<-dbGetQuery(con,
     "SELECT

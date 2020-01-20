@@ -70,10 +70,10 @@ Ukraine_sampling<-function(df, cluster.id=NULL){
   dwellings$replacement.order<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-16,NA)
   
   dwellings<-dwellings%>%
-    select(region_name_en, region_name_uk, structure_number, dwelling_id, sample.order, sampled, replacement.order)%>%
+    select(region_name_en, region_name_uk, structure_number, dwelling_id, dwelling_number, sample.order, sampled, replacement.order, address)%>%
     arrange(sample.order)
   
-  dwellings.s<<-data.frame(dwellings)
+  dwellings_download<<-data.frame(dwellings)
 }
 
 
