@@ -1,6 +1,6 @@
 PackratFormat: 1.4
 PackratVersion: 0.5.0
-RVersion: 3.6.1
+RVersion: 3.6.2
 Repos: CRAN=https://cran.rstudio.com/
 
 Package: BH
@@ -309,6 +309,11 @@ Version: 0.3.3
 Hash: d4f497f8a97ef6c7182a87b2476748d1
 Requires: magrittr, rlang
 
+Package: rJava
+Source: CRAN
+Version: 0.9-11
+Hash: 1d41abb8e4537cb281dd913f0d6f1e76
+
 Package: raster
 Source: CRAN
 Version: 3.0-7
@@ -419,6 +424,18 @@ Source: CRAN
 Version: 2.1.0
 Hash: 097f730987c2dc13d421b65bf01ddf08
 Requires: lattice
+
+Package: xlsx
+Source: CRAN
+Version: 0.6.1
+Hash: cc1594963f85841495a12f107a93db4b
+Requires: rJava, xlsxjars
+
+Package: xlsxjars
+Source: CRAN
+Version: 0.6.1
+Hash: 3902149dad80bcb14fcd88d8c7fd7f3b
+Requires: rJava
 
 Package: xtable
 Source: CRAN
