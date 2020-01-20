@@ -59,10 +59,10 @@ library(RMySQL)
 Ukraine_sampling<-function(df, cluster.id=NULL){
 
   dwellings<-df%>%
-    filter(cluster_id==cluster.id)%>%
-    group_by(structure_number)%>%
-  mutate(dwelling.id=row_number())    
-  
+    filter(cluster_id==cluster.id)# %>% #keep this line
+    #group_by(structure_number)%>%
+  #mutate(dwelling.id=row_number())    
+# first 4 lines only to generate dwellings id numbers not needed in final version  
   dwellings$sample.order<-sample(1:nrow(dwellings))
   
   dwellings$sampled<-ifelse(dwellings$sample.order<=16,TRUE,FALSE)
@@ -70,7 +70,7 @@ Ukraine_sampling<-function(df, cluster.id=NULL){
   dwellings$replacement.order<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-16,NA)
   
   dwellings<-dwellings%>%
-    select(region_name_en, region_name_uk, structure_number, dwelling.id, sample.order, sampled, replacement.order)%>%
+    select(region_name_en, region_name_uk, structure_number, dwelling_id, sample.order, sampled, replacement.order)%>%
     arrange(sample.order)
   
   dwellings.s<<-data.frame(dwellings)

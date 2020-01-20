@@ -40,9 +40,6 @@ buildings$region_name_en <- as.factor(buildings$region_name_en)
 buildings$region_name_uk <- as.factor(buildings$region_name_uk)
 buildings$cluster_id <- as.factor(buildings$cluster_id)
 
-
-#sum_sampled <- as.numeric(replace(buildings$sum_sampled,is.na(buildings$sum_sampled),0))
-
 dwellings<-dbGetQuery(con,
     "SELECT
         dwellings.id as dwelling_id,
@@ -86,14 +83,12 @@ buildings <- left_join(buildings, dwellings_with_text_col, by="structure_number"
 #clusters process
 #buildings$sum_sampled <- buildings$sum_sampled %>% replace(is.na(buildings$sum_sampled), 0)
 
-clusters_process <- dwellings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(sampled) >= 16, 
-                                                                     'dwellings_completed' = as.numeric(sum(sampled)), 
-                                                                     'dwellings_not_completed' = as.numeric(sum(sampled==0)),
-                                                                     'tot_dwellings' = as.numeric(sum(sampled)+sum(sampled==0))
+clusters_process <- dwellings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(data_collected) >= 16, 
+                                                                     'dwellings_completed' = as.numeric(sum(data_collected)), 
+                                                                     'dwellings_not_completed' = as.numeric(sum(data_collected==0)),
+                                                                     'tot_dwellings' = as.numeric(sum(data_collected)+sum(data_collected==0))
                                                                      ) 
-
-                                                                        
-                                                                     
+                                            
 
 dbDisconnect(con)
 
