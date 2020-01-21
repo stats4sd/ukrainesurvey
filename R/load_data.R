@@ -88,6 +88,8 @@ clusters_process <- dwellings %>% group_by(cluster_id) %>% summarise('cluster_co
                                                                      'dwellings_not_completed' = as.numeric(sum(data_collected==0)),
                                                                      'tot_dwellings' = as.numeric(sum(data_collected)+sum(data_collected==0))
                                                                      )
+clusters_process$id <- clusters_process$cluster_id
+clusters <- left_join(clusters, clusters_process, by="id")
 
 
 dbDisconnect(con)
