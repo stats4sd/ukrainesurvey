@@ -15,8 +15,20 @@ server <- function(input, output, session) {
   output$buildings<-make_datatable(buildings)
   output$dwellings<-make_datatable(dwellings)
 
-
-
+  #####################################
+  # Sample Dwellings within a cluster
+  #
+  #####################################
+  observe({
+    selected_sample_cluster<- input$mymap_shape_click
+    
+    updateSelectInput(session,
+                      "cluster.id",
+                      label = "Select Cluster ID for Sampling",
+                      choices = clusters$id,
+                      selected=clusters$id[clusters$id==selected_sample_cluster['id']]
+    )
+  })
  
   # make new sample
   sampleDwellings<-reactive({
@@ -71,28 +83,42 @@ server <- function(input, output, session) {
 
   ####################################
   # Dynamically Add cluster shapes and points based on chosen region
+  # TO REVIEW...
   ####################################
   observe({
 
     region_selected <- subset(regions, id==input$region)
     cluster_shapes <- filter_shapes()
-    ## filter clusters completed and not completed
+
+  
+    ## filter the clusters_process to only include incomplete clusters
+    clusters_process_not_completed<-subset(clusters_process, cluster_completed == FALSE)
+    
+    ## use the filtered clusters to filter the clusters... ?
+    filtered_clusters_not_completed <- subset(clusters, id %in% clusters_process_not_completed$cluster_id)
+    
+    ## filter the shapes to show only incomoplete clusters.
+    cluster_shapes_not_completed <- subset(shape_json, name %in% clusters_process_not_completed$cluster_id)
 
     browser()
     
-    clusters_process_not_completed<-subset(clusters_process, cluster_completed == FALSE)
-    filtered_clusters_not_completed <- subset(clusters, id %in% clusters_process_not_completed$cluster_id)
-    cluster_shapes_not_completed <- subset(shape_json, name %in% filtered_clusters_not_completed$id)
-
     zoom_point <- zoom_to()
 
+    ## Is this just doing the reverse of the previous subset?
     info_cluster_not_completed<-subset(clusters_process_not_completed, cluster_id %in% cluster_shapes_not_completed$name)
+    
+    ##
     clusters_process_completed<-subset(clusters_process, cluster_completed == TRUE)
 
+    
     if(nrow(clusters_process_completed) > 0) {
+      
+      ## As above, so below...
       filtered_clusters_completed <- subset(clusters, id %in% clusters_process_completed$cluster_id)
       cluster_shapes_completed<- subset(shape_json, name %in% filtered_clusters_completed$id)
       info_cluster_completed<-subset(clusters_process_completed, cluster_id==cluster_shapes_completed$name)
+      
+    
     leafletProxy("mymap") %>%
       clearShapes() %>%
       clearMarkers() %>%
@@ -125,49 +151,19 @@ server <- function(input, output, session) {
                                "<b>Dwellings Not Completed:</b>",info_cluster_not_completed$dwellings_not_completed,"</br>",
                                "<b>Dwellings Total:</b>",info_cluster_not_completed$tot_dwellings,"</br>"
                   ))
-      }
+      } #endif(completed clusters exist)
 
-  })
+  }) #endobserve
 
   ####################################
   # Dynamically add buildings based on chosen cluster
   ####################################
- zoom_to_cluster <- reactive({
-    selected_cluster <- input$mymap_marker_click
-
-    print(selected_cluster)
-    return(selected_cluster)
-  })
-
-  selected_sample_cluster <- reactive({
-    selected_sample_cluster <- input$mymap_shape_click
-
-    print(selected_sample_cluster)
-  })
 
   observe({
-  selected_sample_cluster<-selected_sample_cluster()
-
-  updateSelectInput(session,
-                    "cluster.id",
-                    label = "Select Cluster ID for Sampling",
-                    choices = clusters$id,
-                    selected=clusters$id[clusters$id==selected_sample_cluster['id']])
-  })
-
-  zoom_to_cluster_by_shape <- reactive({
-    selected_cluster <- input$mymap_shape_click
-
-    print(selected_cluster)
-    return(selected_cluster)
-  })
-
-
-  observe({
-   selected_cluster <- zoom_to_cluster_by_shape()
+   selected_cluster <- input$mymap_shape_click
 
     if(!is.null(selected_cluster)) {
-     filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
+      filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
       filtered_buildings_sample <- subset(buildings,cluster_id==selected_cluster['id'] & sum_sampled>0)
       filtered_buildings_not_sample <- subset(buildings,cluster_id==selected_cluster['id'] & (sum_sampled==0 | is.na(sum_sampled)))
 
@@ -175,20 +171,40 @@ server <- function(input, output, session) {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 13) %>%
           clearMarkers() %>%
-          addCircleMarkers(layerId = filtered_buildings_not_sample$id, lng = filtered_buildings_not_sample$longitude, lat = filtered_buildings_not_sample$latitude,
-                           radius =5, stroke=FALSE, color = "grey", fillOpacity = 0.4, popup = paste("<h5>Structure No.: ", filtered_buildings_not_sample$structure_number,
-                                                                                                     "</h5><h5> # of Dwellings: ", filtered_buildings_not_sample$num_dwellings, "</h5>")) %>%
-          addCircleMarkers(layerId = filtered_buildings_sample$id, lng = filtered_buildings_sample$longitude, lat = filtered_buildings_sample$latitude,
-                           radius =5, color = "blue", stroke = FALSE, fillOpacity = 0.6, popup = paste("<h5>Structure No.: ", filtered_buildings_sample$structure_number,
-                                                                                                       "</h5><h5> # of Dwellings: ", filtered_buildings_sample$num_dwellings,
-                                                                                                       "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text))
-
+          addCircleMarkers(layerId = filtered_buildings_not_sample$id, 
+                           lng = filtered_buildings_not_sample$longitude, 
+                           lat = filtered_buildings_not_sample$latitude,
+                           radius =5, 
+                           stroke=FALSE, 
+                           color = "grey", 
+                           fillOpacity = 0.4, 
+                           popup = paste("<h5>Structure No.: ", 
+                                         filtered_buildings_not_sample$structure_number,
+                                         "</h5><h5> # of Dwellings: ", 
+                                         filtered_buildings_not_sample$num_dwellings, 
+                                         "</h5>"
+                                         )
+                           ) %>%
+          addCircleMarkers(layerId = filtered_buildings_sample$id, 
+                           lng = filtered_buildings_sample$longitude, 
+                           lat = filtered_buildings_sample$latitude,
+                           radius =5, 
+                           color = "blue", 
+                           stroke = FALSE, 
+                           fillOpacity = 0.6, 
+                           popup = paste("<h5>Structure No.: ", 
+                                         filtered_buildings_sample$structure_number,
+                                         "</h5><h5> # of Dwellings: ", 
+                                         filtered_buildings_sample$num_dwellings,
+                                         "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text
+                                         )
+                           )
       } else {
         leafletProxy("mymap") %>%
           setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
-      }
-    }
-  })
-
+      } #endif(buildings exist)
+    } #endif(cluster is selected)
+   
+  }) #endobserve
 
 }
