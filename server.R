@@ -74,7 +74,7 @@ server <- function(input, output, session) {
   ####################################
   observe({
 
-    oblast_seleted <- subset(regions, id==input$region)
+    region_selected <- subset(regions, id==input$region)
     cluster_shapes <- filter_shapes()
     ## filter clusters completed and not completed
 
@@ -100,7 +100,7 @@ server <- function(input, output, session) {
 
       addPolygons(layerId = cluster_shapes_completed$name, data = cluster_shapes_completed , weight = 1, fillColor = "green",
                   popup =paste("<h5><strong>Cluster", cluster_shapes_completed$name ," Completed</strong></h5>",
-                               "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",
+                               "<b>Oblast:</b>", region_selected$name_en,"</br>",
                                "<b>Cluster Id:</b>", cluster_shapes_completed$name,"</br>",
                                "<b>Dwellings Completed:</b>", info_cluster_completed$dwellings_completed,"</br>",
                                "<b>Dwellings Not Completed:</b>",info_cluster_completed$dwellings_not_completed,"</br>",
@@ -108,7 +108,7 @@ server <- function(input, output, session) {
                                )) %>%
       addPolygons(layerId = cluster_shapes_not_completed$name, data = cluster_shapes_not_completed , weight = 1, fillColor = "red",
                   popup =paste("<h5><strong>Cluster", cluster_shapes_not_completed$name," not Completed</strong></h5>",
-                               "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",
+                               "<b>Oblast:</b>", region_selected$name_en,"</br>",
                                "<b>Cluster Id:</b>", cluster_shapes_not_completed$name,"</br>",
                                "<b>Dwellings Completed:</b>", info_cluster_not_completed$dwellings_completed,"</br>",
                                "<b>Dwellings Not Completed:</b>",info_cluster_not_completed$dwellings_not_completed,"</br>",
@@ -119,7 +119,7 @@ server <- function(input, output, session) {
           setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom) %>%
           addPolygons(layerId = cluster_shapes_not_completed$name, data = cluster_shapes_not_completed , weight = 1, fillColor = "red",
                   popup =paste("<h5><strong>Cluster", cluster_shapes_not_completed$name," not Completed</strong></h5>",
-                               "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",
+                               "<b>Oblast:</b>", region_selected$name_en,"</br>",
                                "<b>Cluster Id:</b>", cluster_shapes_not_completed$name,"</br>",
                                "<b>Dwellings Completed:</b>", info_cluster_not_completed$dwellings_completed,"</br>",
                                "<b>Dwellings Not Completed:</b>",info_cluster_not_completed$dwellings_not_completed,"</br>",
