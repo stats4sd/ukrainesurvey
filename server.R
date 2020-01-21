@@ -1,151 +1,29 @@
-library(leaflet.extras)
-library(dplyr)
-library(xlsx)
-source('./R/load_data.R')
-source('sample_dwelllings.R')
 
 
-regions_list <- setNames(regions$id,as.character(regions$name_en))
-
-ui <- dashboardPage(
-  dashboardHeader(title = "Ukraine Iodine Survey"),
-  dashboardSidebar(
-    sidebarMenu(id="tabs",
-      menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-      menuItem("Cluster Data", tabName = "clusters", icon = icon("th")),
-      menuItem("Building Data", tabName = "buildings", icon = icon("th")),
-      menuItem("Dwelling Data", tabName = "dwellings", icon = icon("th"))
-      #menuItem("Sampling", tabName = "sampling", icon = icon("th"))
-    )
-  ),
-  dashboardBody(
-    #Boxes need to be put in a row (or column)
-    tabItems(
-    # First Tab content
-    tabItem(tabName = "dashboard",
-      fluidRow(
-        column(width = 12,
-               ##Filter by Region
-               div(style="display: inline-block;vertical-align:top; width: 200px;",
-                   selectizeInput(
-                     "region",
-                     "Filter by Region",
-                     regions_list,
-                     options = list(
-                       placeholder = "Select a region",
-                       onInitialize = I('function() { this.setValue(""); }')
-                       )
-                     )
-               ),
-
-
-          div(style="display: inline-block;vertical-align:top; width: 200px;",
-              selectInput("cluster.id", label = "Select Cluster ID for Sampling", choices = clusters$id)
-              ),
-          div(style="display: inline-block; width: 200px;",
-              br(),
-              br(),
-
-              #actionButton("create_sample", "Create Sample for Selected Cluster"),
-              downloadLink("downloadSample", "Download Sample of Dwellings")
-              ),
-
-
-          box(width = NULL, solidHeader = TRUE, height = "90vh",
-
-              leafletOutput("mymap", height="85vh")
-          )
-        )
-
-      )
-    ),
-    # Cluster Table
-    tabItem(tabName = "clusters",
-            h2("Clusters Table"),
-            fluidRow(column(width=12, DT::dataTableOutput('clusters')))
-      ),
-    # Building Table
-    tabItem(tabName = 'buildings',
-            h2("Building Table"),
-            fluidRow(column(12, DT::dataTableOutput('buildings')))
-       ),
-    tabItem(tabName = 'dwellings',
-            h2("Dwelling Table"),
-            fluidRow(column(12, DT::dataTableOutput('dwellings')))
-    )
-    # tabItem(tabName = 'sampling',
-    #         h2("Sampling Tool"),
-    #         selectInput("cluster.id", label = "Select Cluster ID for Sampling", choices = clusters$id),
-    #         downloadLink("downloadSample", "Download Sample of Dwellings")
-    # )
-
-    )
-  )
-)
 
 
 server <- function(input, output, session) {
 
   observeEvent(input$create_sample, {
     downloadLink("downloadSample", "Download Sample of Dwellings")
-    #updateTabsetPanel(session, "tabs", selected = "sampling")
-    })
+  })
+
+  #####################################
+  # Data table tabs
+  #####################################
+  output$clusters<-make_datatable(clusters)
+  output$buildings<-make_datatable(buildings)
+  output$dwellings<-make_datatable(dwellings)
 
 
-  output$clusters<-DT::renderDataTable(DT::datatable(clusters,
-                                                     extensions = 'Buttons',
-                                                     filter = 'top',
-                                                     options = list(
-                                                       pageLength = 100,
-                                                       dom = 'Blfrtip',
-                                                       buttons = list(
-                                                         list(
-                                                           extend = "csv",
-                                                           text = "Download as CSV file"
-                                                           )
-                                                         )
-                                                      ),
-                                                    class = "display"
-                                                  ))
 
-  #Building Table
-  output$buildings<-DT::renderDataTable(DT::datatable(buildings,
-                                                      extensions = 'Buttons',
-                                                      filter = 'top',
-                                                      options = list(
-                                                        pageLength = 100,
-                                                        dom = 'Blfrtip',
-                                                        buttons = list(
-                                                          list(
-                                                            extend = "csv",
-                                                            text = "Download as CSV file"
-                                                          )
-                                                        )
-                                                      ),
-                                                      class = "display"
-  ))
-
-  output$dwellings<-DT::renderDataTable(DT::datatable(dwellings,
-                                                      extensions = 'Buttons',
-                                                      filter = 'top',
-                                                      options = list(
-                                                        pageLength = 100,
-                                                        dom = 'Blfrtip',
-                                                        buttons = list(
-                                                          list(
-                                                            extend = "csv",
-                                                            text = "Download as CSV file"
-                                                          )
-                                                        )
-                                                      ),
-                                                      class = "display"
-  ))
-
+ 
+  # make new sample
   sampleDwellings<-reactive({
     sampleDwellings<-data.frame(Ukraine_sampling(dwellings, input$cluster.id))
   })
 
-
+  # download sample
   output$downloadSample<- downloadHandler(
 
     filename = function() {
@@ -157,12 +35,20 @@ server <- function(input, output, session) {
       write.xlsx(sampleDwellings(), con,row.names=FALSE)
     }
   )
+  
+  ####################################
+  # Initial Map Render
+  ####################################
+  output$mymap <- renderLeaflet({
+    leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
+      addKML(country_shape, fillOpacity = 0) %>%
+      addMiniMap(
+        tiles = providers$Esri.WorldStreetMap,
+        toggleDisplay = TRUE
+      )
+    })
 
-
-  #Filter shape from cluster selected
-  filtered_shapes <- shape_json
-  filtered_points <- point_json
-
+  ## zoom to region
   zoom_to <- reactive({
     if(input$region==""){
       return(data.frame(longitude = 31.165580, latitude = 48.379433, zoom = 6))
@@ -171,6 +57,7 @@ server <- function(input, output, session) {
     }
   })
 
+  ## filter cluster shapes
   filter_shapes <- reactive({
     if(input$region==""){
 
@@ -181,23 +68,6 @@ server <- function(input, output, session) {
     }
   })
 
-  filter_points <- reactive({
-    if(input$region==""){
-        return(point_json)
-    }else{
-        filtered_clusters <- subset(clusters, region_id==input$region)
-        return(subset(point_json, name %in% filtered_clusters$id))
-    }
-    })
-
-  output$mymap <- renderLeaflet({
-    leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
-      addKML(country_shape, fillOpacity = 0) %>%
-      addMiniMap(
-        tiles = providers$Esri.WorldStreetMap,
-        toggleDisplay = TRUE
-      )
-    })
 
   ####################################
   # Dynamically Add cluster shapes and points based on chosen region
@@ -208,11 +78,12 @@ server <- function(input, output, session) {
     cluster_shapes <- filter_shapes()
     ## filter clusters completed and not completed
 
+    browser()
+    
     clusters_process_not_completed<-subset(clusters_process, cluster_completed == FALSE)
     filtered_clusters_not_completed <- subset(clusters, id %in% clusters_process_not_completed$cluster_id)
     cluster_shapes_not_completed <- subset(shape_json, name %in% filtered_clusters_not_completed$id)
 
-    cluster_points <- filter_points()
     zoom_point <- zoom_to()
 
     info_cluster_not_completed<-subset(clusters_process_not_completed, cluster_id %in% cluster_shapes_not_completed$name)
@@ -321,6 +192,3 @@ server <- function(input, output, session) {
 
 
 }
-
-shinyApp(ui = ui, server = server)
-

@@ -1,8 +1,8 @@
 library(DBI)
-library(shinydashboard)
-library(leaflet)
+
 
 load("./Data/shapes.Rdata")
+
 
 country_shape <- readr::read_file("./Data/ukraine.kml")
 #Retrieve config parameters from the config.yml file
@@ -71,8 +71,8 @@ dwellings$cluster_id <- as.factor(dwellings$cluster_id)
 dwellings$dwelling_id <- as.factor(dwellings$dwelling_id)
 dwellings$building_id <- as.factor(dwellings$building_id)
 
-dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number, 
-                                ifelse(dwellings$replacement==1," Replacement ",""), 
+dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number,
+                                ifelse(dwellings$replacement==1," Replacement ",""),
                                 ifelse(dwellings$data_collected==1," Data Collected ",""))
 
 dwellings_with_text_col <- dwellings %>% group_by(structure_number) %>%
@@ -83,12 +83,12 @@ buildings <- left_join(buildings, dwellings_with_text_col, by="structure_number"
 #clusters process
 #buildings$sum_sampled <- buildings$sum_sampled %>% replace(is.na(buildings$sum_sampled), 0)
 
-clusters_process <- dwellings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(data_collected) >= 16, 
-                                                                     'dwellings_completed' = as.numeric(sum(data_collected)), 
+clusters_process <- dwellings %>% group_by(cluster_id) %>% summarise('cluster_completed' = sum(data_collected) >= 16,
+                                                                     'dwellings_completed' = as.numeric(sum(data_collected)),
                                                                      'dwellings_not_completed' = as.numeric(sum(data_collected==0)),
                                                                      'tot_dwellings' = as.numeric(sum(data_collected)+sum(data_collected==0))
-                                                                     ) 
-                                            
+                                                                     )
+
 
 dbDisconnect(con)
 

@@ -47,6 +47,7 @@ point_json = readOGR("Data/points.geojson")
 shape_json <- subset(shape_json, name %in% clusters$id)
 point_json <- subset(point_json, name %in% clusters$id)
 
+regions_list <- setNames(regions$id,as.character(regions$name_en))
 
 # save as rdata for speed
-save(shape_json, point_json, regions, clusters, file="./Data/shapes.Rdata")
+save(shape_json, point_json, regions, clusters, regions_list, file="./Data/shapes.Rdata")
