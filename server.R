@@ -1,7 +1,3 @@
-
-
-
-
 server <- function(input, output, session) {
 
   observeEvent(input$create_sample, {
@@ -17,7 +13,6 @@ server <- function(input, output, session) {
 
   #####################################
   # Sample Dwellings within a cluster
-  #
   #####################################
   observe({
     selected_sample_cluster<- input$mymap_shape_click
@@ -29,25 +24,7 @@ server <- function(input, output, session) {
                       selected=clusters$id[clusters$id==selected_sample_cluster['id']]
     )
   })
-
-  # make new sample
-  sampleDwellings<-reactive({
-    sampleDwellings<-data.frame(Ukraine_sampling(dwellings, input$cluster.id))
-  })
-
-  # download sample
-  output$downloadSample<- downloadHandler(
-
-    filename = function() {
-      paste(input$cluster.id,'-', Sys.Date(), '.xlsx', sep='')
-    },
-
-
-    content = function(con) {
-      write.xlsx(sampleDwellings(), con,row.names=FALSE)
-    }
-  )
-
+  
   ####################################
   # Initial Map Render
   ####################################

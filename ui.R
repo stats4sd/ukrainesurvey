@@ -1,7 +1,3 @@
-
-
-
-
 ui <- dashboardPage(
 
   dashboardHeader(title = "Ukraine Iodine Survey"),
