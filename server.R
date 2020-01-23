@@ -25,6 +25,19 @@ server <- function(input, output, session) {
     )
   })
   
+  # Function to download the sample for the chosen cluster as an Excel file
+  output$downloadSample<- downloadHandler(
+    
+    filename = function() {
+      paste(input$cluster.id,'-', Sys.Date(), '.xlsx', sep='')
+    },
+    
+    
+    content = function(con) {
+      write.xlsx(sampleDwellings(), con,row.names=FALSE)
+    }
+  )
+
   ####################################
   # Initial Map Render
   ####################################

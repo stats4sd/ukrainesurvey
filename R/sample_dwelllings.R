@@ -22,20 +22,7 @@ generate_sample<-function(dwellings, cluster.id=NULL){
   dwellings_download<<-data.frame(dwellings)
 }
 
-
 sampleDwellings<-reactive({
   sampleDwellings<-data.frame(generate_sample(dwellings, input$cluster.id))
 })
 
-# Function to download the sample for the chosen cluster as an Excel file
-output$downloadSample<- downloadHandler(
-  
-  filename = function() {
-    paste(input$cluster.id,'-', Sys.Date(), '.xlsx', sep='')
-  },
-  
-  
-  content = function(con) {
-    write.xlsx(sampleDwellings(), con,row.names=FALSE)
-  }
-)
