@@ -4,7 +4,7 @@ library(dplyr)
 library(xlsx)
 library(shinydashboard)
 library(rgdal)
-
+library(qrcode)
 
 source('R/load_data.R')
 source('R/sample_dwelllings.R')

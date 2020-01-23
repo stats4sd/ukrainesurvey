@@ -211,4 +211,28 @@ server <- function(input, output, session) {
 
   }) #endobserve
 
+  #####################################
+  # QR CODE STUFF
+  #####################################
+  qrcode = reactive( t(qrcode_gen("https://stats4sd.org", plotQRcode= FALSE, dataOutput = TRUE)))
+  nc = reactive( ncol(qrcode()))
+  nr = reactive( nrow(qrcode()))
+  scale = 10
+  
+  output$qrtest <- renderPlot({
+    par(mar=c(0,0,0,0))
+    image(
+      1L:nc(),
+      1L:nr(),
+      qrcode(),
+      xlim = 0.5 + c(0, nc()),
+      ylim = 0.5 + c(nr(), 0),
+      axes = FALSE,
+      xlab = "",
+      ylab = "",
+      col = c("white", "black"),
+      asp = 1
+      )
+    }, width = function() scale*nc(), height = function() scale*nr())
+
 }

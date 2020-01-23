@@ -31,6 +31,23 @@ Version: 1.2-18
 Hash: 54974505e2addac3ec63f9d4bf8ff98a
 Requires: lattice
 
+Package: R.methodsS3
+Source: CRAN
+Version: 1.7.1
+Hash: 99f841ba1614c005e6672c5fb01b352a
+
+Package: R.oo
+Source: CRAN
+Version: 1.23.0
+Hash: 23075ea6b5c395e20b61881e6646dfe4
+Requires: R.methodsS3
+
+Package: R.utils
+Source: CRAN
+Version: 2.9.2
+Hash: 5844ea1a3ef81a9e8d1e1872110ead64
+Requires: R.methodsS3, R.oo
+
 Package: R6
 Source: CRAN
 Version: 2.2.2
@@ -309,6 +326,12 @@ Version: 0.3.3
 Hash: d4f497f8a97ef6c7182a87b2476748d1
 Requires: magrittr, rlang
 
+Package: qrcode
+Source: CRAN
+Version: 0.1.1
+Hash: 5ea7e605f7f0fd9f3ea8d22755a0ff4e
+Requires: R.utils, stringr
+
 Package: rJava
 Source: CRAN
 Version: 0.9-11
@@ -376,8 +399,8 @@ Requires: lattice
 
 Package: stringi
 Source: CRAN
-Version: 1.4.3
-Hash: ed2a82fc7cc668c1345223d938cdfaf2
+Version: 1.4.5
+Hash: 88ba531dfcddc90c6b6b87e97a44aeb6
 
 Package: stringr
 Source: CRAN

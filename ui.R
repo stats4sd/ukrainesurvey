@@ -7,7 +7,8 @@ ui <- dashboardPage(
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Cluster Data", tabName = "clusters", icon = icon("th")),
       menuItem("Building Data", tabName = "buildings", icon = icon("th")),
-      menuItem("Dwelling Data", tabName = "dwellings", icon = icon("th"))
+      menuItem("Dwelling Data", tabName = "dwellings", icon = icon("th")),
+      menuItem("QR Test", tabName = "qrtest", icon = icon("th"))
     )
   ),
 
@@ -66,6 +67,11 @@ ui <- dashboardPage(
       tabItem(tabName = 'dwellings',
               h2("Dwelling Table"),
               fluidRow(column(12, DT::dataTableOutput('dwellings')))
+      ),
+      
+      tabItem(tabName = 'qrtest',
+              h2("Some QR Code Tests"),
+              plotOutput('qrtest')
       )
     )
   )
