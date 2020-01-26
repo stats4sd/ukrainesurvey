@@ -44,9 +44,50 @@ ui <- dashboardPage(
                 br(),
 
                 downloadLink("downloadSample", "Download Sample of Dwellings")
-                ),
-
-            box(width = NULL, solidHeader = TRUE, height = "90vh", leafletOutput("mymap", height="85vh"))
+                )
+            
+          ),
+          column(
+            width = 8,
+            box(width = NULL, solidHeader = TRUE, height = "90vh", leafletOutput("mymap", height="85vh")
+            )
+          ),
+          column(
+            width = 4,
+            h3("Region Kharkiv:"),
+            h3("Cluster ID: 630431"),
+            p("Selected cluster information will appear here."),
+            br(),
+            fluidRow(
+              column(
+                width = 3,
+                h5("Cluster Status")    
+              ),
+              column(
+                width = 6,
+                h5(tags$strong("Building listing in progress"))
+              )
+            ),
+            fluidRow(
+              column(
+                width = 3,
+                h5("# of Buildings")    
+              ),
+              column(
+                width = 6,
+                h5(tags$strong("120"))
+              )
+            ),
+            fluidRow(
+              column(
+                width = 3,
+                h5("# Dwellings")    
+              ),
+              column(
+                width = 6,
+                h5(tags$strong("551"))
+              )
+            ),
           )
         )
       ),
@@ -68,7 +109,7 @@ ui <- dashboardPage(
               h2("Dwelling Table"),
               fluidRow(column(12, DT::dataTableOutput('dwellings')))
       ),
-      
+
       tabItem(tabName = 'qrtest',
               h2("Some QR Code Tests"),
               plotOutput('qrtest')
