@@ -1,3 +1,5 @@
+source('global.R')
+
 ui <- dashboardPage(
 
   dashboardHeader(title = "Ukraine Iodine Survey"),
