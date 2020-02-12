@@ -57,7 +57,6 @@ load_dwellings <- function(cluster_id) {
   dwellings.id as dwelling_id,
   dwellings.dwelling_number,
   dwellings.sampled,
-  dwellings.replacement,
   dwellings.replacement_order_number,
   dwellings.data_collected,
   dwellings.building_id,

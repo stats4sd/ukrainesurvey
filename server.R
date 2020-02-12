@@ -1,15 +1,50 @@
+library (plyr)
+
 server <- function(input, output, session) {
 
   observeEvent(input$create_sample, {
     downloadLink("downloadSample", "Download Sample of Dwellings")
   })
-
+  
+  
   #####################################
-  # Data table tabs
+  # Generate Sample of Dwellings 
   #####################################
-  output$clusters<-make_datatable(clusters)
-  output$buildings<-make_datatable(buildings)
-  output$dwellings<-make_datatable(dwellings)
+  observeEvent(input$generateSample, {
+    req(input$cluster.id)
+    SAMPLE_NUM<-8
+    
+    get_dwellings<-load_dwellings(input$cluster.id) 
+    dwellings<-get_dwellings['dwellings']
+    dwellings <- data.frame(Reduce(rbind, dwellings))
+    #browser()
+    dwellings_by_cluster<-dwellings%>%filter(cluster_id== input$cluster.id)
+    
+    dwellings_by_cluster$sample.order<-sample(1:nrow(dwellings_by_cluster))
+    
+    dwellings_by_cluster$sampled<-ifelse(dwellings_by_cluster$sample.order<=SAMPLE_NUM,TRUE,FALSE)
+    
+    dwellings_by_cluster$replacement.order<-ifelse(dwellings_by_cluster$sampled==FALSE,dwellings_by_cluster$sample.order-SAMPLE_NUM,NA)
+    
+    dwellings_by_cluster<-dwellings_by_cluster%>%
+      select(region_name_en, region_name_uk, dwelling_id, dwelling_number, sample.order, sampled, replacement.order, address) %>%
+      arrange(sample.order)
+    
+    dwellings_download<<-data.frame(dwellings_by_cluster)
+  
+  
+  
+  
+    output$sampleTable<-make_datatable(dwellings_by_cluster)
+  
+  })
+  
+  
+  #####################################
+  # Data table 
+  #####################################
+  
+  output$sampleTable<-make_datatable(NULL)
 
   #####################################
   # Sample Dwellings within a cluster

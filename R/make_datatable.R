@@ -4,22 +4,18 @@
 #  @returns - a datatable to put into an output property.
 ####################################
 make_datatable <- function(df) {
-    DT::renderDataTable(
-        DT::datatable(
-          df,
-          extensions = 'Buttons',
-          filter = 'top',
-          options = list(
-            pageLength = 100,
-            dom = 'Blfrtip',
-            buttons = list(
-              list(
-                extend = "csv",
-                text = "Download as CSV file"
-              )
-            )
-          ),
-        class = "display"
-      )
+  DT::renderDataTable({
+    DT::datatable(
+      df,
+      filter = 'top',
+      extensions = 'Buttons',
+      options = list(
+        dom = 'Blfrtip',
+        buttons = c('copy', 'excel', 'pdf', 'print'),
+        text = 'Download',
+        br()
+      ),
+      class = "display"
     )
+  })
 }
