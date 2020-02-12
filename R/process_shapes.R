@@ -39,7 +39,8 @@ clusters$region_name_uk <- as.factor(clusters$region_name_uk)
 clusters$type <- as.factor(clusters$type)
 clusters$smd_id <- as.factor(clusters$smd_id)
 
-#get shape and points from json file
+#get shape and points from files
+country_shape <- readr::read_file("./Data/ukraine.kml")
 shape_json = readOGR("Data/shapes.geojson")
 point_json = readOGR("Data/points.geojson")
 

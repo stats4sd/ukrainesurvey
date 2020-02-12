@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `clusters` (
   `locality_type` int(11) DEFAULT NULL COMMENT "from sample frame doc",
   `num_voters` int(11) DEFAULT NULL COMMENT "from sample frame doc",
   `smd_id` int(11) DEFAULT NULL COMMENT "Single Mandate District ID - from sample frame doc and electoral register data",
+  `sample_taken` tinyint(1) NOT NULL DEFAULT 0 COMMENT "Has a sample of dwellings been taken for this cluster?",
   PRIMARY KEY (`id`),
   UNIQUE KEY `sample_id` (`sample_id`),
   KEY `link_regions_clusters` (`region_id`),
