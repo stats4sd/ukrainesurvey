@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `buildings` (
 -- Dumping structure for table ukraine.clusters
 CREATE TABLE IF NOT EXISTS `clusters` (
   `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'electoral_id',
-  `region_id` int(11) DEFAULT NULL,
+  `region_id` bigint(11) DEFAULT NULL,
   `sample_id` int(11) DEFAULT NULL COMMENT 'from sample frame doc',
   `boundaries_en` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `boundaries_uk` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS `clusters` (
 -- Dumping structure for table ukraine.dwellings
 CREATE TABLE IF NOT EXISTS `dwellings` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `building_id` int(11) DEFAULT NULL,
+  `building_id` bigint(11) DEFAULT NULL,
   `dwelling_number` int(11) DEFAULT NULL COMMENT "Auto Increment per building",
   `sampled` int(1) DEFAULT '0' COMMENT "Is the dwelling part of the sample frame",
   `replacement_order_number` int(11) DEFAULT NULL COMMENT "Order the dwellings should be selected if replacements are needed",
