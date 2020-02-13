@@ -60,12 +60,12 @@ server <- function(input, output, session) {
     dwellings_sampled <- dwellings_by_cluster %>% filter(sampled==1)
     dwellings_sampled$visited<-"[ ]"
     dwellings_sampled$int_completed<-"[ ]"
-    dwellings_sampled$salt_call<-"[ ]"
+    dwellings_sampled$salt_collected<-"[ ]"
     dwellings_sampled$urine_1<-"[ ]"
     dwellings_sampled$urine_2<-"[ ]"
     
     dwellings_sampled<-dwellings_sampled%>%
-      select(structure_number, dwelling_number, address, visited, int_completed, salt_call, urine_1, urine_2) 
+      select(structure_number, dwelling_number, address, visited, int_completed, salt_collected, urine_1, urine_2) 
     dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
     dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
     output$checklistTable<-make_datatable(dwellings_sampled)
