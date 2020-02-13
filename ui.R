@@ -7,7 +7,8 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(id="tabs",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-      menuItem("QR Test", tabName = "qrtest", icon = icon("th"))
+      menuItem("QR Test", tabName = "qrtest", icon = icon("th")),
+      menuItem("Summary", tabName = "summary", icon = icon("file"))
     )
   ),
 
@@ -21,14 +22,17 @@ ui <- dashboardPage(
         fluidRow(
           column(
             width = 8,
-            box(width = NULL, solidHeader = TRUE, height = "90vh", leafletOutput("mymap", height="85vh"),
+            box(width = NULL, solidHeader = TRUE, height = "90vh", 
+                leafletOutput("mymap", height="85vh"),
+                
+                    downloadButton('downloadPlot', 'Download Plot',class = "btn-primary", style="float: right;")
             ),
             
             column(width = 12,
-             
-                
-                  DT::dataTableOutput("sampleTable")
-              
+        
+                  DT::dataTableOutput("sampleTable"),
+                  DT::dataTableOutput("checklistTable")
+                  
             ),
           ),
           box(
@@ -92,7 +96,7 @@ ui <- dashboardPage(
                 br(),
                 br(),
                 
-                downloadLink("downloadSample", "Download Sample of Dwellings"),
+                #downloadLink("downloadSample", "Download Sample of Dwellings"),
                 actionButton("generateSample", "Generate Sample", class = "btn-primary")
             ),
            
@@ -104,6 +108,56 @@ ui <- dashboardPage(
       tabItem(tabName = 'qrtest',
               h2("Some QR Code Tests"),
               plotOutput('qrtest')
+      ),
+      
+      tabItem(tabName = 'summary',
+              h2("Summary"),
+              div(style="width: 200px;",
+                  selectInput("cluster_summary", label = "Select Cluster ID for Sampling", choices = clusters$id)
+              ),
+              box(width=4,
+                status="warning",
+                h4('buildings listed'),
+                p(clusters$tot_buildings)
+              ),
+              box(width=4,
+                  status="warning",
+                  h4('dwelligns listed'),
+                  p(clusters$tot_dwellings)
+              ),
+              box(width=4,
+                  status="warning",
+                  h4('Total number of salt samples collected'),
+                  p(3)
+              ),
+              box(width=4,
+                  status="warning",
+                  h4('Total number of 1st urine samples collected'),
+                  p('33')
+              ),
+              box(width=4,
+                  status="warning",
+                  h4('Total number of 2nd urine samples collected'),
+                  p('33')
+              ),
+              box(width=4,
+                  status="warning",
+                  h4('Number of completed and unsuccessful interviews '),
+                  p('33')
+              ),
+              box(width=4,
+                  status="warning",
+                  h4('dwelligns visited uploaded to date'),
+                  p('33'),
+                  h5('Total number of interviews attempted'),
+                  p('23'),
+                  h5('Total number of interviews not completed'),
+                  p('22'),
+                  h5('Total number of completed (and successful) interviews'),
+                  p('25'),
+                  h5('Number of replacements'),
+                  p('7'),
+              ),
       )
     )
   )

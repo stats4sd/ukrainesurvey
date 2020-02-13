@@ -118,4 +118,71 @@ drop_sql_connection <- function(con) {
   dbDisconnect(con)  
 }
 
+#Update dwellings after the generate sample button has been clicked
 
+update_dwellings <- function(sampled_dwellings) {
+  
+  selected_dwellings <- sampled_dwellings %>% filter(sampled == TRUE)
+  
+  for (id in selected_dwellings$dwelling_id) {
+  con <- get_sql_connection()
+  
+  sql <- "UPDATE dwellings
+          SET sampled = 1"
+  
+    if(! is.null(id)) {
+      sql <- paste(sql, "WHERE dwellings.id = ", id)
+      dwellings <- dbGetQuery(con, sql)
+      drop_sql_connection(con)
+    }
+  }
+  
+  #update replacement order
+  replacement_dwellings <- sampled_dwellings %>% filter(sampled == FALSE)
+  for (id in replacement_dwellings$dwelling_id) {
+    
+    replacement_row<-replacement_dwellings %>% filter(dwelling_id == id)
+    con <- get_sql_connection()
+    
+    sql <- "UPDATE dwellings
+          SET replacement_order_number = "
+    
+    if(! is.null(id)) {
+      sql <- paste(sql, replacement_row$replacement.order, "WHERE dwellings.id = ", id)
+      dwellings <- dbGetQuery(con, sql)
+      drop_sql_connection(con)
+    }
+  }
+ 
+}
+
+update_cluster <- function(cluster_id) {
+ 
+    con <- get_sql_connection()
+    
+    sql <- "UPDATE clusters
+            SET sample_taken = 1"
+    
+    if(! is.null(cluster_id)) {
+      sql <- paste(sql, "WHERE id = ", cluster_id)
+      
+    }
+    dwellings <- dbGetQuery(con, sql)
+  
+    drop_sql_connection(con)
+
+}
+
+
+killDbConnections <- function () {
+  
+  all_cons <- dbListConnections(MySQL())
+  
+  print(all_cons)
+  
+  for(con in all_cons)
+    +  dbDisconnect(con)
+  
+  print(paste(length(all_cons), " connections killed."))
+  
+}
