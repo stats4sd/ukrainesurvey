@@ -173,6 +173,40 @@ update_cluster <- function(cluster_id) {
 
 }
 
+#load summary cluster
+load_summary_clusters <- function(cluster_id = NULL) {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM summary_cluster"
+  
+  if(! is.null(cluster_id)) {
+    sql <- paste(sql, "WHERE cluster_id = ", cluster_id)
+  }
+  
+  clusters <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(clusters)
+}
+
+drop_sql_connection <- function(con) {
+  dbDisconnect(con)  
+}
+
+summary_clusters <- function() {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM summary_cluster"
+  
+  clusters <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(clusters)
+}
+
+drop_sql_connection <- function(con) {
+  dbDisconnect(con)  
+}
 
 killDbConnections <- function () {
   
@@ -186,3 +220,5 @@ killDbConnections <- function () {
   print(paste(length(all_cons), " connections killed."))
   
 }
+
+

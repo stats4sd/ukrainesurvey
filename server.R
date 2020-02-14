@@ -5,8 +5,17 @@ value= FALSE
   observeEvent(input$create_sample, {
     downloadLink("downloadSample", "Download Sample of Dwellings")
   })
-  
-  
+  reactive({
+    
+   if(!is.na(input$summary_cluster)){
+    
+     sum_clusters<-subset(summary_clusters, cluster_id=input$summary_cluster)
+   } else {
+     sum_clusters<-load_summary_clusters(clusters$id[1])
+     
+   }
+    
+  })
   
   #####################################
   # Generate Sample of Dwellings 
@@ -319,8 +328,6 @@ value= FALSE
   
   # reactive values to store map
   vals <- reactiveValues()
-  
-  
   
   # create map as viewed by user
   observeEvent({
