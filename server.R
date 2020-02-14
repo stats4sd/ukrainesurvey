@@ -1,7 +1,7 @@
 library (plyr)
 
 server <- function(input, output, session) {
-
+value= FALSE
   observeEvent(input$create_sample, {
     downloadLink("downloadSample", "Download Sample of Dwellings")
   })
@@ -230,7 +230,7 @@ server <- function(input, output, session) {
       browser()
       
       
-        leafletProxy("mymap") %>%
+      leafletProxy("mymap") %>%
         setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 13) %>%
         clearMarkers() %>%
         addCircleMarkers(data = buildings, 
@@ -317,37 +317,36 @@ server <- function(input, output, session) {
   # Download Map
   #####################################
   
-  map_reactive <- reactive({
-    zoom_point <- zoom_to()
-   
-    leaflet() %>%
-      addProviderTiles(providers$OpenStreetMap) %>% 
-      setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom)
+  # reactive values to store map
+  vals <- reactiveValues()
+  
+  # create base map  
+  output$mymap <- renderLeaflet({
+    vals$base <- leaflet() %>%
+      addProviderTiles(providers$OpenStreetMap) %>%
+      addTiles()
   })
   
-  output$map <- renderLeaflet({
-    map_reactive()
-  })
-
- 
+  # create map as viewed by user
+  observeEvent({
+    input$mymap_zoom
+    input$mymap_center
+  }, {
+    vals$current <- vals$base %>% 
+      setView(lng = input$mymap_center$lng,
+              lat = input$mymap_center$lat,
+              zoom = input$mymap_zoom)
+  }
+  )
   
-  observeEvent(input$generateSample, {
+  # create download
+  output$dl <- downloadHandler(
+    filename = "map.png",
     
-    if (file.exists("exported_map.png")) 
-      #Delete file if it exists
-      file.remove("exported_map.png")
-      mapshot(map_reactive(), file=paste0(getwd(), '/exported_map.png'))
-  })
-  
-  output$downloadPlot <- downloadHandler(
-    filename = "exported_map.png",
-    
-    content <- function(file) {
-      file.copy("exported_map.png", file)
-   
-    },
-    file.remove("exported_map.png")
-    # contentType = "application/zip"
-    
+    content = function(file) {
+      mapshot(vals$current, file = file,
+              # 2. specify size of map based on div size
+              vwidth = input$dimension[1], vheight = input$dimension[2])
+    }
   )
 }

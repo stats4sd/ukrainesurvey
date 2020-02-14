@@ -1,6 +1,7 @@
 
 library(shinyjs)
 ui <- dashboardPage(
+  
 
   dashboardHeader(title = "Ukraine Iodine Survey"),
 
@@ -8,12 +9,27 @@ ui <- dashboardPage(
     sidebarMenu(id="tabs",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("QR Test", tabName = "qrtest", icon = icon("th")),
-      menuItem("Summary", tabName = "summary", icon = icon("file"))
+      menuItem("Summary Cluster", tabName = "summary_cluster", icon = icon("file")),
+      menuItem("Summary Region", tabName = "summary_region", icon = icon("file"))
     )
   ),
 
 
   dashboardBody(
+    tags$head(tags$script('
+                        var dimension = [0, 0];
+                        $(document).on("shiny:connected", function(e) {
+                        dimension[0] = document.getElementById("mymap").clientWidth;
+                        dimension[1] = document.getElementById("mymap").clientHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        $(window).resize(function(e) {
+                        dimension[0] = document.getElementById("mymap").clientWidth;
+                        dimension[1] = document.getElementById("mymap").clientHeight;
+                        Shiny.onInputChange("dimension", dimension);
+                        });
+                        ')),
+   
 
     tabItems(
 
@@ -25,7 +41,7 @@ ui <- dashboardPage(
             box(width = NULL, solidHeader = TRUE, height = "90vh", 
                 leafletOutput("mymap", height="85vh"),
                 
-                    downloadButton('downloadPlot', 'Download Plot',class = "btn-primary", style="float: right;")
+                downloadButton("dl", "Download Map",class = "btn-primary", style="float: right;")
             ),
             
             column(width = 12,
@@ -110,7 +126,7 @@ ui <- dashboardPage(
               plotOutput('qrtest')
       ),
       
-      tabItem(tabName = 'summary',
+      tabItem(tabName = 'summary_cluster',
               h2("Summary"),
               div(style="width: 200px;",
                   selectInput("cluster_summary", label = "Select Cluster ID for Sampling", choices = clusters$id)
@@ -157,7 +173,13 @@ ui <- dashboardPage(
                   p('25'),
                   h5('Number of replacements'),
                   p('7'),
-              ),
+              )
+       
+      ),
+      tabItem(tabName = 'summary_region',
+              h2("Summary region"),
+             
+              
       )
     )
   )
