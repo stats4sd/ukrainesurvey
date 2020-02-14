@@ -99,7 +99,7 @@ value= FALSE
   # Initial Map Render
   ####################################
   output$mymap <- renderLeaflet({
-    leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
+    vals$base <-leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
       addKML(country_shape, fillOpacity = 0) %>%
       addMiniMap(
         tiles = providers$Esri.WorldStreetMap,
@@ -320,12 +320,7 @@ value= FALSE
   # reactive values to store map
   vals <- reactiveValues()
   
-  # create base map  
-  output$mymap <- renderLeaflet({
-    vals$base <- leaflet() %>%
-      addProviderTiles(providers$OpenStreetMap) %>%
-      addTiles()
-  })
+  
   
   # create map as viewed by user
   observeEvent({
