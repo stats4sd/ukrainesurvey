@@ -1,7 +1,7 @@
 library(DBI)
 
 get_sql_connection <- function() {
-
+  
   #Retrieve config parameters from the config.yml file
   db_param <- config::get(config='mysql')
   
@@ -114,63 +114,44 @@ load_clusters <- function(region_id = NULL) {
   return(clusters)
 }
 
-drop_sql_connection <- function(con) {
-  dbDisconnect(con)  
-}
 
 #Update dwellings after the generate sample button has been clicked
 
 update_dwellings <- function(sampled_dwellings) {
   
-  selected_dwellings <- sampled_dwellings %>% filter(sampled == TRUE)
-  
-  for (id in selected_dwellings$dwelling_id) {
   con <- get_sql_connection()
-  
-  sql <- "UPDATE dwellings
-          SET sampled = 1"
-  
-    if(! is.null(id)) {
-      sql <- paste(sql, "WHERE dwellings.id = ", id)
-      dwellings <- dbGetQuery(con, sql)
-      drop_sql_connection(con)
-    }
+
+  # update sampled dwellings  
+
+  for (row in 1:nrow(sampled_dwellings)) {
+    sql <- paste("UPDATE dwellings 
+                 SET sampled = ",
+                 sampled_dwellings[row, "sampled"],
+                 ", replacement_order_number = ",
+                 sampled_dwellings[row, "replacement.order"],
+                 "WHERE dwellings.id = ",
+                 sampled_dwellings[row, "dwelling_id"])
+    
+    results <- dbGetQuery(con, sql)
   }
   
-  #update replacement order
-  replacement_dwellings <- sampled_dwellings %>% filter(sampled == FALSE)
-  for (id in replacement_dwellings$dwelling_id) {
-    
-    replacement_row<-replacement_dwellings %>% filter(dwelling_id == id)
-    con <- get_sql_connection()
-    
-    sql <- "UPDATE dwellings
-          SET replacement_order_number = "
-    
-    if(! is.null(id)) {
-      sql <- paste(sql, replacement_row$replacement.order, "WHERE dwellings.id = ", id)
-      dwellings <- dbGetQuery(con, sql)
-      drop_sql_connection(con)
-    }
-  }
+  drop_sql_connection(con)
  
 }
 
 update_cluster <- function(cluster_id) {
  
+  if(! is.null(cluster_id)) {
     con <- get_sql_connection()
     
-    sql <- "UPDATE clusters
-            SET sample_taken = 1"
+    sql <- paste("UPDATE clusters
+            SET sample_taken = 1 
+            WHERE id = ", cluster_id)
     
-    if(! is.null(cluster_id)) {
-      sql <- paste(sql, "WHERE id = ", cluster_id)
-      
-    }
-    dwellings <- dbGetQuery(con, sql)
+    results <- dbGetQuery(con, sql)
   
     drop_sql_connection(con)
-
+  }
 }
 
 #load summary cluster
@@ -183,21 +164,6 @@ load_summary_clusters <- function(cluster_id = NULL) {
   if(! is.null(cluster_id)) {
     sql <- paste(sql, "WHERE cluster_id = ", cluster_id)
   }
-  
-  clusters <- dbGetQuery(con,sql)
-  drop_sql_connection(con)
-  return(clusters)
-}
-
-drop_sql_connection <- function(con) {
-  dbDisconnect(con)  
-}
-
-summary_clusters <- function() {
-  
-  con <- get_sql_connection()
-  
-  sql <- "SELECT * FROM summary_cluster"
   
   clusters <- dbGetQuery(con,sql)
   drop_sql_connection(con)
