@@ -156,22 +156,6 @@ update_cluster <- function(cluster_id) {
   }
 }
 
-#load summary cluster
-load_summary_clusters <- function(cluster_id = NULL) {
-  
-  con <- get_sql_connection()
-  
-  sql <- "SELECT * FROM clusters_with_dwelling_counts"
-  
-  if(! is.null(cluster_id)) {
-    sql <- paste(sql, "WHERE id = ", cluster_id)
-  }
-  
-  clusters <- dbGetQuery(con,sql)
-  drop_sql_connection(con)
-  return(clusters)
-}
-
 drop_sql_connection <- function(con) {
   dbDisconnect(con)  
 }

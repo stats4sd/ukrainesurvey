@@ -69,16 +69,28 @@ ui <- dashboardPage(
             #filters
             box(
               width = 12,
+              title = "Filters",
+              solidHeader = TRUE,
+              status = "primary",
+              collapsible = TRUE,
               selectizeInput("region",
-                             "Select a Region",
-                             regions_list,
-                             options = list(
-                               placeholder = "Select a region",
-                               onInitialize = I('function() { this.setValue(""); }')
-                               )
+                          label = "Select a Region",
+                          choices = regions_list,
+                          options = list(
+                            placeholder = "Select a region",
+                            onInitialize = I('function() { this.setValue(""); }')
+                          )
               ),
               
-              selectInput("cluster.id", label = "Select Cluster ID for Sampling", choices = clusters$id),
+              selectizeInput("cluster", 
+                             label = "Select Cluster", 
+                             choices = clusters$id,
+                             options = list(
+                               placeholder = "Select a cluster",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
+              
               actionButton("generateSample", "Generate Sample", class = "btn-primary")
 
               
@@ -87,13 +99,20 @@ ui <- dashboardPage(
             # actions and summary column
             box(
               width = 12,
-              title = "Selected Cluster:",
+              title = "Cluster Information",
+              solidHeader = TRUE,
+              status = "primary",
+              
               conditionalPanel(
-                condition = "cluster.id != NULL",
-
-                h3("Region Kharkiv:"),
-                h3("Cluster ID: 630431"),
-                p("Selected cluster information will appear here."),
+                condition = "input.cluster == ''",
+                h5("Select a cluster to show information here")
+              ),
+              
+              conditionalPanel(
+                condition = "input.cluster != ''",
+              
+                h3(textOutput("region_name")),
+                h3(textOutput("cluster_name")),
                 br(),
                 fluidRow(
                   column(
