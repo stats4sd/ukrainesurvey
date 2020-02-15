@@ -85,17 +85,19 @@ load_dwellings <- function(cluster_id) {
   dwellings$region_name_uk <- as.factor(dwellings$region_name_uk)
   dwellings$cluster_id <- as.factor(dwellings$cluster_id)
 
-  dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number,
-                                    ifelse(dwellings$replacement==1," Replacement ",""),
-                                    ifelse(dwellings$data_collected==1," Data Collected ",""))
+  # Hacky - I'm sure there's a cleaner way than this...
   
-  dwellings_per_building <- dwellings %>% group_by(structure_number) %>%
-    summarise(sum_sampled=sum(sampled), text=paste0(dwelling_text, "</h5>", collapse="\n"))
-  
-  combined = list("dwellings" = dwellings, "dwellings_per_building" = dwellings_per_building)
+  if(nrow(dwellings) > 0) {
+    dwellings$dwelling_text <- paste0("<h5>Dwelling No.: ", dwellings$dwelling_number,
+                                      ifelse(dwellings$replacement==1," Replacement ",""),
+                                      ifelse(dwellings$data_collected==1," Data Collected ",""))
+  }
+  else {
+    dwellings$dwelling_text <- character(0)
+  }
   
   drop_sql_connection(con)
-  return(combined)
+  return(dwellings)
   
 }
 
@@ -159,10 +161,10 @@ load_summary_clusters <- function(cluster_id = NULL) {
   
   con <- get_sql_connection()
   
-  sql <- "SELECT * FROM summary_cluster"
+  sql <- "SELECT * FROM clusters_with_dwelling_counts"
   
   if(! is.null(cluster_id)) {
-    sql <- paste(sql, "WHERE cluster_id = ", cluster_id)
+    sql <- paste(sql, "WHERE id = ", cluster_id)
   }
   
   clusters <- dbGetQuery(con,sql)

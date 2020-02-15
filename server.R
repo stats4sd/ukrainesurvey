@@ -1,4 +1,4 @@
-library (plyr)
+
 
 server <- function(input, output, session) {
 value= FALSE
@@ -24,10 +24,8 @@ value= FALSE
     req(input$cluster.id)
     
     SAMPLE_NUM<-8
-    get_dwellings<-load_dwellings(input$cluster.id) 
-    dwellings<-get_dwellings['dwellings']
-    dwellings <- data.frame(Reduce(rbind, dwellings))
-    
+    dwellings<-load_dwellings(input$cluster.id) 
+
     dwellings_by_cluster<-dwellings%>%filter(cluster_id == input$cluster.id)
     check_cluster<-load_clusters() %>% filter(id == input$cluster.id)
 
@@ -37,7 +35,6 @@ value= FALSE
       dwellings_by_cluster$sampled<-ifelse(dwellings_by_cluster$sample.order<=SAMPLE_NUM,TRUE,FALSE)
       dwellings_by_cluster$replacement.order<-ifelse(dwellings_by_cluster$sampled==FALSE,dwellings_by_cluster$sample.order-SAMPLE_NUM,NA)
       dwellings_by_cluster<-dwellings_by_cluster%>%
-        select(region_name_en, region_name_uk, dwelling_id, dwelling_number, sample.order, sampled, replacement.order, address) %>%
         arrange(sample.order)
       
       #update Dwellings
@@ -53,7 +50,6 @@ value= FALSE
     
       dwellings_sampled <- dwellings_by_cluster %>% filter(sampled==1 | replacement_order_number <= 8)
       dwellings_sampled<-dwellings_sampled%>%
-        select(region_name_en, region_name_uk, dwelling_id, dwelling_number, sampled, replacement_order_number, address) %>%
         arrange(replacement_order_number)
       
      
@@ -228,16 +224,9 @@ value= FALSE
       # building_points = readOGR(building_file)
   
       buildings <- load_buildings(selected_cluster["id"])
-      combined_list <- load_dwellings(selected_cluster["id"])
-      dwellings <- combined_list$dwellings
-      dwellings_per_building <- combined_list$dwellings_per_building
-      
-      
-      buildings <- left_join(buildings, dwellings_per_building, by="structure_number")
-      
-      
-      browser()
-      
+      dwellings <- load_dwellings(selected_cluster["id"])
+
+      # buildings <- left_join(buildings, dwellings_per_building, by="structure_number")
       
       leafletProxy("mymap") %>%
         setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 13) %>%
