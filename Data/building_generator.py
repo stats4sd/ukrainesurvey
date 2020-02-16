@@ -29,6 +29,17 @@ def getDbConnection():
         database=sql_db
     )
 
+def clean_buildings_db():
+
+    mydb = getDbConnection()
+    mycursor = mydb.cursor()
+
+    sql_buildings = "delete from buildings;"
+
+    # dwellings should be deleted through on delete CASCADE relationship
+    mycursor.execute(sql_buildings)
+    mydb.commit()
+
 def generate_buildings():
     ## get the set of filtered cluster shapes
     with open("Data/shapes_filtered.geojson") as file:
@@ -36,6 +47,7 @@ def generate_buildings():
 
     all_building_points = []
 
+    clusters = clusters[1::2]
 
 
     for cluster in clusters:
@@ -137,6 +149,7 @@ def save_buildings_to_db():
         print(mycursor.rowcount, "dwellings were inserted into the database. WOAH.")
 
 
+clean_buildings_db()
 generate_buildings()
 save_buildings_to_db()
 
