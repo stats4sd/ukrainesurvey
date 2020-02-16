@@ -1,14 +1,14 @@
 server <- function(input, output, session) {
 
   
-  ## Something to do with the cluster summary... I think?
+  ## Something to do with the cluster summary tab...
   reactive({
     
    if(!is.na(input$summary_cluster)){
     
      sum_clusters<-subset(summary_clusters, cluster_id=input$summary_cluster)
    } else {
-     sum_clusters<-load_summary_clusters(clusters$id[1])
+     sum_clusters<-load_clusters(clusters$id[1])
      
    }
     
@@ -40,17 +40,16 @@ server <- function(input, output, session) {
     
     updateSelectInput(session,
                       "cluster",
-                      choices = region_clusters$id,
-                      selected=region_clusters$id[region_clusters$id==selected_cluster['id']]
+                      choices = region_clusters$id
     )
     
     clusters_building <- subset(region_clusters, sample_taken == 0)
     clusters_collection <- subset(region_clusters, sample_taken == 1 & cluster_completed == 0)
     clusters_completed <- subset(region_clusters, cluster_completed == 1)
 
-    
     leafletProxy("mymap") %>%
-      clearShapes()
+      clearShapes() %>%
+      clearMarkers()
     
     ## Clusters in stage 1 (Building listing)
     if(nrow(clusters_building) > 0) {
@@ -152,46 +151,73 @@ server <- function(input, output, session) {
   ## via the map (update select input)
   observeEvent(input$mymap_shape_click, {
     
-    # update cluster Input
+    # here, we only update the select input. This triggers the observe(input$cluster) code block, which does all the interesting stuff.
     updateSelectInput(session,
                      "cluster",
                      choices = clusters$id,
                      selected=clusters$id[clusters$id==input$mymap_shape_click['id']]
     )
-    output$cluster_name <- renderText(input$cluster)
-
+    
   })
   
   # via the select input directly
   observeEvent(input$cluster, {
     
-    # Update selected region    
-    updateSelectInput(session,
-                      "region",
-                      choices = regions_list,
-                      selected = clusters$region_id[clusters$id == selected_cluster['id']])
+    # if input$cluster is empty, end here... 
+    req(input$cluster)
     
-    output$region_name <- renderText(clusters$region_name_en[clusters$id==selected_cluster['id']])
+    
+    selected_cluster = subset(clusters, id == input$cluster)
+    output$cluster_name <- renderText(selected_cluster$id)
 
-   if(!is.null(selected_cluster)) {
+    
+    
+    # Only update region if region is not already set correctly
+    if( input$region != clusters$region_id[clusters$id == selected_cluster$id] ) {
       
-      buildings <- load_buildings(selected_cluster["id"])
-      dwellings <- load_dwellings(selected_cluster["id"])
+      browser()
+      
+      updateSelectInput(session,
+                        "region",
+                        choices = regions_list,
+                        selected = clusters$region_id[clusters$id == selected_cluster$id])
+      
+      output$region_name <- renderText(clusters$region_name_en[clusters$id==selected_cluster$id])
+      
+    }
+    
 
-      leafletProxy("mymap") %>%
-        setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 13) %>%
-        clearMarkers() %>%
-        addCircleMarkers(data = buildings, 
-                          lng = buildings$longitude,
-                          lat = buildings$latitude,
-                          radius = 5,
-                          stroke = FALSE,
-                          color = "blue",
-                          popup = paste("<h5>Building number ", buildings$structure_number
-                                        )
-                          )
-        
-        
+    buildings <- load_buildings(selected_cluster$id)
+    dwellings <- load_dwellings(selected_cluster$id)
+
+    leafletProxy("mymap") %>%
+      setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
+      clearMarkers() %>%
+      addCircleMarkers(data = buildings, 
+                        lng = buildings$longitude,
+                        lat = buildings$latitude,
+                        radius = 5,
+                        stroke = FALSE,
+                        color = "blue",
+                        popup = paste("<h5>Building number ", buildings$structure_number
+                                      )
+                        )
+    
+    browser()
+    
+    output$cluster_info <- renderUI({
+      HTML(paste0(
+        "<b>Region: </b>", selected_cluster$region_name_en, "</br>",
+        "<h5><strong>Cluster ID: ", selected_cluster$id, "</strong></h5>",
+        "<hr/>",
+        "<h6 class='text-", selected_cluster$status_color, "'><b>STATUS: </b>", selected_cluster$status_text, "</h6>",
+        "<hr/>",
+        "<b>No. of Buildings: </b>", selected_cluster$tot_buildings,"</br>",
+        "<b>No. of Dwellings: </b>",selected_cluster$tot_dwellings,"</br>"      
+        ))
+    })    
+       
+     
       # 
       # # filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
       # # filtered_buildings_sample <- subset(buildings,cluster_id==selected_cluster['id'] & sum_sampled>0)
@@ -233,7 +259,6 @@ server <- function(input, output, session) {
       #   leafletProxy("mymap") %>%
       #     setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
       # } #endif(buildings exist)
-    } #endif(cluster is selected)
 
   }) #endobserve
 
