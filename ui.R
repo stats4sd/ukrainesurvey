@@ -110,40 +110,7 @@ ui <- dashboardPage(
               
               conditionalPanel(
                 condition = "input.cluster != ''",
-              
-                h3(textOutput("region_name")),
-                h3(textOutput("cluster_name")),
-                br(),
-                fluidRow(
-                  column(
-                    width = 3,
-                    h5("Cluster Status")    
-                  ),
-                  column(
-                    width = 6,
-                    h5(tags$strong("Building listing in progress"))
-                  )
-                ),
-                fluidRow(
-                  column(
-                    width = 3,
-                    h5("# of Buildings")    
-                  ),
-                  column(
-                    width = 6,
-                    h5(tags$strong("120"))
-                  )
-                ),
-                fluidRow(
-                  column(
-                    width = 3,
-                    h5("# Dwellings")    
-                  ),
-                  column(
-                    width = 6,
-                    h5(tags$strong("551"))
-                  )
-                )
+                uiOutput("cluster_info")
               )
             )
           ),
@@ -316,13 +283,13 @@ ui <- dashboardPage(
               
               box(width=3,
                   status="success",
-                  h4('buildings listed'),
-                  p(load_summary_clusters(clusters$id[1])$buildings_listed)
+                  h4('buildings listed')
+                  # p(load_summary_clusters(clusters$id[1])$buildings_listed)
               ),
               box(width=3,
                   status="success",
-                  h4('dwelligns listed'),
-                  p(load_summary_clusters(clusters$id[1])$dwellings_listed)
+                  h4('dwelligns listed')
+                  # p(load_summary_clusters(clusters$id[1])$dwellings_listed)
               ),
               box(width=3,
                   status="success",
@@ -341,13 +308,13 @@ ui <- dashboardPage(
               ),
               box(width=3,
                   status="success",
-                  h4('Number of completed interviews'),
-                  p(load_summary_clusters(clusters$id[1])$interviews_completed)
+                  h4('Number of completed interviews')
+                  # p(load_summary_clusters(clusters$id[1])$interviews_completed)
               ),
               box(width=3,
                   status="success",
-                  h4('Number of unsuccessful interviews'),
-                  p(load_summary_clusters(clusters$id[1])$interviews_incompleted)
+                  h4('Number of unsuccessful interviews')
+                  # p(load_summary_clusters(clusters$id[1])$interviews_incompleted)
               ),
               box(width=3,
                   status="success",
