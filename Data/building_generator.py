@@ -42,7 +42,7 @@ def generate_buildings():
 
         cluster_shape = MultiPolygon(shape(cluster["geometry"]))
 
-        number = random.randrange(30, 250)
+        number = random.randrange(30, 100)
 
         ## generates random geopoints within the cluster's shape
         building_points = pyc.geoloc_generation(cluster_shape, number, cluster['properties']['name'])
@@ -94,14 +94,13 @@ def save_buildings_to_db():
             for building in buildings:
 
                 # random number of dwellings
-                num_dwellings = random.randrange(1,50)
-                current_dwelling = 1
+                num_dwellings = random.randrange(1,20)
 
                 # id, lat, long, cluster_id, structure number, dwelling number
                 building_record = (
                     current_building,
-                    building['geometry']['coordinates'][0],
                     building['geometry']['coordinates'][1],
+                    building['geometry']['coordinates'][0],
                     building['properties']['country'],
                     building['properties']['point'],
                     num_dwellings,
@@ -110,16 +109,15 @@ def save_buildings_to_db():
                 building_records.append(building_record)
 
                 ## 1 new record for each dwelling
-                for x in range(num_dwellings):
+                for x in range(1, num_dwellings):
 
                     # building_id, dwelling_number
                     dwelling_record = (
                         current_building,
-                        current_dwelling
+                        x
                         )
 
                     dwelling_records.append(dwelling_record)
-                    current_dwelling += 1
 
                 current_building += 1
 
@@ -139,5 +137,6 @@ def save_buildings_to_db():
         print(mycursor.rowcount, "dwellings were inserted into the database. WOAH.")
 
 
+generate_buildings()
 save_buildings_to_db()
 
