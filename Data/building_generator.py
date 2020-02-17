@@ -7,6 +7,8 @@ import mysql.connector
 import yaml
 import os
 import fnmatch
+from faker import Faker
+fake = Faker()
 
 def getDbConnection():
 
@@ -116,6 +118,7 @@ def save_buildings_to_db():
                     building['properties']['country'],
                     building['properties']['point'],
                     num_dwellings,
+                    fake.address()
                     )
 
                 building_records.append(building_record)
@@ -134,7 +137,7 @@ def save_buildings_to_db():
                 current_building += 1
 
 
-        sql = "INSERT INTO buildings (id, latitude, longitude, cluster_id, structure_number, num_dwellings) VALUES (%s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO buildings (id, latitude, longitude, cluster_id, structure_number, num_dwellings, address) VALUES (%s, %s, %s, %s, %s, %s, %s)"
 
         mycursor.executemany(sql, building_records)
         mydb.commit()
