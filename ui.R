@@ -15,7 +15,12 @@ ui <- dashboardPage(
   dashboardBody(
     useShinyjs(),
     
-    tags$head(tags$script('
+    tags$head(tags$style("
+                        .modal-lg { 
+                          width: 80vw; }
+                         "),
+
+              tags$script('
                         var dimension = [0, 0];
                         $(document).on("shiny:connected", function(e) {
                         dimension[0] = document.getElementById("mymap").clientWidth;
@@ -27,7 +32,10 @@ ui <- dashboardPage(
                         dimension[1] = document.getElementById("mymap").clientHeight;
                         Shiny.onInputChange("dimension", dimension);
                         });
-                        ')),
+                        ')
+              
+              
+              ),
    
 
     tabItems(
@@ -117,7 +125,7 @@ ui <- dashboardPage(
                 
                 div(
                   id = "sample_taken",
-                  actionButton("downloadSample", "Download Sample of dwellings sheet", class = "btn-primary")
+                  actionButton("download_sample", "Download Sample of dwellings sheet", class = "btn-primary")
                 )
                 
               )
@@ -127,7 +135,7 @@ ui <- dashboardPage(
           column(width = 12,
                  
                  DT::dataTableOutput("sampleTable"),
-                 DT::dataTableOutput("checklistTable")
+             #    DT::dataTableOutput("checklistTable")
                  
           )
         )
