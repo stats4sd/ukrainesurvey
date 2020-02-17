@@ -1,8 +1,4 @@
-
-library(shinyjs)
 ui <- dashboardPage(
-  
-
   dashboardHeader(title = "Ukraine Iodine Survey"),
 
   dashboardSidebar(
@@ -17,6 +13,8 @@ ui <- dashboardPage(
 
 
   dashboardBody(
+    useShinyjs(),
+    
     tags$head(tags$script('
                         var dimension = [0, 0];
                         $(document).on("shiny:connected", function(e) {
@@ -89,11 +87,7 @@ ui <- dashboardPage(
                                placeholder = "Select a cluster",
                                onInitialize = I('function() { this.setValue(""); }')
                              )
-              ),
-              
-              actionButton("generateSample", "Generate Sample", class = "btn-primary")
-
-              
+              )
             ),
           
             # actions and summary column
@@ -110,7 +104,21 @@ ui <- dashboardPage(
               
               conditionalPanel(
                 condition = "input.cluster != ''",
-                uiOutput("cluster_info")
+                uiOutput("cluster_info"),
+                hr(),
+                
+                div(
+                  id = "sample_not_taken",
+                  h5("If building listing is complete, click the button below to do the sampling."),
+                  h5( class = "text-warning", "NOTE, Only proceed after you have confirmed this phase is complete. There is no going back once the sample has been taken!"),
+                  actionButton("generate_sample_button", "Generate Sample", class = "btn-primary")  
+                ),
+                
+                div(
+                  id = "sample_taken",
+                  actionButton("downloadSample", "Download Sample of dwellings sheet", class = "btn-primary")
+                )
+                
               )
             )
           ),

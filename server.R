@@ -1,6 +1,16 @@
 server <- function(input, output, session) {
 
   
+  observeEvent(input$generate_sample_button, {
+    showModal(dataModal())
+  })
+  
+  observeEvent(input$confirm_sample, {
+    removeModal()
+    generate_sample()
+  })
+  
+  
   ## Something to do with the cluster summary tab...
   reactive({
     
@@ -53,19 +63,11 @@ server <- function(input, output, session) {
       addPolygons(layerId = cluster_shapes$name,
                   data = cluster_shapes ,
                   weight = 1,
-                  fillColor = region_clusters$status_color,
-                  popup =paste0("<h5><strong>Cluster ID: ", cluster_shapes$name, "</strong></h5>",
-                               "<b>Region: </b>", region_clusters$region_name_en, "</br>",
-                               "<hr/>",
-                               "<h6 class='text-", region_clusters$status_color, "'><b>STATUS: </b>", region_clusters$status_text, "</h6>",
-                               "<hr/>",
-                               "<b>No. of Buildings: </b>", region_clusters$tot_buildings,"</br>",
-                               "<b>No. of Dwellings: </b>",region_clusters$tot_dwellings,"</br>"
-                  )
+                  fillColor = region_clusters$status_colour
       ) 
     
     ## Other Region-selection stuff
-    selected_region <- subset(regions, id==input$region)
+    selected_region <<- subset(regions, id==input$region)
     
     output$region_name <- renderText(selected_region$name_en)
     
@@ -115,10 +117,17 @@ server <- function(input, output, session) {
     req(input$cluster)
     
     
-    selected_cluster = subset(clusters, id == input$cluster)
+    selected_cluster <<- subset(clusters, id == input$cluster)
     output$cluster_name <- renderText(selected_cluster$id)
-
     
+    if( selected_cluster$sample_taken == 0 ) {
+      shinyjs::hide('sample_taken')
+      shinyjs::show('sample_not_taken')
+    }
+    else {
+      shinyjs::hide('sample_not_taken')
+      shinyjs::show('sample_taken')    
+    }
     
     # Only update region if region is not already set correctly
     if( input$region != clusters$region_id[clusters$id == selected_cluster$id] ) {
@@ -135,15 +144,15 @@ server <- function(input, output, session) {
     }
     
 
-    buildings <- load_buildings(selected_cluster$id)
-    dwellings <- load_dwellings(selected_cluster$id)
+    buildings <<- load_buildings(selected_cluster$id)
+    dwellings <<- load_dwellings(selected_cluster$id)
     
     # setup labels for buildings
     
     building_labels <- lapply(seq(nrow(buildings)), function(i) {
       paste0( 
         "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
-        "<b>Address :</b>", buildings[i, "address"], "<br/>"
+        "<b>Address:</b>", buildings[i, "address"], "<br/>"
       )
     })
 
@@ -156,7 +165,7 @@ server <- function(input, output, session) {
                        radius = 5,
                        stroke = FALSE,
                        color = "blue",
-                       label = lapply(building_labels, htmltools::HTML),
+                       label = lapply(building_labels, htmltools::HTML)
                        # labelOptions = labelOptions(
                        #   noHide = T,
                        # )
@@ -170,7 +179,7 @@ server <- function(input, output, session) {
         "<b>Region: </b>", selected_cluster$region_name_en, "</br>",
         "<h5><strong>Cluster ID: ", selected_cluster$id, "</strong></h5>",
         "<hr/>",
-        "<h6 class='text-", selected_cluster$status_color, "'><b>STATUS: </b>", selected_cluster$status_text, "</h6>",
+        "<h6 class='text-", selected_cluster$status_colour, "'><b>STATUS: </b>", selected_cluster$status_text, "</h6>",
         "<hr/>",
         "<b>No. of Buildings: </b>", selected_cluster$tot_buildings,"</br>",
         "<b>No. of Dwellings: </b>",selected_cluster$tot_dwellings,"</br>"      
@@ -225,26 +234,26 @@ server <- function(input, output, session) {
   #####################################
   # QR CODE STUFF
   #####################################
-  qrcode = reactive( t(qrcode_gen("https://stats4sd.org", plotQRcode= FALSE, dataOutput = TRUE)))
-  nc = reactive( ncol(qrcode()))
-  nr = reactive( nrow(qrcode()))
-  scale = 10
+  # qrcode = reactive( t(qrcode_gen("https://stats4sd.org", plotQRcode= FALSE, dataOutput = TRUE)))
+  # nc = reactive( ncol(qrcode()))
+  # nr = reactive( nrow(qrcode()))
+  # scale = 10
   
-  output$qrtest <- renderPlot({
-    par(mar=c(0,0,0,0))
-    image(
-      1L:nc(),
-      1L:nr(),
-      qrcode(),
-      xlim = 0.5 + c(0, nc()),
-      ylim = 0.5 + c(nr(), 0),
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      col = c("white", "black"),
-      asp = 1
-      )
-    }, width = function() scale*nc(), height = function() scale*nr())
+  # output$qrtest <- renderPlot({
+  #   par(mar=c(0,0,0,0))
+  #   image(
+  #     1L:nc(),
+  #     1L:nr(),
+  #     qrcode(),
+  #     xlim = 0.5 + c(0, nc()),
+  #     ylim = 0.5 + c(nr(), 0),
+  #     axes = FALSE,
+  #     xlab = "",
+  #     ylab = "",
+  #     col = c("white", "black"),
+  #     asp = 1
+  #     )
+  #   }, width = function() scale*nc(), height = function() scale*nr())
   
   #####################################
   # Download Map

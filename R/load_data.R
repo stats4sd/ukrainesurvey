@@ -128,15 +128,27 @@ update_dwellings <- function(sampled_dwellings) {
   # update sampled dwellings  
 
   for (row in 1:nrow(sampled_dwellings)) {
-    sql <- paste("UPDATE dwellings 
-                 SET sampled = ",
-                 sampled_dwellings[row, "sampled"],
-                 ", replacement_order_number = ",
-                 sampled_dwellings[row, "replacement.order"],
-                 "WHERE dwellings.id = ",
-                 sampled_dwellings[row, "dwelling_id"])
     
-    results <- dbGetQuery(con, sql)
+    # Save time by only writing the sampled and 10 replacements to the database. 
+    if(
+      sampled_dwellings[row, "sampled"] == TRUE 
+      | ( sampled_dwellings[row, "replacement_order_number"] <= 10 & ! is.na(sampled_dwellings[row, "replacement_order_number"] ) )
+      )  {
+      
+      # replace NA with "NULL" for SQL entry
+      replacement_number <- ifelse(is.na(sampled_dwellings[row, "replacement_order_number"]),"NULL",sampled_dwellings[row, "replacement_order_number"] )
+      
+      sql <- paste("UPDATE dwellings 
+                   SET sampled = ",
+                   sampled_dwellings[row, "sampled"],
+                   ", replacement_order_number = ",
+                   replacement_number,
+                   "WHERE dwellings.id = ",
+                   sampled_dwellings[row, "dwelling_id"])
+      
+
+      results <- dbGetQuery(con, sql)
+    }
   }
   
   drop_sql_connection(con)
