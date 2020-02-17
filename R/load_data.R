@@ -26,18 +26,20 @@ load_buildings <- function(cluster_id) {
                         "SELECT
                         regions.name_en as region_name_en,
                         regions.name_uk as region_name_uk,
-                        buildings.cluster_id,
-                        buildings.structure_number,
-                        buildings.num_dwellings,
-                        buildings.latitude,
-                        buildings.longitude,
-                        buildings.altitude,
-                        buildings.precision,
-                        buildings.address
-                        FROM buildings
-                        LEFT JOIN clusters on clusters.id = buildings.cluster_id
+                        buildings_with_dwelling_counts.cluster_id,
+                        buildings_with_dwelling_counts.structure_number,
+                        buildings_with_dwelling_counts.num_dwellings,
+                        buildings_with_dwelling_counts.latitude,
+                        buildings_with_dwelling_counts.longitude,
+                        buildings_with_dwelling_counts.altitude,
+                        buildings_with_dwelling_counts.precision,
+                        buildings_with_dwelling_counts.address,
+                        buildings_with_dwelling_counts.num_sampled,
+                        buildings_with_dwelling_counts.num_collected
+                        FROM buildings_with_dwelling_counts
+                        LEFT JOIN clusters on clusters.id = buildings_with_dwelling_counts.cluster_id
                         LEFT JOIN regions on regions.id = clusters.region_id
-                        WHERE buildings.cluster_id = ", cluster_id, ";
+                        WHERE buildings_with_dwelling_counts.cluster_id = ", cluster_id, ";
                         "))
   
   buildings$region_name_en <- as.factor(buildings$region_name_en)
