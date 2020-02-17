@@ -10,7 +10,9 @@ SELECT `clusters`.`id` AS `id`,
        `clusters`.`smd_id` AS `smd_id`,
        `buildings_per_cluster`.`tot` AS `tot_buildings`,
        sum(`dwellings_per_building`.`tot`) AS `tot_dwellings`,
-       if((sum(`dwellings_per_building`.`tot_collected`) = 16),1,0) AS `cluster_completed`
+       if((sum(`dwellings_per_building`.`tot_collected`) = 8),1,0) AS `cluster_completed`,
+       if((`clusters`.`sample_taken` = 0), 'building listing in progress', if((sum(`dwellings_per_building`.`tot_collected`) = 8), 'data collection complete', 'data collection in progress')) AS `status_text`,
+        if((`clusters`.`sample_taken` = 0), 'red', if((sum(`dwellings_per_building`.`tot_collected`) = 8), 'green', 'blue')) AS `status_colour`
 FROM `clusters`
 LEFT JOIN `regions` on `regions`.`id` = `clusters`.`region_id`
 JOIN

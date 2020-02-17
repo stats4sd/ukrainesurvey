@@ -43,78 +43,26 @@ server <- function(input, output, session) {
                       choices = region_clusters$id
     )
     
-    clusters_building <- subset(region_clusters, sample_taken == 0)
-    clusters_collection <- subset(region_clusters, sample_taken == 1 & cluster_completed == 0)
-    clusters_completed <- subset(region_clusters, cluster_completed == 1)
-
     leafletProxy("mymap") %>%
       clearShapes() %>%
       clearMarkers()
     
-    ## Clusters in stage 1 (Building listing)
-    if(nrow(clusters_building) > 0) {
-      
-      cluster_building_shapes <- subset(shape_json, name %in% clusters_building$id)
-      
-      
-      leafletProxy("mymap") %>%
-        addPolygons(layerId = cluster_building_shapes$name,
-                    data = cluster_building_shapes ,
-                    weight = 1,
-                    fillColor = "red",
-                    popup =paste("<h5><strong>Cluster ID:", cluster_building_shapes$name, "</strong></h5>",
-                                 "<b>Region:</b>", clusters_building$region_name_en, "</br>",
-                                 "<hr/>",
-                                 "<h6 class='text-red'><b>STATUS:</b> Building Listing In Progress</h6>",
-                                 "<hr/>",
-                                 "<b>No. of Buildings:</b>", clusters_building$tot_buildings,"</br>",
-                                 "<b>No. of Dwellings:</b>",clusters_building$tot_dwellings,"</br>"
-                    )
-        ) 
-    }
+    cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
     
-    ## Clusters in stage 2 (Data Collection)
-    if(nrow(clusters_collection) > 0) {
-      
-      clusters_collection_shapes <- subset(shape_json, name %in% clusters_collection$id)
-      
-      leafletProxy("mymap") %>%
-        addPolygons(layerId = clusters_collection_shapes$name,
-                    data = clusters_collection_shapes ,
-                    weight = 1,
-                    fillColor = "blue",
-                    popup =paste("<h5><strong>Cluster ID:", clusters_collection_shapes$name, "</strong></h5>",
-                                 "<b>Region:</b>", clusters_collection$region_name_en, "</br>",
-                                 "<hr/>",
-                                 "<h6 class='text-blue'><b>STATUS:</b> Data Collection In Progress</h6>",
-                                 "<hr/>",
-                                 "<b>No. of Buildings:</b>", clusters_collection$tot_buildings,"</br>",
-                                 "<b>No. of Dwellings:</b>",clusters_collection$tot_dwellings,"</br>",
-                                 "<b>No. of Completed Surveys:</b>",clusters_collection$tot_surveys_completed,"</br>"
-                    )
-        ) 
-    }
-    
-    ## Clusters in stage 3 (Data Collection)
-    if(nrow(clusters_completed) > 0) {
-      
-      clusters_completed_shapes <- subset(shape_json, name %in% clusters_completed$id)
-      
-      leafletProxy("mymap") %>%
-        addPolygons(layerId = clusters_completed_shapes$name,
-                    data = clusters_completed_shapes ,
-                    weight = 1,
-                    fillColor = "blue",
-                    popup =paste("<h5><strong>Cluster ID:", clusters_completed_shapes$name, "</strong></h5>",
-                                 "<b>Region:</b>", clusters_completed$region_name_en, "</br>",
-                                 "<hr/>",
-                                 "<h6 class='text-green'><b>STATUS:</b> CLUSTER COMPLETE</h6>",
-                                 "<hr/>",
-                                 "<b>No. of Buildings:</b>", clusters_completed$tot_buildings,"</br>",
-                                 "<b>No. of Completed Surveys:</b>",clusters_completed$tot_surveys_completed,"</br>"
-                    )
-        ) 
-    }
+    leafletProxy("mymap") %>%
+      addPolygons(layerId = cluster_shapes$name,
+                  data = cluster_shapes ,
+                  weight = 1,
+                  fillColor = region_clusters$status_color,
+                  popup =paste0("<h5><strong>Cluster ID: ", cluster_shapes$name, "</strong></h5>",
+                               "<b>Region: </b>", region_clusters$region_name_en, "</br>",
+                               "<hr/>",
+                               "<h6 class='text-", region_clusters$status_color, "'><b>STATUS: </b>", region_clusters$status_text, "</h6>",
+                               "<hr/>",
+                               "<b>No. of Buildings: </b>", region_clusters$tot_buildings,"</br>",
+                               "<b>No. of Dwellings: </b>",region_clusters$tot_dwellings,"</br>"
+                  )
+      ) 
     
     ## Other Region-selection stuff
     selected_region <- subset(regions, id==input$region)
@@ -189,22 +137,34 @@ server <- function(input, output, session) {
 
     buildings <- load_buildings(selected_cluster$id)
     dwellings <- load_dwellings(selected_cluster$id)
+    
+    # setup labels for buildings
+    
+    building_labels <- lapply(seq(nrow(buildings)), function(i) {
+      paste0( 
+        "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
+        "<b>Address :</b>", buildings[i, "address"], "<br/>"
+      )
+    })
 
     leafletProxy("mymap") %>%
       setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
       clearMarkers() %>%
       addCircleMarkers(data = buildings, 
-                        lng = buildings$longitude,
-                        lat = buildings$latitude,
-                        radius = 5,
-                        stroke = FALSE,
-                        color = "blue",
-                        popup = paste("<h5>Building number ", buildings$structure_number
-                                      )
-                        )
+                       lng = buildings$longitude,
+                       lat = buildings$latitude,
+                       radius = 5,
+                       stroke = FALSE,
+                       color = "blue",
+                       label = lapply(building_labels, htmltools::HTML),
+                       # labelOptions = labelOptions(
+                       #   noHide = T,
+                       # )
+      )
     
-    browser()
+
     
+
     output$cluster_info <- renderUI({
       HTML(paste0(
         "<b>Region: </b>", selected_cluster$region_name_en, "</br>",
