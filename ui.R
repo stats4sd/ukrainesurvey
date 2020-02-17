@@ -44,11 +44,12 @@ ui <- dashboardPage(
                 solidHeader = TRUE,
                 collapsible = TRUE,
                 tags$ol(
-                  tags$li("Use the dropdown to select a region. The map will zoom to show all clusters within that region."),
+                  tags$li("Use the dropdown to select an oblast The map will zoom to show all clusters within that region."),
                   tags$li("Click on the cluster on the map, or use the dropdown box to select a cluster"),
                   tags$li("The map will load the listed buildings for the chosen cluster, along with any sample information present."),
                   tags$li("You can then perform key actions for the cluster")
                 )
+            )
           ),
           
           # map
@@ -72,10 +73,10 @@ ui <- dashboardPage(
               status = "primary",
               collapsible = TRUE,
               selectizeInput("region",
-                          label = "Select a Region",
+                          label = "Select an Oblast",
                           choices = regions_list,
                           options = list(
-                            placeholder = "Select a region",
+                            placeholder = "Select an Oblast",
                             onInitialize = I('function() { this.setValue(""); }')
                           )
               ),
@@ -129,14 +130,10 @@ ui <- dashboardPage(
                  DT::dataTableOutput("checklistTable")
                  
           )
-
         )
       ),
 
-      tabItem(tabName = 'qrtest',
-              h2("Some QR Code Tests"),
-              plotOutput('qrtest')
-      ),
+
       
       tabItem(tabName = 'summary_cluster',
               h2("Summary Cluster"),
@@ -214,7 +211,7 @@ ui <- dashboardPage(
                                  "Filter by Region",
                                  regions_list,
                                  options = list(
-                                   placeholder = "Select a region",
+                                   placeholder = "Select an Oblast",
                                    onInitialize = I('function() { this.setValue(""); }')
                                  )
                   )
@@ -350,7 +347,6 @@ ui <- dashboardPage(
                   p('7')
               )
               
-      )
       )
     )
   )
