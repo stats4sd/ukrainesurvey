@@ -63,7 +63,9 @@ server <- function(input, output, session) {
       addPolygons(layerId = cluster_shapes$name,
                   data = cluster_shapes ,
                   weight = 1,
-                  fillColor = region_clusters$status_colour
+                  fillColor = region_clusters$status_colour,
+                  highlightOptions = highlightOptions(color = "blue", weight = 3,
+                                                      bringToFront = TRUE)
       ) 
     
     ## Other Region-selection stuff
@@ -118,6 +120,7 @@ server <- function(input, output, session) {
     
     
     selected_cluster <<- subset(clusters, id == input$cluster)
+    selected_cluster_shape <-  subset(shape_json, name == selected_cluster$id)
     output$cluster_name <- renderText(selected_cluster$id)
     
     if( selected_cluster$sample_taken == 0 ) {
@@ -169,6 +172,14 @@ server <- function(input, output, session) {
                        # labelOptions = labelOptions(
                        #   noHide = T,
                        # )
+      ) %>%
+      
+      # add highlight to current cluster
+      addPolygons(layerId = "selected_cluster",
+                  data = selected_cluster_shape ,
+                  weight = 5,
+                  color = "blue",
+                  fillColor = selected_cluster$status_colour
       )
     
 
