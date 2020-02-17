@@ -34,3 +34,5 @@ We use python to pull data from Kobotools into the database. (Using python inste
 1. Install Python3.7+
 2. Run `pip3 install -r requirements.txt` to make sure you have all the packages needed.
 
+## Setup Database
+restore the database in Mysql/ukrainedb.sql to the database specified in yøur config.yml. This db dump contains all the tables, views and the initial state of the sampled clusters data.
