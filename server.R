@@ -135,6 +135,7 @@ server <- function(input, output, session) {
       addPolygons(layerId = cluster_shapes$name,
                   data = cluster_shapes ,
                   weight = 1,
+                  opacity = 0.5,
                   fillColor = cluster_shapes$status_colour,
                   highlightOptions = highlightOptions(color = "blue", weight = 3,
                                                       bringToFront = TRUE)
@@ -216,45 +217,46 @@ server <- function(input, output, session) {
       
     }
     
-
+    #####################################
+    # Handle Building Markers
+    #####################################
+    
+    # set buildings and dwellings to the global vars, so we only need to call the db once when the cluster loads.
     buildings <<- load_buildings(selected_cluster$id)
     dwellings <<- load_dwellings(selected_cluster$id)
     
-    # setup labels for buildings
     
+    # setup labels for buildings
     building_labels <- lapply(seq(nrow(buildings)), function(i) {
       paste0( 
         "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
-        "<b>Address:</b>", buildings[i, "address"], "<br/>"
+        "<b>Address:</b>", buildings[i, "address"], "<br/>",
+        "<b>No. of Dwellings</b>", buildings[i, "num_dwellings"], "<br/>"
       )
     })
 
     leafletProxy("mymap") %>%
       setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
       clearMarkers() %>%
-      addCircleMarkers(data = buildings, 
-                       lng = buildings$longitude,
-                       lat = buildings$latitude,
-                       radius = 5,
-                       stroke = FALSE,
-                       color = "blue",
-                       label = lapply(building_labels, htmltools::HTML)
-                       # labelOptions = labelOptions(
-                       #   noHide = T,
-                       # )
-      ) %>%
-      
       # add highlight to current cluster
       addPolygons(layerId = "selected_cluster",
                   data = selected_cluster_shape ,
                   weight = 5,
                   color = "blue",
+                  opacity = "0.5",
                   fillColor = selected_cluster$status_colour
+      ) %>%
+      # Add building markers
+      addCircleMarkers(data = buildings, 
+                       lng = buildings$longitude,
+                       lat = buildings$latitude,
+                       radius = 5,
+                       stroke = FALSE,
+                       fillOpacity = 1,
+                       color = buildings$status_colour,
+                       label = lapply(building_labels, htmltools::HTML)
       )
     
-
-    
-
     output$cluster_info <- renderUI({
       HTML(paste0(
         "<b>Region: </b>", selected_cluster$region_name_en, "</br>",
@@ -266,49 +268,6 @@ server <- function(input, output, session) {
         "<b>No. of Dwellings: </b>",selected_cluster$tot_dwellings,"</br>"      
         ))
     })    
-       
-     
-      # 
-      # # filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
-      # # filtered_buildings_sample <- subset(buildings,cluster_id==selected_cluster['id'] & sum_sampled>0)
-      # # filtered_buildings_not_sample <- subset(buildings,cluster_id==selected_cluster['id'] & (sum_sampled==0 | is.na(sum_sampled)))
-      # 
-      # if(nrow(filtered_buildings) > 0) {
-      #   leafletProxy("mymap") %>%
-      #     setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 13) %>%
-      #     clearMarkers() %>%
-      #     addCircleMarkers(layerId = filtered_buildings_not_sample$id,
-      #                      lng = filtered_buildings_not_sample$longitude,
-      #                      lat = filtered_buildings_not_sample$latitude,
-      #                      radius =5,
-      #                      stroke=FALSE,
-      #                      color = "grey",
-      #                      fillOpacity = 0.4,
-      #                      popup = paste("<h5>Structure No.: ",
-      #                                    filtered_buildings_not_sample$structure_number,
-      #                                    "</h5><h5> # of Dwellings: ",
-      #                                    filtered_buildings_not_sample$num_dwellings,
-      #                                    "</h5>"
-      #                                    )
-      #                      ) %>%
-      #     addCircleMarkers(layerId = filtered_buildings_sample$id,
-      #                      lng = filtered_buildings_sample$longitude,
-      #                      lat = filtered_buildings_sample$latitude,
-      #                      radius =5,
-      #                      color = "blue",
-      #                      stroke = FALSE,
-      #                      fillOpacity = 0.6,
-      #                      popup = paste("<h5>Structure No.: ",
-      #                                    filtered_buildings_sample$structure_number,
-      #                                    "</h5><h5> # of Dwellings: ",
-      #                                    filtered_buildings_sample$num_dwellings,
-      #                                    "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text
-      #                                    )
-      #                      )
-      # } else {
-      #   leafletProxy("mymap") %>%
-      #     setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
-      # } #endif(buildings exist)
 
   }) #endobserve
 
