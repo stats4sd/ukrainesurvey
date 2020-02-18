@@ -55,7 +55,7 @@ DROP TABLE IF EXISTS `buildings_with_dwelling_counts`;
 /*!50001 DROP VIEW IF EXISTS `buildings_with_dwelling_counts`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `buildings_with_dwelling_counts` AS SELECT 
+/*!50001 CREATE VIEW `buildings_with_dwelling_counts` AS SELECT
  1 AS `id`,
  1 AS `cluster_id`,
  1 AS `longitude`,
@@ -119,7 +119,7 @@ DROP TABLE IF EXISTS `clusters_with_dwelling_counts`;
 /*!50001 DROP VIEW IF EXISTS `clusters_with_dwelling_counts`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `clusters_with_dwelling_counts` AS SELECT 
+/*!50001 CREATE VIEW `clusters_with_dwelling_counts` AS SELECT
  1 AS `id`,
  1 AS `region_id`,
  1 AS `region_name_en`,
@@ -322,7 +322,7 @@ DROP TABLE IF EXISTS `ukraine_locations_csv`;
 /*!50001 DROP VIEW IF EXISTS `ukraine_locations_csv`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
-/*!50001 CREATE VIEW `ukraine_locations_csv` AS SELECT 
+/*!50001 CREATE VIEW `ukraine_locations_csv` AS SELECT
  1 AS `sector`,
  1 AS `region_key`,
  1 AS `region_en`,
@@ -392,7 +392,7 @@ UNLOCK TABLES;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `buildings_with_dwelling_counts` AS select `buildings`.`id` AS `id`,`buildings`.`cluster_id` AS `cluster_id`,`buildings`.`longitude` AS `longitude`,`buildings`.`latitude` AS `latitude`,`buildings`.`altitude` AS `altitude`,`buildings`.`precision` AS `precision`,`buildings`.`structure_number` AS `structure_number`,`buildings`.`num_dwellings` AS `num_dwellings`,sum(`dwellings`.`sampled`) AS `num_sampled`,sum(`dwellings`.`data_collected`) AS `num_collected`,sum(`dwellings`.`survey_success`) AS `num_success`,if((sum(`dwellings`.`data_collected`) > 0),if((sum(`dwellings`.`survey_success`) = sum(`dwellings`.`sampled`)),'green',if((sum(`dwellings`.`data_collected`) = sum(`dwellings`.`sampled`)),'orange','blue')),if((sum(`dwellings`.`sampled`) > 0),'blue','grey')) AS `status_colour`,if((sum(`dwellings`.`data_collected`) > 0),if((sum(`dwellings`.`survey_success`) = sum(`dwellings`.`sampled`)),'All sampled dwellings successful',if((sum(`dwellings`.`data_collected`) = sum(`dwellings`.`sampled`)),'All dwellings visited - replacement(s) needed','Visit(s) still needed')),if((sum(`dwellings`.`sampled`) > 0),'Visit(s) still needed','')) AS `status_text`,`buildings`.`address` AS `address` from (`dwellings` left join `buildings` on((`buildings`.`id` = `dwellings`.`building_id`))) group by `buildings`.`id` */;
@@ -410,7 +410,7 @@ UNLOCK TABLES;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `clusters_with_dwelling_counts` AS select `clusters`.`id` AS `id`,`clusters`.`region_id` AS `region_id`,`regions`.`name_en` AS `region_name_en`,`regions`.`name_uk` AS `region_name_uk`,`clusters`.`sample_id` AS `sample_id`,`clusters`.`sample_taken` AS `sample_taken`,`clusters`.`type` AS `type`,`clusters`.`locality_type` AS `locality_type`,`clusters`.`num_voters` AS `num_voters`,`clusters`.`smd_id` AS `smd_id`,`clusters`.`latitude` AS `latitude`,`clusters`.`longitude` AS `longitude`,`buildings_per_cluster`.`tot` AS `tot_buildings`,sum(`dwellings_per_building`.`tot`) AS `tot_dwellings`,sum(`dwellings_per_building`.`tot_collected`) AS `tot_surveys_completed`,if((sum(`dwellings_per_building`.`tot_collected`) = 8),1,0) AS `cluster_completed`,if((`clusters`.`sample_taken` = 0),'building listing in progress',if((sum(`dwellings_per_building`.`tot_collected`) = 8),'data collection complete','data collection in progress')) AS `status_text`,if((`clusters`.`sample_taken` = 0),'red',if((sum(`dwellings_per_building`.`tot_collected`) = 8),'green','blue')) AS `status_colour` from (((`clusters` left join `regions` on((`regions`.`id` = `clusters`.`region_id`))) left join (select `buildings`.`cluster_id` AS `cluster_id`,count(`buildings`.`id`) AS `tot` from `buildings` group by `buildings`.`cluster_id`) `buildings_per_cluster` on((`buildings_per_cluster`.`cluster_id` = `clusters`.`id`))) left join (select `dwellings`.`building_id` AS `building_id`,sum(`dwellings`.`data_collected`) AS `tot_collected`,count(`dwellings`.`id`) AS `tot`,`buildings`.`cluster_id` AS `cluster_id` from (`dwellings` left join `buildings` on((`buildings`.`id` = `dwellings`.`building_id`))) group by `dwellings`.`building_id`) `dwellings_per_building` on((`dwellings_per_building`.`cluster_id` = `clusters`.`id`))) group by `clusters`.`id` */;
@@ -428,7 +428,7 @@ UNLOCK TABLES;
 /*!50001 SET @saved_col_connection     = @@collation_connection */;
 /*!50001 SET character_set_client      = utf8mb4 */;
 /*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `ukraine_locations_csv` AS select `regions`.`sector` AS `sector`,`clusters`.`region_id` AS `region_key`,`regions`.`name_en` AS `region_en`,`regions`.`name_uk` AS `region_uk`,`clusters`.`id` AS `cluster_id_key` from (`clusters` left join `regions` on((`regions`.`id` = `clusters`.`region_id`))) */;
