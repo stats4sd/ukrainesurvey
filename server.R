@@ -1,78 +1,59 @@
 server <- function(input, output, session) {
 
+  # initialise some variables
+  clusters <- load_clusters()
+  selected_region <- NULL
+  selected_cluster <- NULL
+  buildings <- NULL
+  dwellings <- NULL
+  
   #####################################
   # Generate Sample of Dwellings 
   #####################################
-  get_sample <- reactive({
-    list(input$confirm_sample, input$download_sample)
-  })
-  
-  observeEvent(get_sample(), {
-    removeModal()
-    
+  observeEvent(input$confirm_sample, {
     req(input$cluster)
     
     if(is.data.frame(dwellings) && nrow(dwellings) <= 18 ) {
       showModal(too_few_dwellings_modal())
     }
-  
     else {
+      dwellings <- generate_new_sample(input$cluster, dwellings)
+      output$checklistTable <- download_sample(input$cluster, dwellings)
       
-      SAMPLE_NUM<-8
-      check_cluster<-load_clusters() %>% filter(id == input$cluster)
       
-      if(check_cluster$sample_taken==0){
-        
-        dwellings$sample.order<-sample(1:nrow(dwellings))
-        dwellings$sampled<-ifelse(dwellings$sample.order<=SAMPLE_NUM,TRUE,FALSE)
-        dwellings$replacement_order_number<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-SAMPLE_NUM,NA)
-        dwellings<-dwellings%>%
-          arrange(sample.order)
-        
-        #update Dwellings in database
-        update_dwellings(dwellings)
-        
-        #update cluster in database
-        update_cluster(input$cluster)
-        
-      }
+      ## manually update values to avoid need for reloading from database;
+      clusters$status_colour[clusters$id == input$cluster] <<- "blue"
+      clusters$status_text[clusters$id == input$cluster] <<- "data collection in progress"
+      clusters$sample_taken[clusters$id == input$cluster] <<- 1
       
-      dwellings_sampled <- dwellings %>% filter(sampled==1 | replacement_order_number <= 10)
-      dwellings_sampled<-dwellings_sampled%>%
-        arrange(replacement_order_number)
+      # update region select to prompt re-rendering of cluster shapes
+      cluster_shapes <- subset(shape_json, name %in% input$cluster)
+      cluster_shapes <- merge(cluster_shapes, clusters, by.x = "name", by.y = "id")
       
-      #create table  
-      output$sampleTable<-make_datatable(dwellings_sampled)
-      create_ckecklist(dwellings_sampled)
+      leafletProxy("mymap") %>%
+      addPolygons(layerId = input$cluster,
+                  data = cluster_shapes ,
+                  weight = 1,
+                  opacity = 0.5,
+                  fillColor = cluster_shapes$status_colour,
+                  highlightOptions = highlightOptions(color = "blue", weight = 3,
+                                                      bringToFront = TRUE)
+      ) 
+      
+      # update cluster select to prompt re-rendering of building dots.
+      updateSelectInput(session,
+                        "cluster",
+                        choices = subset(clusters, region_id == input$region)$id,
+                        selected=clusters$id[clusters$id == input$cluster]
+      )
     }
-    
-    
-    
-    
     
   })
   
-  #create second table for the checklist
-  create_ckecklist<-function(dwellings_sampled){
-    
-    dwellings_sampled$visited<-"[___]"
-    dwellings_sampled$int_completed<-"[ ]"
-    dwellings_sampled$salt_collected<-"[ ]"
-    dwellings_sampled$urine_1<-"[ ]"
-    dwellings_sampled$urine_2<-"[ ]"
-    
-    dwellings_sampled<-dwellings_sampled%>%
-      filter(sampled==1) %>%
-      select(structure_number, dwelling_number, address, visited, int_completed, salt_collected, urine_1, urine_2)
-     
-    dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-    dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-    
-    showModal(dataTableModal())
-    
-    output$checklistTable<-make_sample_datatable(dwellings_sampled)
-    
-  }
+  observeEvent(input$download_sample, {
+    req(input$cluster)
+    output$checklistTable <- download_sample(cluster_id, dwellings)
+  })
   
   observeEvent(input$generate_sample_button, {
     showModal(dataModal())
@@ -85,11 +66,13 @@ server <- function(input, output, session) {
   # Initial Map Render
   ####################################
   
-  output$mymap <- renderLeaflet({
-    vals$base <-leaflet() %>% addTiles() %>%
-      addKML(country_shape, fillOpacity = 0) %>%
+  map_reactive <- reactive({
+    leaflet() %>% 
+      addTiles() %>%
+      addKML(country_shape, fillOpacity = 0) %>%  
       addMiniMap(
         toggleDisplay = TRUE
+
       ) %>% 
       onRender(
         "function(el, x) {
@@ -101,6 +84,12 @@ server <- function(input, output, session) {
             }).addTo(this);
             }"
       )
+
+      
+    })
+  
+  output$mymap <- renderLeaflet({
+    map_reactive()
     })
 
   output$sampleTable<-make_datatable(NULL)
@@ -303,7 +292,6 @@ server <- function(input, output, session) {
   # Download Map
   #####################################
 
- 
   # reactive values to store map
   vals <- reactiveValues()
   
@@ -316,8 +304,9 @@ server <- function(input, output, session) {
       setView(lng = input$mymap_center$lng,
               lat = input$mymap_center$lat,
               zoom = input$mymap_zoom)
-  }
+    }
   )
   
  
+
 }

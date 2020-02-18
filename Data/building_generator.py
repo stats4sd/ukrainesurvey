@@ -54,7 +54,7 @@ def generate_buildings():
 
     all_building_points = []
 
-    clusters = clusters[1::2]
+    #clusters = clusters[1::2]
 
 
     for cluster in clusters:
