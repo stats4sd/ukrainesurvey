@@ -61,7 +61,7 @@ generate_new_sample <- function(cluster_id, dwellings) {
     dwellings$replacement_order_number<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-SAMPLE_NUM,NA)
     
     # update global variable
-    dwellings<<-dwellings%>%
+    dwellings<-dwellings%>%
       arrange(sample.order)
     
     #update Dwellings in database
@@ -71,6 +71,8 @@ generate_new_sample <- function(cluster_id, dwellings) {
     update_cluster(cluster_id)
     
   }
+  
+  return(dwellings)
 
 }
 
@@ -84,10 +86,9 @@ generate_new_sample <- function(cluster_id, dwellings) {
 download_sample <- function(cluster_id, dwellings_sampled){
   
   dwellings_sampled <- dwellings_sampled %>% 
-    filter(sampled == 1) %>%
-    arrange(replacement_order_number)
+    filter(sampled == 1)
   
-  dwellings_sampled$visited<-"[___]"
+  dwellings_sampled$visited<-"[ ]"
   dwellings_sampled$int_completed<-"[ ]"
   dwellings_sampled$salt_collected<-"[ ]"
   dwellings_sampled$urine_1<-"[ ]"

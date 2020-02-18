@@ -17,7 +17,7 @@ server <- function(input, output, session) {
       showModal(too_few_dwellings_modal())
     }
     else {
-      generate_new_sample(input$cluster, dwellings)
+      dwellings <- generate_new_sample(input$cluster, dwellings)
       output$checklistTable <- download_sample(input$cluster, dwellings)
       
       
