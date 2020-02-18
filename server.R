@@ -18,7 +18,7 @@ server <- function(input, output, session) {
     }
     else {
       generate_new_sample(input$cluster, dwellings)
-      output$checklistTable <- download_sample(dwellings)
+      output$checklistTable <- download_sample(cluster_id, dwellings)
       
       
       ## manually update values to avoid need for reloading from database;
@@ -52,7 +52,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$download_sample, {
     req(input$cluster)
-    output$checklistTable <- download_sample(dwellings)
+    output$checklistTable <- download_sample(cluster_id, dwellings)
   })
   
   observeEvent(input$generate_sample_button, {

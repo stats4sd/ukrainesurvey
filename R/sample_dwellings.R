@@ -16,10 +16,10 @@ dataModal <- function() {
 #####################################
 # Show sampled dwellings table for download / export
 #####################################
-dataTableModal <- function() {
+dataTableModal <- function(cluster_id) {
   modalDialog(
     size = 'l',
-    h4(class="text-success", paste("Sampled Dwellings for Cluster - ", selected_cluster$id)),
+    h4(class="text-success", paste("Sampled Dwellings for Cluster - ", cluster_id)),
     p("The table below shows the 8 sampled dwellings for this cluster, and 2 empty rows to be used for replacements if needed."),
     p("Please download this as a pdf file and print it for field use."),
     DT::dataTableOutput("checklistTable"),
@@ -78,9 +78,10 @@ generate_new_sample <- function(cluster_id, dwellings) {
 
 #####################################
 # Function to build a downloadable datatable with the sampled dwellings
+# @prop cluster_id - the id of the cluster to download sample for
 # @prop dwellings_sampled - only the sampled dwellings for the current cluster.
 #####################################
-download_sample <- function(dwellings_sampled){
+download_sample <- function(cluster_id, dwellings_sampled){
   
   dwellings_sampled <- dwellings_sampled %>% 
     filter(sampled == 1) %>%
@@ -98,7 +99,7 @@ download_sample <- function(dwellings_sampled){
   dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
   dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
   
-  showModal(dataTableModal())
+  showModal(dataTableModal(cluster_id))
   
   return(make_sample_datatable(dwellings_sampled))
   
