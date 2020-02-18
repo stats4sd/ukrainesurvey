@@ -82,7 +82,7 @@ generate_new_sample <- function(cluster_id, dwellings) {
 #####################################
 download_sample <- function(dwellings_sampled){
   
-  dwellings_sampled <- dwellings %>% 
+  dwellings_sampled <- dwellings_sampled %>% 
     filter(sampled == 1) %>%
     arrange(replacement_order_number)
   
