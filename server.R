@@ -1,5 +1,12 @@
 server <- function(input, output, session) {
 
+  # initialise some variables
+  clusters <- load_clusters()
+  selected_region <- NULL
+  selected_cluster <- NULL
+  buildings <- NULL
+  dwellings <- NULL
+  
   #####################################
   # Generate Sample of Dwellings 
   #####################################
@@ -69,12 +76,17 @@ server <- function(input, output, session) {
   # Initial Map Render
   ####################################
   
-  output$mymap <- renderLeaflet({
-    vals$base <-leaflet() %>% addTiles() %>%
-      addKML(country_shape, fillOpacity = 0) %>%
+  map_reactive <- reactive({
+    leaflet() %>% 
+      addTiles() %>%
+      addKML(country_shape, fillOpacity = 0) %>%  
       addMiniMap(
         toggleDisplay = TRUE
-      )       
+      )
+    })
+  
+  output$mymap <- renderLeaflet({
+    map_reactive()
     })
 
   output$sampleTable<-make_datatable(NULL)
@@ -273,27 +285,27 @@ server <- function(input, output, session) {
   # Download Map
   #####################################
   
-  # reactive values to store map
-  vals <- reactiveValues()
-  
-  # create map as viewed by user
-  observeEvent({
-    input$mymap_zoom
-    input$mymap_center
-  }, {
-    vals$current <- vals$base %>% 
-      setView(lng = input$mymap_center$lng,
-              lat = input$mymap_center$lat,
-              zoom = input$mymap_zoom)
-  }
-  )
+  # # reactive values to store map
+  # vals <- reactiveValues()
+  # 
+  # # create map as viewed by user
+  # observeEvent({
+  #   input$mymap_zoom
+  #   input$mymap_center
+  # }, {
+  #   vals$current <- vals$base %>% 
+  #     setView(lng = input$mymap_center$lng,
+  #             lat = input$mymap_center$lat,
+  #             zoom = input$mymap_zoom)
+  # }
+  # )
   
   # create download
   output$dl <- downloadHandler(
     filename = "map.png",
     
     content = function(file) {
-      mapshot(vals$current, file = file,
+      mapshot(map_reactive(), file = file,
               # 2. specify size of map based on div size
               vwidth = input$dimension[1], vheight = input$dimension[2])
     }
