@@ -173,36 +173,28 @@ update_cluster <- function(cluster_id) {
 
 }
 
-#load summary cluster
-load_summary_clusters <- function(cluster_id = NULL) {
-  
-  con <- get_sql_connection()
-  
-  sql <- "SELECT * FROM summary_cluster"
-  
-  if(! is.null(cluster_id)) {
-    sql <- paste(sql, "WHERE cluster_id = ", cluster_id)
-  }
-  
-  clusters <- dbGetQuery(con,sql)
-  drop_sql_connection(con)
-  return(clusters)
-}
+
 
 drop_sql_connection <- function(con) {
   dbDisconnect(con)  
 }
 
-summary_clusters <- function() {
+summary_clusters <- function(cluster_id) {
   
   con <- get_sql_connection()
   
   sql <- "SELECT * FROM summary_cluster"
+  if(! is.null(cluster_id)) {
+    sql <- paste(sql, "WHERE cluster_id = ", cluster_id)
+    
+  }
   
-  clusters <- dbGetQuery(con,sql)
+  summary_clusters <- dbGetQuery(con,sql)
   drop_sql_connection(con)
-  return(clusters)
+  return(summary_clusters)
 }
+#create sum_clusters for the Summary Cluster Tab
+sum_clusters <- summary_clusters(clusters$id[1])
 
 drop_sql_connection <- function(con) {
   dbDisconnect(con)  

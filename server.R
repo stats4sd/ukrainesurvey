@@ -1,17 +1,18 @@
 library (plyr)
 
 server <- function(input, output, session) {
-value= FALSE
+  
   observeEvent(input$create_sample, {
     downloadLink("downloadSample", "Download Sample of Dwellings")
   })
-  reactive({
+  
+  observe({
     
-   if(!is.na(input$summary_cluster)){
-    
-     sum_clusters<-subset(summary_clusters, cluster_id=input$summary_cluster)
+   if(input$summary_cluster != clusters$id[1]){
+     sum_clusters<-summary_clusters(input$summary_cluster)
+     
    } else {
-     sum_clusters<-load_summary_clusters(clusters$id[1])
+     sum_clusters<-summary_clusters(clusters$id[1])
      
    }
     
@@ -325,7 +326,8 @@ value= FALSE
   #####################################
   # Download Map
   #####################################
-  
+
+ 
   # reactive values to store map
   vals <- reactiveValues()
   

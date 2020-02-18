@@ -46,7 +46,7 @@ ui <- dashboardPage(
             ),
             
             column(width = 12,
-        
+            
                   DT::dataTableOutput("sampleTable"),
                   DT::dataTableOutput("checklistTable")
                   
