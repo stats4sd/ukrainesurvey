@@ -7,6 +7,8 @@ import mysql.connector
 import yaml
 import os
 import fnmatch
+from faker import Faker
+fake = Faker()
 
 def getDbConnection():
 
@@ -29,6 +31,17 @@ def getDbConnection():
         database=sql_db
     )
 
+def clean_buildings_db():
+
+    mydb = getDbConnection()
+    mycursor = mydb.cursor()
+
+    sql_buildings = "delete from buildings;"
+
+    # dwellings should be deleted through on delete CASCADE relationship
+    mycursor.execute(sql_buildings)
+    mydb.commit()
+
 def generate_buildings():
     ## get the set of filtered cluster shapes
     with open("Data/shapes_filtered.geojson") as file:
@@ -36,13 +49,14 @@ def generate_buildings():
 
     all_building_points = []
 
+    clusters = clusters[1::2]
 
 
     for cluster in clusters:
 
         cluster_shape = MultiPolygon(shape(cluster["geometry"]))
 
-        number = random.randrange(30, 250)
+        number = random.randrange(30, 100)
 
         ## generates random geopoints within the cluster's shape
         building_points = pyc.geoloc_generation(cluster_shape, number, cluster['properties']['name'])
@@ -94,37 +108,36 @@ def save_buildings_to_db():
             for building in buildings:
 
                 # random number of dwellings
-                num_dwellings = random.randrange(1,50)
-                current_dwelling = 1
+                num_dwellings = random.randrange(1,20)
 
                 # id, lat, long, cluster_id, structure number, dwelling number
                 building_record = (
                     current_building,
-                    building['geometry']['coordinates'][0],
                     building['geometry']['coordinates'][1],
+                    building['geometry']['coordinates'][0],
                     building['properties']['country'],
                     building['properties']['point'],
                     num_dwellings,
+                    fake.address()
                     )
 
                 building_records.append(building_record)
 
                 ## 1 new record for each dwelling
-                for x in range(num_dwellings):
+                for x in range(1, num_dwellings):
 
                     # building_id, dwelling_number
                     dwelling_record = (
                         current_building,
-                        current_dwelling
+                        x
                         )
 
                     dwelling_records.append(dwelling_record)
-                    current_dwelling += 1
 
                 current_building += 1
 
 
-        sql = "INSERT INTO buildings (id, latitude, longitude, cluster_id, structure_number, num_dwellings) VALUES (%s, %s, %s, %s, %s, %s)"
+        sql = "INSERT INTO buildings (id, latitude, longitude, cluster_id, structure_number, num_dwellings, address) VALUES (%s, %s, %s, %s, %s, %s, %s)"
 
         mycursor.executemany(sql, building_records)
         mydb.commit()
@@ -139,5 +152,7 @@ def save_buildings_to_db():
         print(mycursor.rowcount, "dwellings were inserted into the database. WOAH.")
 
 
+clean_buildings_db()
+generate_buildings()
 save_buildings_to_db()
 

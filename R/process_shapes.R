@@ -1,6 +1,10 @@
 library(DBI)
 library(rgdal)
 
+####################################
+# PROCESS SHAPES 
+# ## Run this script manually whenever clusters are added or removed from the database / sample frame.
+####################################
 #Retrieve config parameters from the config.yml file
 db_param <- config::get(config='mysql')
 
@@ -44,7 +48,7 @@ country_shape <- readr::read_file("./Data/ukraine.kml")
 shape_json = readOGR("Data/shapes.geojson")
 point_json = readOGR("Data/points.geojson")
 
-# filter to get only the clusters we want - to be modified to put all the clusters
+# filter to get only the clusters we want
 shape_json <- subset(shape_json, name %in% clusters$id)
 point_json <- subset(point_json, name %in% clusters$id)
 
@@ -54,5 +58,67 @@ writeOGR(point_json, "Data/points_filtered.geojson", driver="GeoJSON", layer="po
 
 regions_list <- setNames(regions$id,as.character(regions$name_en))
 
+
+####################################
+# Get "middle" of regions
+#  - based on clusters in sample
+####################################
+points = as.data.frame(point_json)
+points$name <- as.character(points$name)
+
+latitude = list()
+longitude = list()
+
+for (i in 1:nrow(regions)) {
+  
+  filtered_clusters <- subset(clusters, region_id==regions$id[i])
+  
+  filtered_points <- subset(points, name %in% filtered_clusters$id)
+  
+  latitude[i] = mean(filtered_points$coords.x2) 
+  longitude[i] = mean(filtered_points$coords.x1)
+  
+}
+
+regions$latitude = latitude
+regions$longitude = longitude
+
+# UPDATE VALUES IN DB 
+for (i in 1:nrow(regions)) {
+  dbSendQuery(con,
+              paste0("UPDATE regions set `longitude` = ",longitude[i],", `latitude` = ", latitude[i], " WHERE id = ", regions$id[i], ";")
+  )
+  
+}
+
+
+####################################
+# Get Cluster Middles (using geopoints file)
+####################################
+
+names(points)[names(points)=="coords.x2"] <- "latitude"
+names(points)[names(points)=="coords.x1"] <- "longitude"
+
+drops <- names(points) %in% c("id")
+points <- points[!drops] 
+
+clusters <- merge(clusters, points, by.x="id", by.y="name")
+
+db_param <- config::get(config='mysql')
+
+
+for (i in 1:nrow(clusters)) {
+  dbSendQuery(con,
+              paste0("UPDATE clusters set `longitude` = ",clusters$longitude[i],", `latitude` = ", clusters$latitude[i], " WHERE id = ", clusters$id[i], ";")
+  )
+  
+}
+
+dbDisconnect(con)
+
+
+save(shape_json, point_json, regions, regions_list, country_shape, file="./Data/shapes.Rdata")
+
+
 # save as rdata for speed
-save(shape_json, point_json, regions, clusters, regions_list, file="./Data/shapes.Rdata")
+save(shape_json, point_json, regions, regions_list, country_shape, file="./Data/shapes.Rdata")

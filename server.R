@@ -1,122 +1,79 @@
-library (plyr)
-
 server <- function(input, output, session) {
+
   
-  observeEvent(input$create_sample, {
-    downloadLink("downloadSample", "Download Sample of Dwellings")
+  observeEvent(input$generate_sample_button, {
+    showModal(dataModal())
   })
   
-  observe({
-    
-   if(input$summary_cluster != clusters$id[1]){
-     sum_clusters<-summary_clusters(input$summary_cluster)
-     
-   } else {
-     sum_clusters<-summary_clusters(clusters$id[1])
-     
-   }
-    
+  observeEvent(input$confirm_sample, {
+    removeModal()
+    generate_sample()
   })
   
-  #####################################
-  # Generate Sample of Dwellings 
-  #####################################
-  observeEvent(input$generateSample, {
-    req(input$cluster.id)
-    
-    SAMPLE_NUM<-8
-    get_dwellings<-load_dwellings(input$cluster.id) 
-    dwellings<-get_dwellings['dwellings']
-    dwellings <- data.frame(Reduce(rbind, dwellings))
-    
-    dwellings_by_cluster<-dwellings%>%filter(cluster_id == input$cluster.id)
-    check_cluster<-load_clusters() %>% filter(id == input$cluster.id)
-
-    if(check_cluster$sample_taken==0){
-    
-      dwellings_by_cluster$sample.order<-sample(1:nrow(dwellings_by_cluster))
-      dwellings_by_cluster$sampled<-ifelse(dwellings_by_cluster$sample.order<=SAMPLE_NUM,TRUE,FALSE)
-      dwellings_by_cluster$replacement.order<-ifelse(dwellings_by_cluster$sampled==FALSE,dwellings_by_cluster$sample.order-SAMPLE_NUM,NA)
-      dwellings_by_cluster<-dwellings_by_cluster%>%
-        select(region_name_en, region_name_uk, dwelling_id, dwelling_number, sample.order, sampled, replacement.order, address) %>%
-        arrange(sample.order)
-      
-      #update Dwellings
-      
-      update_dwellings(dwellings_by_cluster)
-      
-      #update cluster
-      update_cluster(input$cluster.id)
-      
-      
-      
-    } else {
-    
-      dwellings_sampled <- dwellings_by_cluster %>% filter(sampled==1 | replacement_order_number <= 8)
-      dwellings_sampled<-dwellings_sampled%>%
-        select(region_name_en, region_name_uk, dwelling_id, dwelling_number, sampled, replacement_order_number, address) %>%
-        arrange(replacement_order_number)
-      
-     
-    }
-    #create table  
-    output$sampleTable<-make_datatable(dwellings_sampled)
-    create_ckecklist(dwellings_by_cluster)
-  })
   
-  #create second table for the checklist
- create_ckecklist<-function(dwellings_by_cluster){
-   
-    dwellings_sampled <- dwellings_by_cluster %>% filter(sampled==1)
-    dwellings_sampled$visited<-"[ ]"
-    dwellings_sampled$int_completed<-"[ ]"
-    dwellings_sampled$salt_collected<-"[ ]"
-    dwellings_sampled$urine_1<-"[ ]"
-    dwellings_sampled$urine_2<-"[ ]"
-    
-    dwellings_sampled<-dwellings_sampled%>%
-      select(structure_number, dwelling_number, address, visited, int_completed, salt_collected, urine_1, urine_2) 
-    dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-    dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-    output$checklistTable<-make_datatable(dwellings_sampled)
-  }
+  ## Something to do with the cluster summary tab...
   
-  #####################################
-  # Data table 
-  #####################################
   
-  output$sampleTable<-make_datatable(NULL)
-  output$checklistTable<-make_datatable(NULL)
-
-  #####################################
-  # Sample Dwellings within a cluster
-  #####################################
-
-    # Function to download the sample for the chosen cluster as an Excel file
-  output$downloadSample<- downloadHandler(
-    
-    filename = function() {
-      paste(input$cluster.id,'-', Sys.Date(), '.xlsx', sep='')
-    },
-    
-    
-    content = function(con) {
-      write.xlsx(sampleDwellings(), con,row.names=FALSE)
-    }
-  )
-
   ####################################
   # Initial Map Render
   ####################################
   output$mymap <- renderLeaflet({
-    vals$base <-leaflet() %>% addTiles() %>% addProviderTiles("Esri.WorldStreetMap") %>%
+    vals$base <-leaflet() %>% addTiles() %>%
       addKML(country_shape, fillOpacity = 0) %>%
       addMiniMap(
-        tiles = providers$Esri.WorldStreetMap,
         toggleDisplay = TRUE
-      )
+      )       
     })
-
+                         
+  ####################################
+  # Render Clusters based on Status                                                                                                                                                    
+  ####################################                                            
+  
+  observeEvent(input$region, {
+    
+    if( !is.na(input$region) & input$region != "") {
+      region_clusters <- subset(clusters, region_id == input$region)
+    }
+    else {
+      region_clusters <- clusters
+    }
+    
+    updateSelectInput(session,
+                      "cluster",
+                      choices = region_clusters$id
+    )
+    
+    leafletProxy("mymap") %>%
+      clearShapes() %>%
+      clearMarkers()
+    
+    cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
+    
+    leafletProxy("mymap") %>%
+      addPolygons(layerId = cluster_shapes$name,
+                  data = cluster_shapes ,
+                  weight = 1,
+                  fillColor = region_clusters$status_colour
+      ) 
+    
+    ## Other Region-selection stuff
+    selected_region <<- subset(regions, id==input$region)
+    
+    output$region_name <- renderText(selected_region$name_en)
+    
+    zoom_point <- zoom_to()
+    
+    leafletProxy("mymap") %>%
+      setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom)  
+    
+  }) #end render clusters
+  
+  
+  
+  ####################################
+  # When Region Is Selected
+  ####################################
+  
   ## zoom to region
   zoom_to <- reactive({
     if(input$region==""){
@@ -126,134 +83,100 @@ server <- function(input, output, session) {
     }
   })
 
-  ## filter cluster shapes
-  filter_shapes <- reactive({
-    if(input$region==""){
-
-      return(shape_json)
-    }else{
-      filtered_clusters <- subset(clusters, region_id==input$region)
-      return(subset(shape_json, name %in% filtered_clusters$id))
-    }
-  })
-
 
   ####################################
-  # Dynamically Add cluster shapes and points based on chosen region
-  ####################################
-  observe({
-
-    oblast_seleted <- subset(regions, id==input$region)
-    cluster_shapes <- filter_shapes()
-    zoom_point <- zoom_to()
-
-    ## filter clusters completed and not completed
-    clusters_not_completed<-subset(clusters, cluster_completed == FALSE | is.na(cluster_completed))
-    clusters_completed<-subset(clusters, cluster_completed == TRUE)
-
-    ## Clear map
-    leafletProxy("mymap") %>%
-      clearShapes() %>%
-      clearMarkers() %>%
-      setView(lng = zoom_point$longitude, lat = zoom_point$latitude, zoom = zoom_point$zoom)
-
-    ## render completed clusters if they exist
-    if(nrow(clusters_completed) > 0) {
-
-      cluster_shapes_completed<-subset(cluster_shapes, name %in% clusters_completed$id)
-      info_cluster_completed<-subset(clusters_completed, id==cluster_shapes_completed$name)
-
-      leafletProxy("mymap") %>%
-        addPolygons(layerId = cluster_shapes_completed$name,
-                    data = cluster_shapes_completed ,
-                    weight = 1,
-                    fillColor = "green",
-                    popup =paste("<h5><strong>Cluster",
-                                 cluster_shapes_completed$name,
-                                 " Completed</strong></h5>",
-                                 "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",
-                                 "<b>Cluster Id:</b>", cluster_shapes_completed$name,"</br>",
-                                 "<b>Dwellings Completed:</b>", info_cluster_completed$dwellings_completed,"</br>",
-                                 "<b>Dwellings Not Completed:</b>",info_cluster_completed$dwellings_not_completed,"</br>",
-                                 "<b>Dwellings Total:</b>",info_cluster_completed$tot_dwellings,"</br>"
-                               )
-                    )
-
-    }
-
-    ## render incomplete clusters if they exist
-    if(nrow(clusters_not_completed) > 0) {
-
-      cluster_shapes_not_completed <- subset(cluster_shapes, name %in% clusters_not_completed$id)
-      info_cluster_not_completed<-subset(clusters_not_completed, id %in% cluster_shapes_not_completed$name)
-
-
-      leafletProxy("mymap") %>%
-        addPolygons(layerId = cluster_shapes_not_completed$name,
-                    data = cluster_shapes_not_completed ,
-                    weight = 1,
-                    fillColor = "red",
-                    popup =paste("<h5><strong>Cluster",
-                                 cluster_shapes_not_completed$name," not Completed</strong></h5>",
-                                 "<b>Oblast:</b>", oblast_seleted$name_en,"</br>",
-                                 "<b>Cluster Id:</b>", cluster_shapes_not_completed$name,"</br>",
-                                 "<b>Dwellings Completed:</b>", info_cluster_not_completed$dwellings_completed,"</br>",
-                                 "<b>Dwellings Not Completed:</b>",info_cluster_not_completed$dwellings_not_completed,"</br>",
-                                 "<b>Dwellings Total:</b>",info_cluster_not_completed$tot_dwellings,"</br>"
-                                 )
-                  )
-    }
-
-  })
-
-
-  ####################################
-  # Dynamically add buildings based on chosen cluster
+  # When Cluster Is Selected
   ####################################
 
-  observe({
-   selected_cluster <- input$mymap_shape_click
-
-   updateSelectInput(session,
-                     "cluster.id",
-                     label = "Select Cluster ID for Sampling",
-                     choices = clusters$id,
-                     selected=clusters$id[clusters$id==selected_cluster['id']]
-   )
-   
-
-   if(!is.null(selected_cluster)) {
-      
+  ## via the map (update select input)
+  observeEvent(input$mymap_shape_click, {
     
-      # building_file = paste0("Data/test/buildings_cluster", selected_cluster$id,".geojson")
-      # building_points = readOGR(building_file)
+    # here, we only update the select input. This triggers the observe(input$cluster) code block, which does all the interesting stuff.
+    updateSelectInput(session,
+                     "cluster",
+                     choices = clusters$id,
+                     selected=clusters$id[clusters$id==input$mymap_shape_click['id']]
+    )
+    
+  })
   
-      buildings <- load_buildings(selected_cluster["id"])
-      combined_list <- load_dwellings(selected_cluster["id"])
-      dwellings <- combined_list$dwellings
-      dwellings_per_building <- combined_list$dwellings_per_building
-      
-      
-      buildings <- left_join(buildings, dwellings_per_building, by="structure_number")
-      
+  # via the select input directly
+  observeEvent(input$cluster, {
+    
+    # if input$cluster is empty, end here... 
+    req(input$cluster)
+    
+    
+    selected_cluster <<- subset(clusters, id == input$cluster)
+    output$cluster_name <- renderText(selected_cluster$id)
+    
+    if( selected_cluster$sample_taken == 0 ) {
+      shinyjs::hide('sample_taken')
+      shinyjs::show('sample_not_taken')
+    }
+    else {
+      shinyjs::hide('sample_not_taken')
+      shinyjs::show('sample_taken')    
+    }
+    
+    # Only update region if region is not already set correctly
+    if( input$region != clusters$region_id[clusters$id == selected_cluster$id] ) {
       
       browser()
       
+      updateSelectInput(session,
+                        "region",
+                        choices = regions_list,
+                        selected = clusters$region_id[clusters$id == selected_cluster$id])
       
-      leafletProxy("mymap") %>%
-        setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 13) %>%
-        clearMarkers() %>%
-        addCircleMarkers(data = buildings, 
-                          lng = buildings$longitude,
-                          lat = buildings$latitude,
-                          radius = 5,
-                          stroke = FALSE,
-                          color = "blue",
-                          popup = paste("<h5>Building number ", buildings$structure_number
-                                        )
-                          )
-        
-        
+      output$region_name <- renderText(clusters$region_name_en[clusters$id==selected_cluster$id])
+      
+    }
+    
+
+    buildings <<- load_buildings(selected_cluster$id)
+    dwellings <<- load_dwellings(selected_cluster$id)
+    
+    # setup labels for buildings
+    
+    building_labels <- lapply(seq(nrow(buildings)), function(i) {
+      paste0( 
+        "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
+        "<b>Address:</b>", buildings[i, "address"], "<br/>"
+      )
+    })
+
+    leafletProxy("mymap") %>%
+      setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
+      clearMarkers() %>%
+      addCircleMarkers(data = buildings, 
+                       lng = buildings$longitude,
+                       lat = buildings$latitude,
+                       radius = 5,
+                       stroke = FALSE,
+                       color = "blue",
+                       label = lapply(building_labels, htmltools::HTML)
+                       # labelOptions = labelOptions(
+                       #   noHide = T,
+                       # )
+      )
+    
+
+    
+
+    output$cluster_info <- renderUI({
+      HTML(paste0(
+        "<b>Region: </b>", selected_cluster$region_name_en, "</br>",
+        "<h5><strong>Cluster ID: ", selected_cluster$id, "</strong></h5>",
+        "<hr/>",
+        "<h6 class='text-", selected_cluster$status_colour, "'><b>STATUS: </b>", selected_cluster$status_text, "</h6>",
+        "<hr/>",
+        "<b>No. of Buildings: </b>", selected_cluster$tot_buildings,"</br>",
+        "<b>No. of Dwellings: </b>",selected_cluster$tot_dwellings,"</br>"      
+        ))
+    })    
+       
+     
       # 
       # # filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
       # # filtered_buildings_sample <- subset(buildings,cluster_id==selected_cluster['id'] & sum_sampled>0)
@@ -295,33 +218,32 @@ server <- function(input, output, session) {
       #   leafletProxy("mymap") %>%
       #     setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
       # } #endif(buildings exist)
-    } #endif(cluster is selected)
 
   }) #endobserve
 
   #####################################
   # QR CODE STUFF
   #####################################
-  qrcode = reactive( t(qrcode_gen("https://stats4sd.org", plotQRcode= FALSE, dataOutput = TRUE)))
-  nc = reactive( ncol(qrcode()))
-  nr = reactive( nrow(qrcode()))
-  scale = 10
+  # qrcode = reactive( t(qrcode_gen("https://stats4sd.org", plotQRcode= FALSE, dataOutput = TRUE)))
+  # nc = reactive( ncol(qrcode()))
+  # nr = reactive( nrow(qrcode()))
+  # scale = 10
   
-  output$qrtest <- renderPlot({
-    par(mar=c(0,0,0,0))
-    image(
-      1L:nc(),
-      1L:nr(),
-      qrcode(),
-      xlim = 0.5 + c(0, nc()),
-      ylim = 0.5 + c(nr(), 0),
-      axes = FALSE,
-      xlab = "",
-      ylab = "",
-      col = c("white", "black"),
-      asp = 1
-      )
-    }, width = function() scale*nc(), height = function() scale*nr())
+  # output$qrtest <- renderPlot({
+  #   par(mar=c(0,0,0,0))
+  #   image(
+  #     1L:nc(),
+  #     1L:nr(),
+  #     qrcode(),
+  #     xlim = 0.5 + c(0, nc()),
+  #     ylim = 0.5 + c(nr(), 0),
+  #     axes = FALSE,
+  #     xlab = "",
+  #     ylab = "",
+  #     col = c("white", "black"),
+  #     asp = 1
+  #     )
+  #   }, width = function() scale*nc(), height = function() scale*nr())
   
   #####################################
   # Download Map
