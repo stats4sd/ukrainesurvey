@@ -6,6 +6,7 @@ ui <- dashboardPage(
     sidebarMenu(id="tabs",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("QR Test", tabName = "qrtest", icon = icon("th")),
+      menuItem("Replacement Sample", tabName = "replacement_sample", icon = icon("fas fa-exchange-alt")),
       menuItem("Summary Cluster", tabName = "summary_cluster", icon = icon("file")),
       menuItem("Summary Region", tabName = "summary_region", icon = icon("file")),
       menuItem("Summary National", tabName = "summary_national", icon = icon("file"))
@@ -128,14 +129,54 @@ ui <- dashboardPage(
           column(width = 12,
 
                  DT::dataTableOutput("sampleTable"),
-             #    DT::dataTableOutput("checklistTable")
+                 DT::dataTableOutput("checklistTable")
 
           )
         )
 
       ),
 
-
+      tabItem(tabName = 'replacement_sample',
+              h2("Replacement Sample"),
+              box(width = 9,
+                  title = "Warning",
+                  status = "warning",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  tags$ol(
+                    tags$li("This is to generate replacement"),
+                    tags$li("Only the supervisor are allowed to use this section")
+                  )
+                 
+                  
+              ),
+              box(width = 5,
+                  title = "Generate the replacement",
+                  status = "info",
+                  solidHeader = TRUE,
+                  collapsible = TRUE,
+                  selectizeInput("repl_region",
+                                 label = "Select an Oblast",
+                                 choices = regions_list,
+                                 options = list(
+                                   placeholder = "Select an Oblast",
+                                   onInitialize = I('function() { this.setValue(""); }')
+                                 )
+                  ),
+                  
+                  selectizeInput("repl_cluster",
+                                 label = "Select Cluster",
+                                 choices = clusters$id,
+                                 options = list(
+                                   placeholder = "Select a cluster",
+                                   onInitialize = I('function() { this.setValue(""); }')
+                                 )
+                  ),
+                  
+                  actionButton("generate_replacement", "Generate Replacement", class = "btn-primary", style="float:right"),
+                  DT::dataTableOutput("replacementTable")
+              )
+      ),
 
       tabItem(tabName = 'summary_cluster',
               h2("Summary Cluster"),

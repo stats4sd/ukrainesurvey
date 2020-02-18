@@ -223,7 +223,7 @@ server <- function(input, output, session) {
         "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
         "<b>Address:</b>", buildings[i, "address"], "<br/>",
         "<b>No. of Dwellings </b>", buildings[i, "num_dwellings"], "<br/>",
-        "<a href='https://maps.google.com/?q=",buildings[i, "latitudine"],",",buildings[i,"longitude"],"'",">Open Google Maps<a/>"
+        "<a href='https://maps.google.com/?q=", buildings[i, "latitude"],",", buildings[i,"longitude"],"'",">Open Google Maps</a>"
       )
      })
     
@@ -288,25 +288,6 @@ server <- function(input, output, session) {
   #     )
   #   }, width = function() scale*nc(), height = function() scale*nr())
   
-  #####################################
-  # Download Map
-  #####################################
 
-  # reactive values to store map
-  vals <- reactiveValues()
-  
-  # create map as viewed by user
-  observeEvent({
-    input$mymap_zoom
-    input$mymap_center
-  }, {
-    vals$current <- vals$base %>% 
-      setView(lng = input$mymap_center$lng,
-              lat = input$mymap_center$lat,
-              zoom = input$mymap_zoom)
-    }
-  )
-  
- 
 
 }
