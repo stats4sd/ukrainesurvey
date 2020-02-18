@@ -167,7 +167,8 @@ update_cluster <- function(cluster_id) {
     results <- dbGetQuery(con, sql)
   
     drop_sql_connection(con)
-<<<<<<< HEAD
+  }
+
 
 }
 
@@ -190,10 +191,10 @@ summary_clusters <- function(cluster_id) {
   summary_clusters <- dbGetQuery(con,sql)
   drop_sql_connection(con)
   return(summary_clusters)
-=======
-  }
->>>>>>> dev
+
 }
+
+
 #create sum_clusters for the Summary Cluster Tab
 sum_clusters <- summary_clusters(clusters$id[1])
 

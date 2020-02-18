@@ -122,7 +122,7 @@ server <- function(input, output, session) {
     # Only update region if region is not already set correctly
     if( input$region != clusters$region_id[clusters$id == selected_cluster$id] ) {
       
-      browser()
+      #browser()
       
       updateSelectInput(session,
                         "region",

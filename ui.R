@@ -56,7 +56,7 @@ ui <- dashboardPage(
             width = 8,
             box(width = NULL, solidHeader = TRUE, height = "90vh", 
 
-                leafletOutput("mymap", height="85vh")
+                leafletOutput("mymap", height="85vh"),
                 downloadButton("dl", "Download Map",class = "btn-primary", style="float: right;")
             )
 
@@ -133,6 +133,7 @@ ui <- dashboardPage(
           )
 
         )
+
       ),
 
       tabItem(tabName = 'qrtest',
@@ -351,8 +352,9 @@ ui <- dashboardPage(
                   h4('Number of replacements'),
                   p('7')
               )
+      
               
-      )
+        )
       )
     )
   )
