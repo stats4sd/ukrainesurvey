@@ -1,4 +1,3 @@
-
 ####################################
 # Show Modal to confirm building listing is complete
 ####################################
@@ -9,61 +8,34 @@ dataModal <- function() {
     p("Please confirm that building listing is complete to continue."),
     footer = tagList(
       modalButton("Cancel"),
-      actionButton("confirm_sample", "I confirm building listing is complete", class = "btn-success", )
+      actionButton("confirm_sample", "I confirm building listing is complete", class = "btn-success" )
     )
   )
 }
 
-
-
 #####################################
-# Generate Sample of Dwellings 
+# Show sampled dwellings table for download / export
 #####################################
-generate_sample <- function() {
-  
-  req(input$cluster)
-  
-  SAMPLE_NUM<-8
-  
-  check_cluster<-load_clusters() %>% filter(id == input$cluster)
-  
-  if(check_cluster$sample_taken==0){
+dataTableModal <- function() {
+  modalDialog(
+    size = 'l',
+    h4(class="text-success", paste("Sampled Dwellings for Cluster - ", selected_cluster$id)),
+    p("The table below shows the 8 sampled dwellings for this cluster, and 2 empty rows to be used for replacements if needed."),
+    p("Please download this as a pdf file and print it for field use."),
+    DT::dataTableOutput("checklistTable"),
     
-    dwellings$sample.order<-sample(1:nrow(dwellings))
-    dwellings$sampled<-ifelse(dwellings$sample.order<=SAMPLE_NUM,TRUE,FALSE)
-    dwellings$replacement_order_number<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-SAMPLE_NUM,NA)
-    dwellings<-dwellings%>%
-      arrange(sample.order)
-    
-    #update Dwellings in database
-    update_dwellings(dwellings)
-    
-    #update cluster in database
-    update_cluster(input$cluster)
-    
-  }
-  
-  dwellings_sampled <- dwellings %>% filter(sampled==1 | replacement_order_number <= 10)
-  dwellings_sampled<-dwellings_sampled%>%
-    arrange(replacement_order_number)
-  
-  #create table  
-  output$sampleTable<-make_datatable(dwellings_sampled)
-  create_ckecklist(dwellings_sampled)
+    footer = tagList(
+      modalButton("Close")
+    )
+  )
 }
 
-#create second table for the checklist
-create_ckecklist<-function(dwellings_sampled){
-  
-  dwellings_sampled$visited<-"[ ]"
-  dwellings_sampled$int_completed<-"[ ]"
-  dwellings_sampled$salt_collected<-"[ ]"
-  dwellings_sampled$urine_1<-"[ ]"
-  dwellings_sampled$urine_2<-"[ ]"
-  
-  dwellings_sampled<-dwellings_sampled%>%
-    select(structure_number, dwelling_number, address, visited, int_completed, salt_collected, urine_1, urine_2) 
-  dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-  dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-  output$checklistTable<-make_datatable(dwellings_sampled)
+too_few_dwellings_modal <- function() {
+  modalDialog(
+    h4(class = "text-warning", "NO SAMPLE HAS BEEN TAKEN"),
+    h5(class = "text-warning", "There are too few dwellings in this cluster to take a sample. Please double check the building listing data, and ensure that every occupied building in the cluster is accounted for."),
+    footer = tagList(
+      modalButton("Return to dashboard")
+    )
+  )
 }

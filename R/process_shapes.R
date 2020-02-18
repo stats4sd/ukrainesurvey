@@ -52,6 +52,14 @@ point_json = readOGR("Data/points.geojson")
 shape_json <- subset(shape_json, name %in% clusters$id)
 point_json <- subset(point_json, name %in% clusters$id)
 
+
+if(file.exists("Data/shapes_filtered.geojson")) {
+  file.remove("Data/shapes_filtered.geojson")
+}
+if(file.exists("Data/points_filtered.geojson")) {
+  file.remove("Data/points_filtered.geojson")
+}
+
 writeOGR(shape_json, "Data/shapes_filtered.geojson", driver="GeoJSON", layer="shapes")
 
 writeOGR(point_json, "Data/points_filtered.geojson", driver="GeoJSON", layer="points")

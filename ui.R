@@ -14,8 +14,13 @@ ui <- dashboardPage(
 
   dashboardBody(
     useShinyjs(),
-    
-    tags$head(tags$script('
+
+    tags$head(tags$style("
+                        .modal-lg {
+                          width: 80vw; }
+                         "),
+
+              tags$script('
                         var dimension = [0, 0];
                         $(document).on("shiny:connected", function(e) {
                         dimension[0] = document.getElementById("mymap").clientWidth;
@@ -27,45 +32,50 @@ ui <- dashboardPage(
                         dimension[1] = document.getElementById("mymap").clientHeight;
                         Shiny.onInputChange("dimension", dimension);
                         });
-                        ')),
-   
+                        ')
+
+
+              ),
+
 
     tabItems(
 
       # Dashboard Tab
       tabItem(tabName = "dashboard",
         fluidRow(
-          
+
           column(
             width = 12,
             box(width = 12,
-                title = "Instructions", 
-                status = "primary", 
+                title = "Instructions",
+                status = "primary",
                 solidHeader = TRUE,
                 collapsible = TRUE,
                 tags$ol(
-                  tags$li("Use the dropdown to select a region. The map will zoom to show all clusters within that region."),
+                  tags$li("Use the dropdown to select an oblast The map will zoom to show all clusters within that region."),
                   tags$li("Click on the cluster on the map, or use the dropdown box to select a cluster"),
                   tags$li("The map will load the listed buildings for the chosen cluster, along with any sample information present."),
                   tags$li("You can then perform key actions for the cluster")
                 )
+            )
           ),
-          
+
           # map
           column(
             width = 8,
-            box(width = NULL, solidHeader = TRUE, height = "90vh", 
+
+            box(width = NULL, solidHeader = TRUE, height = "90vh",
 
                 leafletOutput("mymap", height="85vh"),
                 downloadButton("dl", "Download Map",class = "btn-primary", style="float: right;")
             )
 
           ),
-          
+
           # filters
           column(
             width = 4,
-            
+
             #filters
             box(
               width = 12,
@@ -74,16 +84,16 @@ ui <- dashboardPage(
               status = "primary",
               collapsible = TRUE,
               selectizeInput("region",
-                          label = "Select a Region",
+                          label = "Select an Oblast",
                           choices = regions_list,
                           options = list(
-                            placeholder = "Select a region",
+                            placeholder = "Select an Oblast",
                             onInitialize = I('function() { this.setValue(""); }')
                           )
               ),
-              
-              selectizeInput("cluster", 
-                             label = "Select Cluster", 
+
+              selectizeInput("cluster",
+                             label = "Select Cluster",
                              choices = clusters$id,
                              options = list(
                                placeholder = "Select a cluster",
@@ -91,56 +101,52 @@ ui <- dashboardPage(
                              )
               )
             ),
-          
+
             # actions and summary column
             box(
               width = 12,
               title = "Cluster Information",
               solidHeader = TRUE,
               status = "primary",
-              
+
               conditionalPanel(
                 condition = "input.cluster == ''",
                 h5("Select a cluster to show information here")
               ),
-              
+
               conditionalPanel(
                 condition = "input.cluster != ''",
                 uiOutput("cluster_info"),
                 hr(),
-                
+
                 div(
                   id = "sample_not_taken",
                   h5("If building listing is complete, click the button below to do the sampling."),
                   h5( class = "text-warning", "NOTE, Only proceed after you have confirmed this phase is complete. There is no going back once the sample has been taken!"),
-                  actionButton("generate_sample_button", "Generate Sample", class = "btn-primary")  
+                  actionButton("generate_sample_button", "Generate Sample", class = "btn-primary")
                 ),
-                
+
                 div(
                   id = "sample_taken",
-                  actionButton("downloadSample", "Download Sample of dwellings sheet", class = "btn-primary")
+                  actionButton("download_sample", "Download Sample of dwellings sheet", class = "btn-primary")
                 )
-                
+
               )
             )
           ),
-          
-          column(width = 12,
-                 
-                 DT::dataTableOutput("sampleTable"),
-                 DT::dataTableOutput("checklistTable")
-                 
-          )
 
+          column(width = 12,
+
+                 DT::dataTableOutput("sampleTable"),
+             #    DT::dataTableOutput("checklistTable")
+
+          )
         )
 
       ),
 
-      tabItem(tabName = 'qrtest',
-              h2("Some QR Code Tests"),
-              plotOutput('qrtest')
-      ),
-      
+
+
       tabItem(tabName = 'summary_cluster',
               h2("Summary Cluster"),
               div(style="width: 200px;",
@@ -150,8 +156,8 @@ ui <- dashboardPage(
                 status="warning",
                 h4('buildings listed')
                 # p(sum_clusters$buildings_listed)
-                
-               
+
+
               ),
               box(width=3,
                   status="warning",
@@ -208,7 +214,7 @@ ui <- dashboardPage(
                   h4('Number of replacements'),
                   p('7')
               )
-       
+
       ),
       tabItem(tabName = 'summary_region',
               h2("Summary Region"),
@@ -217,13 +223,13 @@ ui <- dashboardPage(
                                  "Filter by Region",
                                  regions_list,
                                  options = list(
-                                   placeholder = "Select a region",
+                                   placeholder = "Select an Oblast",
                                    onInitialize = I('function() { this.setValue(""); }')
                                  )
                   )
-                  
+
               ),
-              
+
               box(width=3,
                   status="info",
                   h4('buildings listed')
@@ -284,14 +290,14 @@ ui <- dashboardPage(
                   h4('Number of replacements'),
                   p('7')
               )
-             
-              
+
+
       ),
-      
+
       tabItem(tabName = 'summary_national',
               h2("Summary National"),
               br(),
-              
+
               box(width=3,
                   status="success",
                   h4('buildings listed')
@@ -352,9 +358,7 @@ ui <- dashboardPage(
                   h4('Number of replacements'),
                   p('7')
               )
-      
-              
-        )
+
       )
     )
   )

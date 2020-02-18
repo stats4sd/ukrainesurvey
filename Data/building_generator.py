@@ -8,6 +8,8 @@ import yaml
 import os
 import fnmatch
 from faker import Faker
+import shutil
+
 fake = Faker()
 
 def getDbConnection():
@@ -41,6 +43,9 @@ def clean_buildings_db():
     # dwellings should be deleted through on delete CASCADE relationship
     mycursor.execute(sql_buildings)
     mydb.commit()
+
+    shutil.rmtree('Data/test', ignore_errors=True)
+    os.mkdir('Data/test')
 
 def generate_buildings():
     ## get the set of filtered cluster shapes

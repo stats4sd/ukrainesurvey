@@ -1,15 +1,82 @@
 server <- function(input, output, session) {
 
+  #####################################
+  # Generate Sample of Dwellings 
+  #####################################
+  get_sample <- reactive({
+    list(input$confirm_sample, input$download_sample)
+  })
+  
+  observeEvent(get_sample(), {
+    removeModal()
+    
+    req(input$cluster)
+    
+    if(is.data.frame(dwellings) && nrow(dwellings) <= 18 ) {
+      showModal(too_few_dwellings_modal())
+    }
+  
+    else {
+      
+      SAMPLE_NUM<-8
+      check_cluster<-load_clusters() %>% filter(id == input$cluster)
+      
+      if(check_cluster$sample_taken==0){
+        
+        dwellings$sample.order<-sample(1:nrow(dwellings))
+        dwellings$sampled<-ifelse(dwellings$sample.order<=SAMPLE_NUM,TRUE,FALSE)
+        dwellings$replacement_order_number<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-SAMPLE_NUM,NA)
+        dwellings<-dwellings%>%
+          arrange(sample.order)
+        
+        #update Dwellings in database
+        update_dwellings(dwellings)
+        
+        #update cluster in database
+        update_cluster(input$cluster)
+        
+      }
+      
+      dwellings_sampled <- dwellings %>% filter(sampled==1 | replacement_order_number <= 10)
+      dwellings_sampled<-dwellings_sampled%>%
+        arrange(replacement_order_number)
+      
+      #create table  
+      output$sampleTable<-make_datatable(dwellings_sampled)
+      create_ckecklist(dwellings_sampled)
+    }
+    
+    
+    
+    
+    
+  })
+  
+  #create second table for the checklist
+  create_ckecklist<-function(dwellings_sampled){
+    
+    dwellings_sampled$visited<-"[___]"
+    dwellings_sampled$int_completed<-"[ ]"
+    dwellings_sampled$salt_collected<-"[ ]"
+    dwellings_sampled$urine_1<-"[ ]"
+    dwellings_sampled$urine_2<-"[ ]"
+    
+    dwellings_sampled<-dwellings_sampled%>%
+      filter(sampled==1) %>%
+      select(structure_number, dwelling_number, address, visited, int_completed, salt_collected, urine_1, urine_2)
+     
+    dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
+    dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
+    
+    showModal(dataTableModal())
+    
+    output$checklistTable<-make_sample_datatable(dwellings_sampled)
+    
+  }
   
   observeEvent(input$generate_sample_button, {
     showModal(dataModal())
   })
-  
-  observeEvent(input$confirm_sample, {
-    removeModal()
-    generate_sample()
-  })
-  
   
   ## Something to do with the cluster summary tab...
   
@@ -17,6 +84,7 @@ server <- function(input, output, session) {
   ####################################
   # Initial Map Render
   ####################################
+  
   output$mymap <- renderLeaflet({
     vals$base <-leaflet() %>% addTiles() %>%
       addKML(country_shape, fillOpacity = 0) %>%
@@ -24,7 +92,10 @@ server <- function(input, output, session) {
         toggleDisplay = TRUE
       )       
     })
-                         
+
+  output$sampleTable<-make_datatable(NULL)
+  output$checklistTable<-make_datatable(NULL)
+  
   ####################################
   # Render Clusters based on Status                                                                                                                                                    
   ####################################                                            
@@ -48,12 +119,16 @@ server <- function(input, output, session) {
       clearMarkers()
     
     cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
+    cluster_shapes <- merge(cluster_shapes, region_clusters, by.x = "name", by.y = "id")
     
     leafletProxy("mymap") %>%
       addPolygons(layerId = cluster_shapes$name,
                   data = cluster_shapes ,
                   weight = 1,
-                  fillColor = region_clusters$status_colour
+                  opacity = 0.5,
+                  fillColor = cluster_shapes$status_colour,
+                  highlightOptions = highlightOptions(color = "blue", weight = 3,
+                                                      bringToFront = TRUE)
       ) 
     
     ## Other Region-selection stuff
@@ -108,6 +183,7 @@ server <- function(input, output, session) {
     
     
     selected_cluster <<- subset(clusters, id == input$cluster)
+    selected_cluster_shape <-  subset(shape_json, name == selected_cluster$id)
     output$cluster_name <- renderText(selected_cluster$id)
     
     if( selected_cluster$sample_taken == 0 ) {
@@ -122,8 +198,7 @@ server <- function(input, output, session) {
     # Only update region if region is not already set correctly
     if( input$region != clusters$region_id[clusters$id == selected_cluster$id] ) {
       
-      #browser()
-      
+
       updateSelectInput(session,
                         "region",
                         choices = regions_list,
@@ -133,37 +208,54 @@ server <- function(input, output, session) {
       
     }
     
-
+    #####################################
+    # Handle Building Markers
+    #####################################
+    
+    # set buildings and dwellings to the global vars, so we only need to call the db once when the cluster loads.
     buildings <<- load_buildings(selected_cluster$id)
     dwellings <<- load_dwellings(selected_cluster$id)
     
-    # setup labels for buildings
     
-    building_labels <- lapply(seq(nrow(buildings)), function(i) {
-      paste0( 
-        "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
-        "<b>Address:</b>", buildings[i, "address"], "<br/>"
-      )
-    })
-
+    # setup labels for buildings
+    #building_labels <- lapply(seq(nrow(buildings)), function(i) {
+      
+    #  paste0( 
+    #    "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
+    #    "<b>Address:</b>", buildings[i, "address"], "<br/>",
+    #    "<b>No. of Dwellings</b>", buildings[i, "num_dwellings"], "<br/>",
+    #    "<a href='https://maps.google.com/?q=",buildings$latitude,",",buildings$longitude,"'",">Open Google Maps<a/>"
+    #  )
+    # })
+    
     leafletProxy("mymap") %>%
       setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
       clearMarkers() %>%
+      # add highlight to current cluster
+      addPolygons(layerId = "selected_cluster",
+                  data = selected_cluster_shape ,
+                  weight = 5,
+                  color = "blue",
+                  opacity = "0.5",
+                  fillColor = selected_cluster$status_colour
+      ) %>%
+      # Add building markers
       addCircleMarkers(data = buildings, 
                        lng = buildings$longitude,
                        lat = buildings$latitude,
                        radius = 5,
                        stroke = FALSE,
-                       color = "blue",
-                       label = lapply(building_labels, htmltools::HTML)
-                       # labelOptions = labelOptions(
-                       #   noHide = T,
-                       # )
+                       fillOpacity = 1,
+                       color = buildings$status_colour,
+                       #label = lapply(building_labels, htmltools::HTML),
+                       popup = lapply(paste0( 
+                         "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
+                         "<b>Address:</b>", buildings[i, "address"], "<br/>",
+                         "<b>No. of Dwellings</b>", buildings[i, "num_dwellings"], "<br/>",
+                         "<a href='https://maps.google.com/?q=",buildings$latitude,",",buildings$longitude,"'",">Open Google Maps<a/>"
+                       ), htmltools::HTML)
       )
     
-
-    
-
     output$cluster_info <- renderUI({
       HTML(paste0(
         "<b>Region: </b>", selected_cluster$region_name_en, "</br>",
@@ -175,49 +267,6 @@ server <- function(input, output, session) {
         "<b>No. of Dwellings: </b>",selected_cluster$tot_dwellings,"</br>"      
         ))
     })    
-       
-     
-      # 
-      # # filtered_buildings <- subset(buildings,cluster_id==selected_cluster['id'])
-      # # filtered_buildings_sample <- subset(buildings,cluster_id==selected_cluster['id'] & sum_sampled>0)
-      # # filtered_buildings_not_sample <- subset(buildings,cluster_id==selected_cluster['id'] & (sum_sampled==0 | is.na(sum_sampled)))
-      # 
-      # if(nrow(filtered_buildings) > 0) {
-      #   leafletProxy("mymap") %>%
-      #     setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 13) %>%
-      #     clearMarkers() %>%
-      #     addCircleMarkers(layerId = filtered_buildings_not_sample$id,
-      #                      lng = filtered_buildings_not_sample$longitude,
-      #                      lat = filtered_buildings_not_sample$latitude,
-      #                      radius =5,
-      #                      stroke=FALSE,
-      #                      color = "grey",
-      #                      fillOpacity = 0.4,
-      #                      popup = paste("<h5>Structure No.: ",
-      #                                    filtered_buildings_not_sample$structure_number,
-      #                                    "</h5><h5> # of Dwellings: ",
-      #                                    filtered_buildings_not_sample$num_dwellings,
-      #                                    "</h5>"
-      #                                    )
-      #                      ) %>%
-      #     addCircleMarkers(layerId = filtered_buildings_sample$id,
-      #                      lng = filtered_buildings_sample$longitude,
-      #                      lat = filtered_buildings_sample$latitude,
-      #                      radius =5,
-      #                      color = "blue",
-      #                      stroke = FALSE,
-      #                      fillOpacity = 0.6,
-      #                      popup = paste("<h5>Structure No.: ",
-      #                                    filtered_buildings_sample$structure_number,
-      #                                    "</h5><h5> # of Dwellings: ",
-      #                                    filtered_buildings_sample$num_dwellings,
-      #                                    "</h5><h5>-----------", "<h5>", filtered_buildings_sample$text
-      #                                    )
-      #                      )
-      # } else {
-      #   leafletProxy("mymap") %>%
-      #     setView(lng = selected_cluster["lng"], lat = selected_cluster["lat"], zoom = 12)
-      # } #endif(buildings exist)
 
   }) #endobserve
 
