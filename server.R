@@ -18,7 +18,6 @@ server <- function(input, output, session) {
   
     else {
       
-      
       SAMPLE_NUM<-8
       check_cluster<-load_clusters() %>% filter(id == input$cluster)
       
@@ -95,6 +94,7 @@ server <- function(input, output, session) {
   ####################################
   # Initial Map Render
   ####################################
+  
   output$mymap <- renderLeaflet({
     vals$base <-leaflet() %>% addTiles() %>%
       addKML(country_shape, fillOpacity = 0) %>%
@@ -129,12 +129,13 @@ server <- function(input, output, session) {
       clearMarkers()
     
     cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
+    cluster_shapes <- merge(cluster_shapes, region_clusters, by.x = "name", by.y = "id")
     
     leafletProxy("mymap") %>%
       addPolygons(layerId = cluster_shapes$name,
                   data = cluster_shapes ,
                   weight = 1,
-                  fillColor = region_clusters$status_colour,
+                  fillColor = cluster_shapes$status_colour,
                   highlightOptions = highlightOptions(color = "blue", weight = 3,
                                                       bringToFront = TRUE)
       ) 
