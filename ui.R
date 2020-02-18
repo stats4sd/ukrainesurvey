@@ -1,3 +1,4 @@
+jsfile <- "https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js" 
 ui <- dashboardPage(
   dashboardHeader(title = "Ukraine Iodine Survey"),
 
@@ -15,27 +16,16 @@ ui <- dashboardPage(
   dashboardBody(
     useShinyjs(),
 
-    tags$head(tags$style("
+   
+    tags$style("
                         .modal-lg {
                           width: 80vw; }
                          "),
 
-              tags$script('
-                        var dimension = [0, 0];
-                        $(document).on("shiny:connected", function(e) {
-                        dimension[0] = document.getElementById("mymap").clientWidth;
-                        dimension[1] = document.getElementById("mymap").clientHeight;
-                        Shiny.onInputChange("dimension", dimension);
-                        });
-                        $(window).resize(function(e) {
-                        dimension[0] = document.getElementById("mymap").clientWidth;
-                        dimension[1] = document.getElementById("mymap").clientHeight;
-                        Shiny.onInputChange("dimension", dimension);
-                        });
-                        ')
-
-
+    tags$head( tags$script(src = jsfile)
               ),
+  
+    
 
 
     tabItems(
@@ -66,8 +56,8 @@ ui <- dashboardPage(
 
             box(width = NULL, solidHeader = TRUE, height = "90vh",
 
-                leafletOutput("mymap", height="85vh"),
-                downloadButton("dl", "Download Map",class = "btn-primary", style="float: right;")
+                leafletOutput("mymap", height="85vh")
+                
             )
 
           ),

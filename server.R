@@ -90,7 +90,17 @@ server <- function(input, output, session) {
       addKML(country_shape, fillOpacity = 0) %>%
       addMiniMap(
         toggleDisplay = TRUE
-      )       
+      ) %>% 
+      onRender(
+        "function(el, x) {
+            L.easyPrint({
+              sizeModes: ['A4Landscape', 'A4Portrait'],
+              filename: 'mymap',
+              exportOnly: true,
+              hideControlContainer: true
+            }).addTo(this);
+            }"
+      )
     })
 
   output$sampleTable<-make_datatable(NULL)
@@ -218,15 +228,15 @@ server <- function(input, output, session) {
     
     
     # setup labels for buildings
-    #building_labels <- lapply(seq(nrow(buildings)), function(i) {
+    building_labels <- lapply(seq(nrow(buildings)), function(i) {
       
-    #  paste0( 
-    #    "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
-    #    "<b>Address:</b>", buildings[i, "address"], "<br/>",
-    #    "<b>No. of Dwellings</b>", buildings[i, "num_dwellings"], "<br/>",
-    #    "<a href='https://maps.google.com/?q=",buildings$latitude,",",buildings$longitude,"'",">Open Google Maps<a/>"
-    #  )
-    # })
+      paste0( 
+        "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
+        "<b>Address:</b>", buildings[i, "address"], "<br/>",
+        "<b>No. of Dwellings </b>", buildings[i, "num_dwellings"], "<br/>",
+        "<a href='https://maps.google.com/?q=",buildings[i, "latitudine"],",",buildings[i,"longitude"],"'",">Open Google Maps<a/>"
+      )
+     })
     
     leafletProxy("mymap") %>%
       setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
@@ -247,13 +257,8 @@ server <- function(input, output, session) {
                        stroke = FALSE,
                        fillOpacity = 1,
                        color = buildings$status_colour,
-                       #label = lapply(building_labels, htmltools::HTML),
-                       popup = lapply(paste0( 
-                         "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
-                         "<b>Address:</b>", buildings[i, "address"], "<br/>",
-                         "<b>No. of Dwellings</b>", buildings[i, "num_dwellings"], "<br/>",
-                         "<a href='https://maps.google.com/?q=",buildings$latitude,",",buildings$longitude,"'",">Open Google Maps<a/>"
-                       ), htmltools::HTML)
+                       popup = lapply(building_labels, htmltools::HTML)
+                       
       )
     
     output$cluster_info <- renderUI({
@@ -314,14 +319,5 @@ server <- function(input, output, session) {
   }
   )
   
-  # create download
-  output$dl <- downloadHandler(
-    filename = "map.png",
-    
-    content = function(file) {
-      mapshot(vals$current, file = file,
-              # 2. specify size of map based on div size
-              vwidth = input$dimension[1], vheight = input$dimension[2])
-    }
-  )
+ 
 }
