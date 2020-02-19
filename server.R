@@ -7,6 +7,8 @@ server <- function(input, output, session) {
   buildings <- NULL
   dwellings <- NULL
   
+  shinyjs::hide('error_message')
+  shinyjs::hide('replament_table')
   #####################################
   # Generate Sample of Dwellings 
   #####################################
@@ -84,8 +86,6 @@ server <- function(input, output, session) {
             }).addTo(this);
             }"
       )
-
-      
     })
   
   output$mymap <- renderLeaflet({
@@ -288,6 +288,28 @@ server <- function(input, output, session) {
   #     )
   #   }, width = function() scale*nc(), height = function() scale*nr())
   
+  #####################################
+  # Generate replacement sample 
+  #####################################
+  
+  observeEvent(input$generate_replacement, {
+    
+    req(input$repl_cluster)
+    req(input$repl_num)
+    
+    gener_repl<-generate_replacement(input$repl_cluster, input$repl_num)
 
+    if(length(gener_repl)>0){
+      shinyjs::hide('error_message')
+      shinyjs::show('replament_table')
+      output$replacementTable <- make_datatable(gener_repl)
+    }else {
+      shinyjs::show('error_message')
+      shinyjs::hide('replament_table')
+      output$message_error <- renderText({ 
+        paste("the sample for the cluster", input$repl_cluster, "was not taken.")
+      })
+    }
+  })
 
 }

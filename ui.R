@@ -138,43 +138,65 @@ ui <- dashboardPage(
 
       tabItem(tabName = 'replacement_sample',
               h2("Replacement Sample"),
-              box(width = 9,
-                  title = "Warning",
-                  status = "warning",
-                  solidHeader = TRUE,
-                  collapsible = TRUE,
-                  tags$ol(
-                    tags$li("This is to generate replacement"),
-                    tags$li("Only the supervisor are allowed to use this section")
-                  )
-                 
-                  
+              column(3,
+                box(width = 12,
+                    title = "Warning",
+                    status = "warning",
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    tags$ol(
+                      tags$li("This is to generate replacement"),
+                      tags$li("Only the supervisor are allowed to use this section")
+                    ),
+                ),
+                box(width = 12,
+                    title = "Generate the replacement",
+                    status = "info",
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    selectizeInput("repl_region",
+                                   label = "Select an Oblast",
+                                   choices = regions_list,
+                                   options = list(
+                                     placeholder = "Select an Oblast",
+                                     onInitialize = I('function() { this.setValue(""); }')
+                                   )
+                    ),
+                    
+                    selectizeInput("repl_cluster",
+                                   label = "Select Cluster",
+                                   choices = clusters$id,
+                                   options = list(
+                                     placeholder = "Select a cluster",
+                                     onInitialize = I('function() { this.setValue(""); }')
+                                   )
+                    ),
+                    
+                    selectInput("repl_num", 
+                                label = "Select number of replacement", 
+                                choices = c(1,2,3,4,5,6,7,8)
+                                ),
+                    
+                    actionButton("generate_replacement", "Generate Replacement", class = "btn-primary", style="float:right"),
+                    
+                )
+                   
               ),
-              box(width = 5,
-                  title = "Generate the replacement",
-                  status = "info",
-                  solidHeader = TRUE,
-                  collapsible = TRUE,
-                  selectizeInput("repl_region",
-                                 label = "Select an Oblast",
-                                 choices = regions_list,
-                                 options = list(
-                                   placeholder = "Select an Oblast",
-                                   onInitialize = I('function() { this.setValue(""); }')
-                                 )
-                  ),
-                  
-                  selectizeInput("repl_cluster",
-                                 label = "Select Cluster",
-                                 choices = clusters$id,
-                                 options = list(
-                                   placeholder = "Select a cluster",
-                                   onInitialize = I('function() { this.setValue(""); }')
-                                 )
-                  ),
-                  
-                  actionButton("generate_replacement", "Generate Replacement", class = "btn-primary", style="float:right"),
-                  DT::dataTableOutput("replacementTable")
+              column(9,
+              div( id = "replament_table",
+                box(width = 12,
+                    DT::dataTableOutput("replacementTable")
+                    ),
+              ),
+              div(id = "error_message",
+                box(width = 8,
+                    title = "Error Message",
+                    status = "danger",
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    textOutput("message_error"),
+                )
+              ),
               )
       ),
 

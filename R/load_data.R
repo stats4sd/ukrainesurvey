@@ -178,12 +178,39 @@ summary_clusters <- function(cluster_id) {
 }
 
 
-#create sum_clusters for the Summary Cluster Tab
-sum_clusters <- summary_clusters(clusters$id[1])
+# Update the replacement_order_number column in dwellings table 
+
+update_replacement <- function(replaced_dwellings) {
+  
+  con <- get_sql_connection()
+
+  for (row in 1:nrow(replaced_dwellings)) {
+    
+    if(replaced_dwellings[row, "sampled"] == 0 | ( replaced_dwellings[row, "replacement_order_number"] <= 10 )) {
+      
+      # replace NA with "NULL" for SQL entry
+      replacement_number <- ifelse(is.na(replaced_dwellings[row, "replacement_order_number"]),"NULL",replaced_dwellings[row, "replacement_order_number"] )
+      
+      sql <- paste("UPDATE dwellings 
+                   SET replacement_order_number = ",
+                   replacement_number,
+                   "WHERE dwellings.id = ",
+                   replaced_dwellings[row, "dwelling_id"])
+      
+      
+      results <- dbGetQuery(con, sql)
+    }
+  }
+  
+  drop_sql_connection(con)
+  
+}
+  
 
 drop_sql_connection <- function(con) {
   dbDisconnect(con)  
 }
+
 
 killDbConnections <- function () {
   

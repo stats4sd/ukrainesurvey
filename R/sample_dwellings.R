@@ -105,3 +105,58 @@ download_sample <- function(cluster_id, dwellings_sampled){
   return(make_sample_datatable(dwellings_sampled))
   
 }
+
+#####################################
+# Function to generate replacement for a cluster
+# @prop cluster_id - the id of the cluster to sample
+# @returns the list of replaced dwellings or NULL if the sample was taken.
+#####################################
+generate_replacement <- function(cluster_id, repl_num) {
+  
+  REPLACEMENT_NUM <- 8
+  
+  dwellings <- load_dwellings(cluster_id)
+  check_cluster <- load_clusters() %>% filter(id == cluster_id)
+  check_replacement <- dwellings %>%  filter(replacement_order_number == max(replacement_order_number, na.rm = TRUE))
+ 
+  if(nrow(check_replacement)>0){
+    
+    last_repl_num<-as.numeric(max(check_replacement$replacement_order_number,  na.rm = TRUE))
+    
+  }else {
+    last_repl_num<-0
+  }
+  
+  if(check_cluster$sample_taken == 1 & last_repl_num < repl_num){
+browser()
+    dwellings$replacement.order <- ifelse(dwellings$sampled == FALSE & is.na(dwellings$replacement_order_number), sample(1:nrow(dwellings), replace=FALSE),NA) 
+   
+    
+    dwellings<-dwellings %>% arrange(replacement.order)
+    new_replaced_dwellings<-dwellings %>%  filter(replacement.order<= repl_num - last_repl_num)
+    
+    
+    replaced_dwellings<- dwellings %>%  filter(replacement_order_number <= repl_num)
+    #update Dwellings in database
+    #update_replacement(replaced_dwellings)
+    
+    replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
+   
+    return(replaced_dwellings)
+  
+  } else if (check_cluster$sample_taken == 1 & last_repl_num >= repl_num) {
+    browser()
+      replaced_dwellings <- dwellings %>%  filter(replacement_order_number <= repl_num & replacement_order_number > 0)
+      replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
+   
+      
+      return(replaced_dwellings)
+  }
+  else {
+    
+      return(NULL) 
+  }
+  
+}
+generate_replacement('050005', 2)
+
