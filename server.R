@@ -54,7 +54,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$download_sample, {
     req(input$cluster)
-    output$checklistTable <- download_sample(cluster_id, dwellings)
+    dwellings<-load_dwellings(input$cluster)
+    output$checklistTable <- download_sample(input$cluster, dwellings)
   })
   
   observeEvent(input$generate_sample_button, {
@@ -297,12 +298,12 @@ server <- function(input, output, session) {
     req(input$repl_cluster)
     req(input$repl_num)
     
-    gener_repl<-generate_replacement(input$repl_cluster, input$repl_num)
+    gener_repl_data<-generate_replacement(input$repl_cluster, input$repl_num)
 
-    if(length(gener_repl)>0){
+    if(length(gener_repl_data)>0){
       shinyjs::hide('error_message')
       shinyjs::show('replament_table')
-      output$replacementTable <- make_datatable(gener_repl)
+      output$replacementTable <- make_datatable(gener_repl_data)
     }else {
       shinyjs::show('error_message')
       shinyjs::hide('replament_table')
@@ -311,5 +312,18 @@ server <- function(input, output, session) {
       })
     }
   })
+  
+  #####################################
+  # Cluster Summary 
+  #####################################
+  observe({
+    clus_summ<-load_cluster_summary() %>% select(id, region_name_uk, buildings_listed, dwellings_listed, 
+                                                 dwellings_building_id, salt_samples_collected, "1st_urine_sample_collected", 
+                                                 "2st_urine_sample_collected", completed_interviews, unsuccessful_interviews, 
+                                                 dwellings_visited, tot_interviews_attempted, tot_interviews_not_completed, 
+                                                 tot_interviews_completed_successful, replacement_number)
+    output$clustersTable <- make_summary_datatable(clus_summ)
+  })
+ 
 
 }

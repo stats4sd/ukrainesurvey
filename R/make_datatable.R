@@ -41,3 +41,27 @@ make_sample_datatable <- function(df) {
     )
   })
 }
+
+make_summary_datatable <- function(df) {
+  DT::renderDataTable({
+    DT::datatable(
+      df,
+      filter = 'top',
+      extensions = 'Buttons',
+      options = list(
+        dom = 'Brt',
+        buttons = c('excel', 'pdf'),
+        text = 'Download',
+        DT::JS(
+          'function(row, data) {
+        // Bold cells for those >= 5 in the first column
+        if (parseFloat(data[4]) >= 5)
+          $("td:eq(1)", row).css("font-weight", "bold");
+      }'
+        )
+       
+      ),
+      class = "display"
+    )
+  })
+}

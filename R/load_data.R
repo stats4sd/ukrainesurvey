@@ -124,8 +124,6 @@ update_dwellings <- function(sampled_dwellings) {
       sql <- paste("UPDATE dwellings 
                    SET sampled = ",
                    sampled_dwellings[row, "sampled"],
-                   ", replacement_order_number = ",
-                   replacement_number,
                    "WHERE dwellings.id = ",
                    sampled_dwellings[row, "dwelling_id"])
       
@@ -209,6 +207,18 @@ update_replacement <- function(replaced_dwellings) {
 
 drop_sql_connection <- function(con) {
   dbDisconnect(con)  
+}
+
+
+load_cluster_summary <- function() {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM cluster_summary"
+  
+  cluster_summary <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(cluster_summary)
 }
 
 

@@ -50,19 +50,15 @@ too_few_dwellings_modal <- function() {
 # @returns null - calls function to download sample.
 #####################################
 generate_new_sample <- function(cluster_id, dwellings) {
-  
+  browser()
   SAMPLE_NUM<-8
   check_cluster<-load_clusters() %>% filter(id == cluster_id)
   
   if(check_cluster$sample_taken==0){
-    
+   
     dwellings$sample.order<-sample(1:nrow(dwellings))
     dwellings$sampled<-ifelse(dwellings$sample.order<=SAMPLE_NUM,TRUE,FALSE)
-    dwellings$replacement_order_number<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-SAMPLE_NUM,NA)
     
-    # update global variable
-    dwellings<-dwellings%>%
-      arrange(sample.order)
     
     #update Dwellings in database
     update_dwellings(dwellings)
@@ -76,15 +72,13 @@ generate_new_sample <- function(cluster_id, dwellings) {
 
 }
 
-
-
 #####################################
 # Function to build a downloadable datatable with the sampled dwellings
 # @prop cluster_id - the id of the cluster to download sample for
 # @prop dwellings_sampled - only the sampled dwellings for the current cluster.
 #####################################
 download_sample <- function(cluster_id, dwellings_sampled){
-  
+
   dwellings_sampled <- dwellings_sampled %>% 
     filter(sampled == 1)
   
@@ -109,54 +103,55 @@ download_sample <- function(cluster_id, dwellings_sampled){
 #####################################
 # Function to generate replacement for a cluster
 # @prop cluster_id - the id of the cluster to sample
-# @returns the list of replaced dwellings or NULL if the sample was taken.
+# @returns the list of replaced dwellings or NULL if the sample was not taken.
 #####################################
 generate_replacement <- function(cluster_id, repl_num) {
-  
-  REPLACEMENT_NUM <- 8
-  
+ 
+  repl_num <-as.numeric(repl_num)
+ 
   dwellings <- load_dwellings(cluster_id)
   check_cluster <- load_clusters() %>% filter(id == cluster_id)
   check_replacement <- dwellings %>%  filter(replacement_order_number == max(replacement_order_number, na.rm = TRUE))
- 
+  
+  #Create the last replacement number 
   if(nrow(check_replacement)>0){
     
     last_repl_num<-as.numeric(max(check_replacement$replacement_order_number,  na.rm = TRUE))
     
-  }else {
+  } else {
+    
     last_repl_num<-0
   }
   
   if(check_cluster$sample_taken == 1 & last_repl_num < repl_num){
-browser()
-    dwellings$replacement.order <- ifelse(dwellings$sampled == FALSE & is.na(dwellings$replacement_order_number), sample(1:nrow(dwellings), replace=FALSE),NA) 
-   
+
+    dwellings_not_sampled <- dwellings %>%  subset(sampled==FALSE & is.na(replacement_order_number))
+    selected_replacement <- sample_n(dwellings_not_sampled, size=repl_num-last_repl_num, replace = FALSE)
+    selected_replacement$replacement_order_number <- last_repl_num+1:nrow(selected_replacement)
     
-    dwellings<-dwellings %>% arrange(replacement.order)
-    new_replaced_dwellings<-dwellings %>%  filter(replacement.order<= repl_num - last_repl_num)
-    
-    
-    replaced_dwellings<- dwellings %>%  filter(replacement_order_number <= repl_num)
     #update Dwellings in database
-    #update_replacement(replaced_dwellings)
+    update_replacement(selected_replacement)
     
+    #create replaced_dwellings for the return
+    dwellings <- load_dwellings(cluster_id)
+    replaced_dwellings<-dwellings%>%  filter(replacement_order_number <= repl_num)
     replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
-   
+    replaced_dwellings<-replaced_dwellings[order(replaced_dwellings$replacement_order_number),]
     return(replaced_dwellings)
   
   } else if (check_cluster$sample_taken == 1 & last_repl_num >= repl_num) {
-    browser()
-      replaced_dwellings <- dwellings %>%  filter(replacement_order_number <= repl_num & replacement_order_number > 0)
-      replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
-   
-      
-      return(replaced_dwellings)
-  }
-  else {
     
-      return(NULL) 
+    replaced_dwellings <- dwellings %>%  filter(replacement_order_number <= repl_num & replacement_order_number > 0)
+    replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
+ 
+    replaced_dwellings<-replaced_dwellings[order(replaced_dwellings$replacement_order_number),]
+    return(replaced_dwellings)
+      
+  } else {
+    
+    return(NULL) 
   }
   
 }
-generate_replacement('050005', 2)
+
 

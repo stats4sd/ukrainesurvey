@@ -36,4 +36,4 @@ JOIN
 
     `dwellings_per_building` on `dwellings_per_building`.`cluster_id` = `clusters`.`id`
 
-GROUP BY `clusters`.`id`
+

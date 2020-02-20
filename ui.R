@@ -7,9 +7,10 @@ ui <- dashboardPage(
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("QR Test", tabName = "qrtest", icon = icon("th")),
       menuItem("Replacement Sample", tabName = "replacement_sample", icon = icon("fas fa-exchange-alt")),
-      menuItem("Summary Cluster", tabName = "summary_cluster", icon = icon("file")),
-      menuItem("Summary Region", tabName = "summary_region", icon = icon("file")),
-      menuItem("Summary National", tabName = "summary_national", icon = icon("file"))
+      menuItem("Cluster Summary", tabName = "cluster_summary", icon = icon("file")),
+      menuItem("District Summary", tabName = "district_summary", icon = icon("file")),
+      menuItem("Oblast Summary", tabName = "oblast_summary", icon = icon("file")),
+      menuItem("National Summary", tabName = "national_summary", icon = icon("file"))
     )
   ),
 
@@ -200,155 +201,24 @@ ui <- dashboardPage(
               )
       ),
 
-      tabItem(tabName = 'summary_cluster',
-              h2("Summary Cluster"),
-              div(style="width: 200px;",
-                  selectInput("summary_cluster", label = "Select Cluster ID for Sampling", choices = clusters$id)
-              ),
-              box(width=3,
-                status="warning",
-                h4('buildings listed')
-                # p(sum_clusters$buildings_listed)
-
-
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('dwelligns listed')
-                  # p(sum_clusters$dwellings_listed)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of salt samples collected'),
-                  p(3)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of 1st urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of 2nd urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Number of completed interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_completed)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Number of unsuccessful interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_incompleted)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('dwelligns visited uploaded to date'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of interviews attempted'),
-                  p('23')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of interviews not completed'),
-                  p('22')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of completed (and successful) interviews'),
-                  p('25')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Number of replacements'),
-                  p('7')
-              )
+      tabItem(tabName = 'cluster_summary',
+              h2("Cluster Summary"),
+              DT::dataTableOutput("clustersTable"),
+              
 
       ),
-      tabItem(tabName = 'summary_region',
-              h2("Summary Region"),
-              div(style="width: 200px;",
-                  selectizeInput("summary_region",
-                                 "Filter by Region",
-                                 regions_list,
-                                 options = list(
-                                   placeholder = "Select an Oblast",
-                                   onInitialize = I('function() { this.setValue(""); }')
-                                 )
-                  )
-
-              ),
-
-              box(width=3,
-                  status="info",
-                  h4('buildings listed')
-                  # p(load_summary_clusters(clusters$id[1])$buildings_listed)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('dwelligns listed')
-                  # p(load_summary_clusters(clusters$id[1])$dwellings_listed)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of salt samples collected'),
-                  p(3)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of 1st urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of 2nd urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Number of completed interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_completed)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Number of unsuccessful interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_incompleted)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('dwelligns visited uploaded to date'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of interviews attempted'),
-                  p('23')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of interviews not completed'),
-                  p('22')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of completed (and successful) interviews'),
-                  p('25')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Number of replacements'),
-                  p('7')
-              )
-
-
+      tabItem(tabName = 'district_summary',
+              h2("Discrict Summary"),
+              DT::dataTableOutput("districtsTable"),
+              
+      ),
+      tabItem(tabName = 'oblast_summary',
+              h2("Oblast Summary"),
+              DT::dataTableOutput("oblastsTable"),
       ),
 
-      tabItem(tabName = 'summary_national',
-              h2("Summary National"),
+      tabItem(tabName = 'national_summary',
+              h2("National Summary"),
               br(),
 
               box(width=3,
