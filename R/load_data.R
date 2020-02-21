@@ -159,21 +159,7 @@ drop_sql_connection <- function(con) {
   dbDisconnect(con)  
 }
 
-summary_clusters <- function(cluster_id) {
-  
-  con <- get_sql_connection()
-  
-  sql <- "SELECT * FROM summary_cluster"
-  if(! is.null(cluster_id)) {
-    sql <- paste(sql, "WHERE cluster_id = ", cluster_id)
-    
-  }
-  
-  summary_clusters <- dbGetQuery(con,sql)
-  drop_sql_connection(con)
-  return(summary_clusters)
 
-}
 
 
 # Update the replacement_order_number column in dwellings table 
@@ -204,11 +190,6 @@ update_replacement <- function(replaced_dwellings) {
   
 }
   
-
-drop_sql_connection <- function(con) {
-  dbDisconnect(con)  
-}
-
 
 load_cluster_summary <- function() {
   

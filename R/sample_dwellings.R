@@ -106,7 +106,7 @@ download_sample <- function(cluster_id, dwellings_sampled){
 # @returns the list of replaced dwellings or NULL if the sample was not taken.
 #####################################
 generate_replacement <- function(cluster_id, repl_num) {
- 
+
   repl_num <-as.numeric(repl_num)
  
   dwellings <- load_dwellings(cluster_id)
@@ -123,10 +123,10 @@ generate_replacement <- function(cluster_id, repl_num) {
     last_repl_num<-0
   }
   
-  if(check_cluster$sample_taken == 1 & last_repl_num < repl_num){
+  if(check_cluster$sample_taken == 1){
 
     dwellings_not_sampled <- dwellings %>%  subset(sampled==FALSE & is.na(replacement_order_number))
-    selected_replacement <- sample_n(dwellings_not_sampled, size=repl_num-last_repl_num, replace = FALSE)
+    selected_replacement <- sample_n(dwellings_not_sampled, size=repl_num, replace = FALSE)
     selected_replacement$replacement_order_number <- last_repl_num+1:nrow(selected_replacement)
     
     #update Dwellings in database
@@ -134,23 +134,43 @@ generate_replacement <- function(cluster_id, repl_num) {
     
     #create replaced_dwellings for the return
     dwellings <- load_dwellings(cluster_id)
-    replaced_dwellings<-dwellings%>%  filter(replacement_order_number <= repl_num)
+    replaced_dwellings<-dwellings%>%  filter(replacement_order_number <= last_repl_num + repl_num)
     replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
     replaced_dwellings<-replaced_dwellings[order(replaced_dwellings$replacement_order_number),]
     return(replaced_dwellings)
   
-  } else if (check_cluster$sample_taken == 1 & last_repl_num >= repl_num) {
-    
-    replaced_dwellings <- dwellings %>%  filter(replacement_order_number <= repl_num & replacement_order_number > 0)
-    replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
- 
-    replaced_dwellings<-replaced_dwellings[order(replaced_dwellings$replacement_order_number),]
-    return(replaced_dwellings)
-      
   } else {
     
     return(NULL) 
   }
+  
+}
+
+#####################################
+# Function to count replacement for a cluster
+# @prop cluster_id - the id of the cluster to sample
+# @return a number of replacement for the cluster
+#####################################
+count_replacement <- function(cluster_id) {
+  
+  dwellings_by_cluster<-load_dwellings(cluster_id)
+  number_replacement<-length(which(dwellings_by_cluster$replacement_order_number>0))
+  return(number_replacement)
+  
+}
+
+#####################################
+# Function to count replacement for a cluster
+# @prop cluster_id - the id of the cluster to sample
+# @return a number of replacement for the cluster
+#####################################
+replacement_list <- function(cluster_id) {
+  
+  dwellings_by_cluster<-load_dwellings(cluster_id)
+  replaced_dwellings <- dwellings_by_cluster %>%  filter(replacement_order_number > 0)
+  replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
+  
+  return(replaced_dwellings)
   
 }
 

@@ -9,6 +9,8 @@ server <- function(input, output, session) {
   
   shinyjs::hide('error_message')
   shinyjs::hide('replament_table')
+  shinyjs::hide('show_replacement')
+  shinyjs::hide('generate_replacement')
   #####################################
   # Generate Sample of Dwellings 
   #####################################
@@ -293,13 +295,12 @@ server <- function(input, output, session) {
   # Generate replacement sample 
   #####################################
   
-  observeEvent(input$generate_replacement, {
+  observeEvent(input$generate_replacement,{
     
     req(input$repl_cluster)
     req(input$repl_num)
     
     gener_repl_data<-generate_replacement(input$repl_cluster, input$repl_num)
-
     if(length(gener_repl_data)>0){
       shinyjs::hide('error_message')
       shinyjs::show('replament_table')
@@ -311,19 +312,67 @@ server <- function(input, output, session) {
         paste("the sample for the cluster", input$repl_cluster, "was not taken.")
       })
     }
+   
+  })
+  
+  #####################################
+  # Update the current number of replacement  
+  #####################################
+  
+  observeEvent(input$generate_replacement,{
+    number_replacement_db <- count_replacement(input$repl_cluster)
+    output$replacement_number <- renderText({ 
+      paste("Current number of replacement", number_replacement_db , ".")
+    })
+  })
+  
+  observeEvent(input$repl_cluster,{
+    req(input$repl_cluster)
+    number_replacement_db <- count_replacement(input$repl_cluster)
+    output$replacement_number <- renderText({ 
+      paste("Current number of replacement", number_replacement_db , ".")
+    })
+  })
+  
+  #####################################
+  # Show replacement sample in database 
+  #####################################
+  
+  observe({
+    req(input$repl_cluster)
+    shinyjs::show('show_replacement')
+    shinyjs::show('generate_replacement')
+    number_replacement_db <- count_replacement(input$repl_cluster)
+    if(number_replacement_db > 0){
+      output$replacementTable <- make_datatable(replacement_list(input$repl_cluster))
+      shinyjs::show('replament_table')
+    }
   })
   
   #####################################
   # Cluster Summary 
   #####################################
+  
   observe({
     clus_summ<-load_cluster_summary() %>% select(id, region_name_uk, buildings_listed, dwellings_listed, 
                                                  dwellings_building_id, salt_samples_collected, "1st_urine_sample_collected", 
                                                  "2st_urine_sample_collected", completed_interviews, unsuccessful_interviews, 
                                                  dwellings_visited, tot_interviews_attempted, tot_interviews_not_completed, 
                                                  tot_interviews_completed_successful, replacement_number)
-    output$clustersTable <- make_summary_datatable(clus_summ)
+    output$clustersTable <- make_datatable(clus_summ)
   })
- 
+  
+  observeEvent(input$filter_cluster_summary,{
+    req(input$filter_cluster_summary)
+    
+    clus_summ<-load_cluster_summary() %>% select(id, region_name_uk, buildings_listed, dwellings_listed, 
+                                                 dwellings_building_id, salt_samples_collected, "1st_urine_sample_collected", 
+                                                 "2st_urine_sample_collected", completed_interviews, unsuccessful_interviews, 
+                                                 dwellings_visited, tot_interviews_attempted, tot_interviews_not_completed, 
+                                                 tot_interviews_completed_successful, replacement_number)
+    clus_summ<- clus_summ %>% filter(id %in% input$filter_cluster_summary)
+    output$clustersTable <- make_datatable(clus_summ)
+  })
+
 
 }

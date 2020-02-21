@@ -151,7 +151,7 @@ ui <- dashboardPage(
                     ),
                 ),
                 box(width = 12,
-                    title = "Generate the replacement",
+                    title = "Show the replacements",
                     status = "info",
                     solidHeader = TRUE,
                     collapsible = TRUE,
@@ -172,14 +172,28 @@ ui <- dashboardPage(
                                      onInitialize = I('function() { this.setValue(""); }')
                                    )
                     ),
-                    
-                    selectInput("repl_num", 
-                                label = "Select number of replacement", 
-                                choices = c(1,2,3,4,5,6,7,8)
-                                ),
-                    
-                    actionButton("generate_replacement", "Generate Replacement", class = "btn-primary", style="float:right"),
-                    
+                    div(id = "show_replacement",
+                      tags$b(textOutput("replacement_number")),
+                      br(),
+                      br()
+                    )
+                ),
+                div(id = "generate_replacement",
+                  box(width = 12,
+                      title = "Generate the replacements",
+                      status = "info",
+                      solidHeader = TRUE,
+                      collapsible = TRUE,
+                      p("if do you need more replacement select the number and click the button for generating new replacement"),
+                      selectInput("repl_num", 
+                                  label = "Select number of replacement", 
+                                  choices = c(1,2,3,4,5,6,7,8)
+                                  ),
+                      
+                      actionButton("generate_replacement", "Generate Replacement", class = "btn-primary", style="float:right")
+                     
+                      
+                  )
                 )
                    
               ),
@@ -203,6 +217,23 @@ ui <- dashboardPage(
 
       tabItem(tabName = 'cluster_summary',
               h2("Cluster Summary"),
+              selectizeInput("filter_oblast_cs",
+                             label = "Select an Oblast",
+                             choices = regions_list,
+                             options = list(
+                               placeholder = "Select an Oblast",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
+              selectizeInput("filter_cluster_summary",
+                             label = "Filter Cluster",
+                             choices = clusters$id,
+                             multiple = TRUE,
+                             options = list(
+                               placeholder = "Select a cluster",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
               DT::dataTableOutput("clustersTable"),
               
 
@@ -281,7 +312,6 @@ ui <- dashboardPage(
                   h4('Number of replacements'),
                   p('7')
               )
-
       )
     )
   )
