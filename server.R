@@ -7,6 +7,10 @@ server <- function(input, output, session) {
   buildings <- NULL
   dwellings <- NULL
   
+  shinyjs::hide('error_message')
+  shinyjs::hide('replament_table')
+  shinyjs::hide('show_replacement')
+  shinyjs::hide('generate_replacement')
   #####################################
   # Generate Sample of Dwellings 
   #####################################
@@ -52,7 +56,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$download_sample, {
     req(input$cluster)
-    output$checklistTable <- download_sample(cluster_id, dwellings)
+    dwellings<-load_dwellings(input$cluster)
+    output$checklistTable <- download_sample(input$cluster, dwellings)
   })
   
   observeEvent(input$generate_sample_button, {
@@ -60,17 +65,7 @@ server <- function(input, output, session) {
   })
   
   ## Something to do with the cluster summary tab...
-  reactive({
-    
-   if(!is.na(input$summary_cluster)){
-    
-     sum_clusters<-subset(summary_clusters, cluster_id=input$summary_cluster)
-   } else {
-     sum_clusters<-load_clusters(clusters$id[1])
-     
-   }
-    
-  })
+  
   
   ####################################
   # Initial Map Render
@@ -82,6 +77,17 @@ server <- function(input, output, session) {
       addKML(country_shape, fillOpacity = 0) %>%  
       addMiniMap(
         toggleDisplay = TRUE
+
+      ) %>% 
+      onRender(
+        "function(el, x) {
+            L.easyPrint({
+              sizeModes: ['A4Landscape', 'A4Portrait'],
+              filename: 'mymap',
+              exportOnly: true,
+              hideControlContainer: true
+            }).addTo(this);
+            }"
       )
     })
   
@@ -194,6 +200,7 @@ server <- function(input, output, session) {
     # Only update region if region is not already set correctly
     if( input$region != clusters$region_id[clusters$id == selected_cluster$id] ) {
       
+
       updateSelectInput(session,
                         "region",
                         choices = regions_list,
@@ -214,13 +221,15 @@ server <- function(input, output, session) {
     
     # setup labels for buildings
     building_labels <- lapply(seq(nrow(buildings)), function(i) {
+      
       paste0( 
         "<h5>Structure No. ", buildings[i, "structure_number"], "</h5>",
         "<b>Address:</b>", buildings[i, "address"], "<br/>",
-        "<b>No. of Dwellings</b>", buildings[i, "num_dwellings"], "<br/>"
+        "<b>No. of Dwellings </b>", buildings[i, "num_dwellings"], "<br/>",
+        "<a href='https://maps.google.com/?q=", buildings[i, "latitude"],",", buildings[i,"longitude"],"'",">Open Google Maps</a>"
       )
-    })
-
+     })
+    
     leafletProxy("mymap") %>%
       setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
       clearMarkers() %>%
@@ -240,7 +249,8 @@ server <- function(input, output, session) {
                        stroke = FALSE,
                        fillOpacity = 1,
                        color = buildings$status_colour,
-                       label = lapply(building_labels, htmltools::HTML)
+                       popup = lapply(building_labels, htmltools::HTML)
+                       
       )
     
     output$cluster_info <- renderUI({
@@ -282,32 +292,87 @@ server <- function(input, output, session) {
   #   }, width = function() scale*nc(), height = function() scale*nr())
   
   #####################################
-  # Download Map
+  # Generate replacement sample 
   #####################################
   
-  # # reactive values to store map
-  # vals <- reactiveValues()
-  # 
-  # # create map as viewed by user
-  # observeEvent({
-  #   input$mymap_zoom
-  #   input$mymap_center
-  # }, {
-  #   vals$current <- vals$base %>% 
-  #     setView(lng = input$mymap_center$lng,
-  #             lat = input$mymap_center$lat,
-  #             zoom = input$mymap_zoom)
-  # }
-  # )
-  
-  # create download
-  output$dl <- downloadHandler(
-    filename = "map.png",
+  observeEvent(input$generate_replacement,{
     
-    content = function(file) {
-      mapshot(map_reactive(), file = file,
-              # 2. specify size of map based on div size
-              vwidth = input$dimension[1], vheight = input$dimension[2])
+    req(input$repl_cluster)
+    req(input$repl_num)
+    
+    gener_repl_data<-generate_replacement(input$repl_cluster, input$repl_num)
+    if(length(gener_repl_data)>0){
+      shinyjs::hide('error_message')
+      shinyjs::show('replament_table')
+      output$replacementTable <- make_datatable(gener_repl_data)
+    }else {
+      shinyjs::show('error_message')
+      shinyjs::hide('replament_table')
+      output$message_error <- renderText({ 
+        paste("the sample for the cluster", input$repl_cluster, "was not taken.")
+      })
     }
-  )
+   
+  })
+  
+  #####################################
+  # Update the current number of replacement  
+  #####################################
+  
+  observeEvent(input$generate_replacement,{
+    number_replacement_db <- count_replacement(input$repl_cluster)
+    output$replacement_number <- renderText({ 
+      paste("Current number of replacement", number_replacement_db , ".")
+    })
+  })
+  
+  observeEvent(input$repl_cluster,{
+    req(input$repl_cluster)
+    number_replacement_db <- count_replacement(input$repl_cluster)
+    output$replacement_number <- renderText({ 
+      paste("Current number of replacement", number_replacement_db , ".")
+    })
+  })
+  
+  #####################################
+  # Show replacement sample in database 
+  #####################################
+  
+  observe({
+    req(input$repl_cluster)
+    shinyjs::show('show_replacement')
+    shinyjs::show('generate_replacement')
+    number_replacement_db <- count_replacement(input$repl_cluster)
+    if(number_replacement_db > 0){
+      output$replacementTable <- make_datatable(replacement_list(input$repl_cluster))
+      shinyjs::show('replament_table')
+    }
+  })
+  
+  #####################################
+  # Cluster Summary 
+  #####################################
+  
+  observe({
+    clus_summ<-load_cluster_summary() %>% select(id, region_name_uk, buildings_listed, dwellings_listed, 
+                                                 dwellings_building_id, salt_samples_collected, "1st_urine_sample_collected", 
+                                                 "2st_urine_sample_collected", completed_interviews, unsuccessful_interviews, 
+                                                 dwellings_visited, tot_interviews_attempted, tot_interviews_not_completed, 
+                                                 tot_interviews_completed_successful, replacement_number)
+    output$clustersTable <- make_datatable(clus_summ)
+  })
+  
+  observeEvent(input$filter_cluster_summary,{
+    req(input$filter_cluster_summary)
+    
+    clus_summ<-load_cluster_summary() %>% select(id, region_name_uk, buildings_listed, dwellings_listed, 
+                                                 dwellings_building_id, salt_samples_collected, "1st_urine_sample_collected", 
+                                                 "2st_urine_sample_collected", completed_interviews, unsuccessful_interviews, 
+                                                 dwellings_visited, tot_interviews_attempted, tot_interviews_not_completed, 
+                                                 tot_interviews_completed_successful, replacement_number)
+    clus_summ<- clus_summ %>% filter(id %in% input$filter_cluster_summary)
+    output$clustersTable <- make_datatable(clus_summ)
+  })
+
+
 }

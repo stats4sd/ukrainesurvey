@@ -291,7 +291,7 @@ CREATE TABLE `submissions` (
   `id` bigint(20) NOT NULL COMMENT '_id from kobotools',
   `uuid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `form_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `dwellings_id` bigint(20) NOT NULL,
+  `dwelling_id` bigint(20) NOT NULL,
   `version` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `start` timestamp NOT NULL,
   `end` timestamp NOT NULL,
@@ -301,7 +301,9 @@ CREATE TABLE `submissions` (
   `submission` json NOT NULL,
   PRIMARY KEY (`id`),
   KEY `link_forms_submissions` (`form_id`),
-  CONSTRAINT `link_forms_submissions` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`)
+  CONSTRAINT `link_forms_submissions` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  KEY `link_dwellings_submissions` (`dwelling_id`),
+  CONSTRAINT `link_dwellings_submissions` FOREIGN KEY (`dwelling_id`) REFERENCES `dwellings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

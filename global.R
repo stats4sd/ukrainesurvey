@@ -9,6 +9,7 @@ library(mapview)
 library(rlist)
 library(shiny)
 library(shinyjs)
+library(htmlwidgets)
 
 load("./Data/shapes.Rdata")
 

@@ -124,10 +124,13 @@ update_dwellings <- function(sampled_dwellings) {
       sql <- paste("UPDATE dwellings 
                    SET sampled = ",
                    sampled_dwellings[row, "sampled"],
+<<<<<<< HEAD
                    ", replacement_order_number = ",
                    replacement_number,
                    ", salt_needed = ",
                    sampled_dwellings[row, "salt_needed"],
+=======
+>>>>>>> dev-lucia
                    "WHERE dwellings.id = ",
                    sampled_dwellings[row, "dwelling_id"])
       
@@ -153,11 +156,59 @@ update_cluster <- function(cluster_id) {
   
     drop_sql_connection(con)
   }
+
+
 }
+
+
 
 drop_sql_connection <- function(con) {
   dbDisconnect(con)  
 }
+
+
+
+
+# Update the replacement_order_number column in dwellings table 
+
+update_replacement <- function(replaced_dwellings) {
+  
+  con <- get_sql_connection()
+
+  for (row in 1:nrow(replaced_dwellings)) {
+    
+    if(replaced_dwellings[row, "sampled"] == 0 | ( replaced_dwellings[row, "replacement_order_number"] <= 10 )) {
+      
+      # replace NA with "NULL" for SQL entry
+      replacement_number <- ifelse(is.na(replaced_dwellings[row, "replacement_order_number"]),"NULL",replaced_dwellings[row, "replacement_order_number"] )
+      
+      sql <- paste("UPDATE dwellings 
+                   SET replacement_order_number = ",
+                   replacement_number,
+                   "WHERE dwellings.id = ",
+                   replaced_dwellings[row, "dwelling_id"])
+      
+      
+      results <- dbGetQuery(con, sql)
+    }
+  }
+  
+  drop_sql_connection(con)
+  
+}
+  
+
+load_cluster_summary <- function() {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM cluster_summary"
+  
+  cluster_summary <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(cluster_summary)
+}
+
 
 killDbConnections <- function () {
   

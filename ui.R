@@ -1,3 +1,4 @@
+jsfile <- "https://rawgit.com/rowanwins/leaflet-easyPrint/gh-pages/dist/bundle.js" 
 ui <- dashboardPage(
   dashboardHeader(title = "Ukraine Iodine Survey"),
 
@@ -5,9 +6,11 @@ ui <- dashboardPage(
     sidebarMenu(id="tabs",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("QR Test", tabName = "qrtest", icon = icon("th")),
-      menuItem("Summary Cluster", tabName = "summary_cluster", icon = icon("file")),
-      menuItem("Summary Region", tabName = "summary_region", icon = icon("file")),
-      menuItem("Summary National", tabName = "summary_national", icon = icon("file"))
+      menuItem("Replacement Sample", tabName = "replacement_sample", icon = icon("fas fa-exchange-alt")),
+      menuItem("Cluster Summary", tabName = "cluster_summary", icon = icon("file")),
+      menuItem("District Summary", tabName = "district_summary", icon = icon("file")),
+      menuItem("Oblast Summary", tabName = "oblast_summary", icon = icon("file")),
+      menuItem("National Summary", tabName = "national_summary", icon = icon("file"))
     )
   ),
 
@@ -15,27 +18,16 @@ ui <- dashboardPage(
   dashboardBody(
     useShinyjs(),
 
-    tags$head(tags$style("
+   
+    tags$style("
                         .modal-lg {
                           width: 80vw; }
                          "),
 
-              tags$script('
-                        var dimension = [0, 0];
-                        $(document).on("shiny:connected", function(e) {
-                        dimension[0] = document.getElementById("mymap").clientWidth;
-                        dimension[1] = document.getElementById("mymap").clientHeight;
-                        Shiny.onInputChange("dimension", dimension);
-                        });
-                        $(window).resize(function(e) {
-                        dimension[0] = document.getElementById("mymap").clientWidth;
-                        dimension[1] = document.getElementById("mymap").clientHeight;
-                        Shiny.onInputChange("dimension", dimension);
-                        });
-                        ')
-
-
+    tags$head( tags$script(src = jsfile)
               ),
+  
+    
 
 
     tabItems(
@@ -63,10 +55,13 @@ ui <- dashboardPage(
           # map
           column(
             width = 8,
+
             box(width = NULL, solidHeader = TRUE, height = "90vh",
-                leafletOutput("mymap", height="85vh"),
-                downloadButton("dl", "Download Map",class = "btn-primary", style="float: right;")
+
+                leafletOutput("mymap", height="85vh")
+                
             )
+
           ),
 
           # filters
@@ -135,163 +130,126 @@ ui <- dashboardPage(
           column(width = 12,
 
                  DT::dataTableOutput("sampleTable"),
-             #    DT::dataTableOutput("checklistTable")
+                 DT::dataTableOutput("checklistTable")
 
           )
         )
-      ),
-
-
-
-      tabItem(tabName = 'summary_cluster',
-              h2("Summary Cluster"),
-              div(style="width: 200px;",
-                  selectInput("summary_cluster", label = "Select Cluster ID for Sampling", choices = clusters$id)
-              ),
-              box(width=3,
-                status="warning",
-                h4('buildings listed')
-                # p(sum_clusters$buildings_listed)
-
-
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('dwelligns listed')
-                  # p(sum_clusters$dwellings_listed)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of salt samples collected'),
-                  p(3)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of 1st urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of 2nd urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Number of completed interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_completed)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Number of unsuccessful interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_incompleted)
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('dwelligns visited uploaded to date'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of interviews attempted'),
-                  p('23')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of interviews not completed'),
-                  p('22')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Total number of completed (and successful) interviews'),
-                  p('25')
-              ),
-              box(width=3,
-                  status="warning",
-                  h4('Number of replacements'),
-                  p('7')
-              )
 
       ),
-      tabItem(tabName = 'summary_region',
-              h2("Summary Region"),
-              div(style="width: 200px;",
-                  selectizeInput("summary_region",
-                                 "Filter by Region",
-                                 regions_list,
-                                 options = list(
-                                   placeholder = "Select an Oblast",
-                                   onInitialize = I('function() { this.setValue(""); }')
-                                 )
+
+      tabItem(tabName = 'replacement_sample',
+              h2("Replacement Sample"),
+              column(3,
+                box(width = 12,
+                    title = "Warning",
+                    status = "warning",
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    tags$ol(
+                      tags$li("This is to generate replacement"),
+                      tags$li("Only the supervisor are allowed to use this section")
+                    ),
+                ),
+                box(width = 12,
+                    title = "Show the replacements",
+                    status = "info",
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    selectizeInput("repl_region",
+                                   label = "Select an Oblast",
+                                   choices = regions_list,
+                                   options = list(
+                                     placeholder = "Select an Oblast",
+                                     onInitialize = I('function() { this.setValue(""); }')
+                                   )
+                    ),
+                    
+                    selectizeInput("repl_cluster",
+                                   label = "Select Cluster",
+                                   choices = clusters$id,
+                                   options = list(
+                                     placeholder = "Select a cluster",
+                                     onInitialize = I('function() { this.setValue(""); }')
+                                   )
+                    ),
+                    div(id = "show_replacement",
+                      tags$b(textOutput("replacement_number")),
+                      br(),
+                      br()
+                    )
+                ),
+                div(id = "generate_replacement",
+                  box(width = 12,
+                      title = "Generate the replacements",
+                      status = "info",
+                      solidHeader = TRUE,
+                      collapsible = TRUE,
+                      p("if do you need more replacement select the number and click the button for generating new replacement"),
+                      selectInput("repl_num", 
+                                  label = "Select number of replacement", 
+                                  choices = c(1,2,3,4,5,6,7,8)
+                                  ),
+                      
+                      actionButton("generate_replacement", "Generate Replacement", class = "btn-primary", style="float:right")
+                     
+                      
                   )
-
+                )
+                   
               ),
-
-              box(width=3,
-                  status="info",
-                  h4('buildings listed')
-                  # p(load_summary_clusters(clusters$id[1])$buildings_listed)
+              column(9,
+              div( id = "replament_table",
+                box(width = 12,
+                    DT::dataTableOutput("replacementTable")
+                    ),
               ),
-              box(width=3,
-                  status="info",
-                  h4('dwelligns listed')
-                  # p(load_summary_clusters(clusters$id[1])$dwellings_listed)
+              div(id = "error_message",
+                box(width = 8,
+                    title = "Error Message",
+                    status = "danger",
+                    solidHeader = TRUE,
+                    collapsible = TRUE,
+                    textOutput("message_error"),
+                )
               ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of salt samples collected'),
-                  p(3)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of 1st urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of 2nd urine samples collected'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Number of completed interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_completed)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Number of unsuccessful interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_incompleted)
-              ),
-              box(width=3,
-                  status="info",
-                  h4('dwelligns visited uploaded to date'),
-                  p('33')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of interviews attempted'),
-                  p('23')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of interviews not completed'),
-                  p('22')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Total number of completed (and successful) interviews'),
-                  p('25')
-              ),
-              box(width=3,
-                  status="info",
-                  h4('Number of replacements'),
-                  p('7')
               )
-
-
       ),
 
-      tabItem(tabName = 'summary_national',
-              h2("Summary National"),
+      tabItem(tabName = 'cluster_summary',
+              h2("Cluster Summary"),
+              selectizeInput("filter_oblast_cs",
+                             label = "Select an Oblast",
+                             choices = regions_list,
+                             options = list(
+                               placeholder = "Select an Oblast",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
+              selectizeInput("filter_cluster_summary",
+                             label = "Filter Cluster",
+                             choices = clusters$id,
+                             multiple = TRUE,
+                             options = list(
+                               placeholder = "Select a cluster",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
+              DT::dataTableOutput("clustersTable"),
+              
+
+      ),
+      tabItem(tabName = 'district_summary',
+              h2("Discrict Summary"),
+              DT::dataTableOutput("districtsTable"),
+              
+      ),
+      tabItem(tabName = 'oblast_summary',
+              h2("Oblast Summary"),
+              DT::dataTableOutput("oblastsTable"),
+      ),
+
+      tabItem(tabName = 'national_summary',
+              h2("National Summary"),
               br(),
 
               box(width=3,
@@ -354,7 +312,6 @@ ui <- dashboardPage(
                   h4('Number of replacements'),
                   p('7')
               )
-
       )
     )
   )
