@@ -124,13 +124,8 @@ update_dwellings <- function(sampled_dwellings) {
       sql <- paste("UPDATE dwellings 
                    SET sampled = ",
                    sampled_dwellings[row, "sampled"],
-<<<<<<< HEAD
-                   ", replacement_order_number = ",
-                   replacement_number,
                    ", salt_needed = ",
                    sampled_dwellings[row, "salt_needed"],
-=======
->>>>>>> dev-lucia
                    "WHERE dwellings.id = ",
                    sampled_dwellings[row, "dwelling_id"])
       
