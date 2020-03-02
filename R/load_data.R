@@ -126,6 +126,8 @@ update_dwellings <- function(sampled_dwellings) {
                    sampled_dwellings[row, "sampled"],
                    ", replacement_order_number = ",
                    replacement_number,
+                   ", salt_needed = ",
+                   sampled_dwellings[row, "salt_needed"],
                    "WHERE dwellings.id = ",
                    sampled_dwellings[row, "dwelling_id"])
       

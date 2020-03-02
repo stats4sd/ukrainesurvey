@@ -58,6 +58,8 @@ generate_new_sample <- function(cluster_id, dwellings) {
     
     dwellings$sample.order<-sample(1:nrow(dwellings))
     dwellings$sampled<-ifelse(dwellings$sample.order<=SAMPLE_NUM,TRUE,FALSE)
+    dwellings$salt_needed <- ifelse(dwellings$sample.order %in% list(1, 2, 4, 6, 8),TRUE,FALSE)
+      
     dwellings$replacement_order_number<-ifelse(dwellings$sampled==FALSE,dwellings$sample.order-SAMPLE_NUM,NA)
     
     # update global variable
