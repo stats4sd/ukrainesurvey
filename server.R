@@ -354,25 +354,27 @@ server <- function(input, output, session) {
   #####################################
   
   observe({
-    clus_summ<-load_cluster_summary() %>% select(id, region_name_uk, buildings_listed, dwellings_listed, 
-                                                 dwellings_building_id, salt_samples_collected, "1st_urine_sample_collected", 
-                                                 "2st_urine_sample_collected", completed_interviews, unsuccessful_interviews, 
-                                                 dwellings_visited, tot_interviews_attempted, tot_interviews_not_completed, 
-                                                 tot_interviews_completed_successful, replacement_number)
+    clus_summ<-load_cluster_summary() 
     output$clustersTable <- make_datatable(clus_summ)
   })
   
-  observeEvent(input$filter_cluster_summary,{
+  observe({
     req(input$filter_cluster_summary)
     
-    clus_summ<-load_cluster_summary() %>% select(id, region_name_uk, buildings_listed, dwellings_listed, 
-                                                 dwellings_building_id, salt_samples_collected, "1st_urine_sample_collected", 
-                                                 "2st_urine_sample_collected", completed_interviews, unsuccessful_interviews, 
-                                                 dwellings_visited, tot_interviews_attempted, tot_interviews_not_completed, 
-                                                 tot_interviews_completed_successful, replacement_number)
-    clus_summ<- clus_summ %>% filter(id %in% input$filter_cluster_summary)
+    clus_summ<-load_cluster_summary()
     output$clustersTable <- make_datatable(clus_summ)
   })
+  
+  #####################################
+  # Oblast Summary 
+  #####################################
+  
+  observe({
+    oblast_summ<-load_oblast_summary() 
+    output$oblastsTable <- make_datatable(oblast_summ)
+  })
+  
+ 
 
 
 }

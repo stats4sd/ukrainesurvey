@@ -202,6 +202,16 @@ load_cluster_summary <- function() {
   return(cluster_summary)
 }
 
+load_oblast_summary <- function() {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM oblast_summary"
+  
+  oblast_summary <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(oblast_summary)
+}
 
 killDbConnections <- function () {
   
