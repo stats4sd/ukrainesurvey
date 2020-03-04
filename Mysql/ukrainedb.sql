@@ -211,8 +211,8 @@ CREATE TABLE `household_data` (
   UNIQUE KEY `id` (`id`),
   KEY `dwelling_id` (`dwelling_id`),
   KEY `submission_id` (`submission_id`),
-  CONSTRAINT `household_data_ibfk_1` FOREIGN KEY (`dwelling_id`) REFERENCES `dwellings` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `household_data_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `submissions` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `household_data_ibfk_1` FOREIGN KEY (`dwelling_id`) REFERENCES `dwellings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `household_data_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `submissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -267,7 +267,7 @@ CREATE TABLE `salt_samples` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   KEY `hh_id` (`hh_id`),
-  CONSTRAINT `salt_samples_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `salt_samples_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -345,7 +345,7 @@ CREATE TABLE `urine_samples` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   KEY `wra_id` (`wra_id`),
-  CONSTRAINT `urine_samples_ibfk_1` FOREIGN KEY (`wra_id`) REFERENCES `wra_data` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `urine_samples_ibfk_1` FOREIGN KEY (`wra_id`) REFERENCES `wra_data` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -371,7 +371,7 @@ CREATE TABLE `wra_data` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   KEY `hh_id` (`hh_id`),
-  CONSTRAINT `wra_data_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `wra_data_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
