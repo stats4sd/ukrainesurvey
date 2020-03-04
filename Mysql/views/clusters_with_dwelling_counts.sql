@@ -8,17 +8,17 @@ SELECT `clusters`.`id` AS `id`,
        `clusters`.`locality_type` AS `locality_type`,
        `clusters`.`num_voters` AS `num_voters`,
        `clusters`.`smd_id` AS `smd_id`,
-       
+
       -- summaries at the building level
        `buildings_per_cluster`.`tot` AS `tot_buildings`,
-       
+
        -- summaries at the dwelling level
        sum(`dwellings_per_building`.`tot`) AS `tot_dwellings`,
        sum(`dwellings_per_building`.`tot_collected`) AS `tot_collected`,
        sum(`dwellings_per_building`.`tot_success`) AS `tot_success`,
        sum(`dwellings_per_building`.`tot_failed`) AS `tot_failed`,
-       
-       -- has the cluster been completed? 
+
+       -- has the cluster been completed?
        if((sum(`dwellings_per_building`.`tot_collected`) = 8),1,0) AS `cluster_completed`,
        if((`clusters`.`sample_taken` = 0), 'building listing in progress', if((sum(`dwellings_per_building`.`tot_collected`) = 8), 'data collection complete', 'data collection in progress')) AS `status_text`,
        if((`clusters`.`sample_taken` = 0), 'red', if((sum(`dwellings_per_building`.`tot_collected`) = 8), 'green', 'blue')) AS `status_colour`
@@ -46,12 +46,15 @@ JOIN
         `buildings`.`cluster_id` AS `cluster_id`
     FROM `dwellings`
     LEFT JOIN `buildings` on `buildings`.`id` = `dwellings`.`building_id`
-    GROUP BY `dwellings`.`building_id`)
+
+
+    GROUP BY `buildings`.`cluster_id`
+)
 
     `dwellings_per_building` on `dwellings_per_building`.`cluster_id` = `clusters`.`id`
 
 -- join with data collected at the salt-sample level
-JOIN 
+JOIN
   (SELECT
     `salt_samples`.`
   )

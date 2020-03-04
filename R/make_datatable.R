@@ -10,6 +10,7 @@ make_datatable <- function(df) {
       filter = 'top',
       extensions = 'Buttons',
       options = list(
+        scrollX = TRUE,
         dom = 'Brtp',
         buttons = c('excel', 'pdf'),
         text = 'Download',

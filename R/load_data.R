@@ -204,6 +204,38 @@ load_cluster_summary <- function() {
   return(cluster_summary)
 }
 
+load_oblast_summary <- function() {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM oblast_summary"
+  
+  oblast_summary <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(oblast_summary)
+}
+
+load_district_summary <- function() {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM district_summary"
+  
+  district_summary <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(district_summary)
+}
+
+load_national_summary <- function() {
+  
+  con <- get_sql_connection()
+  
+  sql <- "SELECT * FROM national_summary"
+  
+  national_summary <- dbGetQuery(con,sql)
+  drop_sql_connection(con)
+  return(national_summary)
+}
 
 killDbConnections <- function () {
   
