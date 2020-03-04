@@ -379,7 +379,7 @@ server <- function(input, output, session) {
     req(input$filter_oblast_summary)
  
     oblast_summ <- replace(load_oblast_summary(),is.na(load_oblast_summary()),0)
-    oblast_summ <- filter(oblast_summ, region_id %in% as.numeric(input$filter_oblast_summary))
+    oblast_summ <- filter(oblast_summ, oblast_en %in% input$filter_oblast_summary)
   
     output$clustersTable <- make_datatable(oblast_summ)
   })

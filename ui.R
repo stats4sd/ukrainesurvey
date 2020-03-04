@@ -256,7 +256,7 @@ ui <- dashboardPage(
               h2("Oblast Summary"),
               selectizeInput("filter_oblast_summary",
                              label = "Select an Oblast",
-                             choices = regions_list,
+                             choices = load_oblast_summary()$oblast_en,
                              multiple = TRUE,
                              options = list(
                                placeholder = "Select an Oblast",
