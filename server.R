@@ -92,7 +92,13 @@ server <- function(input, output, session) {
     })
 
   output$mymap <- renderLeaflet({
-    map_reactive()
+    leaflet() %>%
+      addTiles() %>%
+      addKML(country_shape, fillOpacity = 0) %>%
+      addMiniMap(
+        toggleDisplay = TRUE
+
+      )
     })
 
   output$sampleTable<-make_datatable(NULL)
@@ -183,6 +189,10 @@ server <- function(input, output, session) {
     # if input$cluster is empty, end here...
     req(input$cluster)
 
+    progress<- shiny::Progress$new()
+    on.exit(progress$close())
+
+    progress$set(message = "getting cluster details", value = 0)
 
     selected_cluster <<- subset(clusters, id == input$cluster)
     selected_cluster_shape <-  subset(shape_json, name == selected_cluster$id)
@@ -215,7 +225,11 @@ server <- function(input, output, session) {
     #####################################
 
     # set buildings and dwellings to the global vars, so we only need to call the db once when the cluster loads.
+    progress$inc(1/3, detail = "loading buildings")
     buildings <<- load_buildings(selected_cluster$id)
+
+
+    progress$inc(2/3, detail = "loading dwellings")
     dwellings <<- load_dwellings(selected_cluster$id)
 
 
@@ -231,7 +245,7 @@ server <- function(input, output, session) {
      })
 
     leafletProxy("mymap") %>%
-      setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 13) %>%
+      setView(lng = selected_cluster$longitude, lat = selected_cluster$latitude, zoom = 12) %>%
       clearMarkers() %>%
       # add highlight to current cluster
       addPolygons(layerId = "selected_cluster",

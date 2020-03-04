@@ -9,6 +9,10 @@ SELECT `clusters`.`id` AS `id`,
        `clusters`.`num_voters` AS `num_voters`,
        `clusters`.`smd_id` AS `smd_id`,
 
+       `clusters`.`longitude` as `longitude`,
+       `clusters`.`latitude` as `latitude`,
+       `clusters`.`boundaries_en` as `boundaries_en`,
+       `clusters`.`replacement` as `replacement`,
       -- summaries at the building level
        `buildings_per_cluster`.`tot` AS `tot_buildings`,
 
@@ -52,12 +56,6 @@ JOIN
 )
 
     `dwellings_per_building` on `dwellings_per_building`.`cluster_id` = `clusters`.`id`
-
--- join with data collected at the salt-sample level
-JOIN
-  (SELECT
-    `salt_samples`.`
-  )
 
 
 GROUP BY `clusters`.`id`

@@ -57,9 +57,7 @@ ui <- dashboardPage(
             width = 8,
 
             box(width = NULL, solidHeader = TRUE, height = "90vh",
-
-                leafletOutput("mymap", height="85vh")
-
+                leafletOutput("mymap", height="85vh") %>% withSpinner()
             )
 
           ),
@@ -108,7 +106,7 @@ ui <- dashboardPage(
 
               conditionalPanel(
                 condition = "input.cluster != ''",
-                uiOutput("cluster_info"),
+                uiOutput("cluster_info") %>% withSpinner(),
                 hr(),
 
                 div(

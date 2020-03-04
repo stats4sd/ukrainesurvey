@@ -10,6 +10,8 @@ library(rlist)
 library(shiny)
 library(shinyjs)
 library(htmlwidgets)
+library(shinycssloaders)
+
 
 load("./Data/shapes.Rdata")
 

@@ -45,8 +45,6 @@ load_dwellings <- function(cluster_id) {
   dwellings.replacement_order_number,
   dwellings.data_collected,
   dwellings.building_id,
-  regions.name_en as region_name_en,
-  regions.name_uk as region_name_uk,
   buildings.cluster_id,
   buildings.structure_number,
   buildings.num_dwellings,
@@ -55,19 +53,15 @@ load_dwellings <- function(cluster_id) {
   buildings.altitude,
   buildings.precision,
   buildings.address
-  FROM buildings
-  RIGHT JOIN dwellings on dwellings.building_id = buildings.id
-  LEFT JOIN clusters on clusters.id = buildings.cluster_id
-  LEFT JOIN regions on regions.id = clusters.region_id"
-  
+  FROM dwellings
+  LEFT JOIN buildings on dwellings.building_id = buildings.id"
+
   if(! is.null(cluster_id)) {
     sql <- paste(sql, "WHERE buildings.cluster_id = ", cluster_id)
   }
   
   dwellings <- dbGetQuery(con, sql)
   
-  dwellings$region_name_en <- as.factor(dwellings$region_name_en)
-  dwellings$region_name_uk <- as.factor(dwellings$region_name_uk)
   dwellings$cluster_id <- as.factor(dwellings$cluster_id)
 
   # Hacky - I'm sure there's a cleaner way than this...
