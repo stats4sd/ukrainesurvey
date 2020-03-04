@@ -371,11 +371,45 @@ server <- function(input, output, session) {
   #####################################
   
   observe({
-    oblast_summ<-load_oblast_summary() 
+    oblast_summ<- replace(load_oblast_summary(),is.na(load_oblast_summary()),0) 
     output$oblastsTable <- make_datatable(oblast_summ)
   })
   
+  observe({
+    req(input$filter_oblast_summary)
  
+    oblast_summ <- replace(load_oblast_summary(),is.na(load_oblast_summary()),0)
+    oblast_summ <- filter(oblast_summ, region_id %in% as.numeric(input$filter_oblast_summary))
+  
+    output$clustersTable <- make_datatable(oblast_summ)
+  })
+  #####################################
+  # District Summary 
+  #####################################
+  
+  observe({
+    district_summ<- replace(load_district_summary(),is.na(load_district_summary()),0) 
+    output$districtsTable <- make_datatable(district_summ)
+  })
+  
+  observe({
+    req(input$filter_district_summary)
+    
+    district_summ<- replace(load_district_summary(),is.na(load_district_summary()),0) 
+    district_summ <- subset(district_summ, district_id %in% input$filter_district_summary)
+    output$districtsTable <- make_datatable(district_summ)
+  })
+  
+  #####################################
+  # National Summary 
+  #####################################
+  
+  observe({
+    national_summ<- replace(load_national_summary(),is.na(load_national_summary()),0) 
+    output$nationalTable <- make_datatable(national_summ)
+  })
+  
+  ####
 
 
 }

@@ -3,7 +3,7 @@
 SELECT 
     `buildings`.`cluster_id` AS `cluster_id`,
      COUNT(`dwellings`.`id`) AS `dwellings_listed`,
-     COUNT(`buildings`.`id`) AS `buildings_listed`,
+     COUNT( DISTINCT `buildings.id`) AS `buildings_listed`,
     (8 - sum(`dwellings`.`survey_success`)) AS `interviews_attempted`,
     SUM(CASE WHEN `dwellings`.`replacement_order_number` > 0 THEN 1 ELSE 0 END) AS `replacements_number`,
     `household_data_per_cluster`.`completed_interviews`,

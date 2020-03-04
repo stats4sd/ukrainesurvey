@@ -240,11 +240,29 @@ ui <- dashboardPage(
       ),
       tabItem(tabName = 'district_summary',
               h2("Discrict Summary"),
+              selectizeInput("filter_district_summary",
+                             label = "Filter District",
+                             choices = load_district_summary()$district_id,
+                             multiple = TRUE,
+                             options = list(
+                               placeholder = "Select a district",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
               DT::dataTableOutput("districtsTable"),
               
       ),
       tabItem(tabName = 'oblast_summary',
               h2("Oblast Summary"),
+              selectizeInput("filter_oblast_summary",
+                             label = "Select an Oblast",
+                             choices = regions_list,
+                             multiple = TRUE,
+                             options = list(
+                               placeholder = "Select an Oblast",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
               DT::dataTableOutput("oblastsTable"),
       ),
 
@@ -254,63 +272,63 @@ ui <- dashboardPage(
 
               box(width=3,
                   status="success",
-                  h4('buildings listed')
-                  # p(load_summary_clusters(clusters$id[1])$buildings_listed)
+                  h4('buildings listed'),
+                   p(load_national_summary()$buildings_listed)
               ),
               box(width=3,
                   status="success",
-                  h4('dwelligns listed')
-                  # p(load_summary_clusters(clusters$id[1])$dwellings_listed)
+                  h4('dwelligns listed'),
+                  p(load_national_summary()$dwellings_listed)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of salt samples collected'),
-                  p(3)
+                  p(load_national_summary()$tot_salt_samples)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of 1st urine samples collected'),
-                  p('33')
+                  p(load_national_summary()$tot_1st_urine_samples_collected)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of 2nd urine samples collected'),
-                  p('33')
+                  p(load_national_summary()$tot_2st_urine_samples_collected)
               ),
               box(width=3,
                   status="success",
-                  h4('Number of completed interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_completed)
+                  h4('Number of completed interviews'),
+                  p(load_national_summary()$completed_interviews)
               ),
               box(width=3,
                   status="success",
-                  h4('Number of unsuccessful interviews')
-                  # p(load_summary_clusters(clusters$id[1])$interviews_incompleted)
+                  h4('Number of unsuccessful interviews'),
+                  p(load_national_summary()$unsuccessful_interviews)
               ),
               box(width=3,
                   status="success",
                   h4('dwelligns visited uploaded to date'),
-                  p('33')
+                  p(load_national_summary()$dwellings_visited)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of interviews attempted'),
-                  p('23')
+                  p(load_national_summary()$interviews_attempted)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of interviews not completed'),
-                  p('22')
+                  p(load_national_summary()$interviews_not_completed)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of completed (and successful) interviews'),
-                  p('25')
+                  p(load_national_summary()$interviews_completed_successful)
               ),
               box(width=3,
                   status="success",
                   h4('Number of replacements'),
-                  p('7')
+                  p(load_national_summary()$replacements_number)
               )
       )
     )
