@@ -354,14 +354,15 @@ server <- function(input, output, session) {
   #####################################
   
   observe({
-    clus_summ<-load_cluster_summary() 
+    clus_summ <-replace(load_cluster_summary(),is.na(load_cluster_summary()),0) 
     output$clustersTable <- make_datatable(clus_summ)
   })
   
   observe({
     req(input$filter_cluster_summary)
-    
-    clus_summ<-load_cluster_summary()
+
+    clus_summ <- replace(load_cluster_summary(),is.na(load_cluster_summary()),0)
+    clus_summ <- subset(clus_summ, cluster_id %in% input$filter_cluster_summary)
     output$clustersTable <- make_datatable(clus_summ)
   })
   

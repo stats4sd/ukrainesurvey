@@ -1,8 +1,6 @@
 
 SELECT 
-    `clusters`.`region_id`,
-    `regions`.`name_en`,
-    `regions`.`name_uk`,
+    
     SUM(`dwellings`.`data_collected`) AS `dwellings_visited`,
     (8 - sum(`dwellings`.`survey_success`)) AS `interviews_attempted`,
     SUM(CASE WHEN `dwellings`.`replacement_order_number` > 0 THEN 1 ELSE 0 END) AS `replacements_number`,
@@ -34,7 +32,6 @@ SELECT
         LEFT JOIN `clusters` on `clusters`.`id` = `buildings`.`cluster_id`
 
 
-        GROUP BY `clusters`.`region_id`
 
        ) `household_data_per_cluster` on `household_data_per_cluster`.`region_id` = `clusters`.`region_id`
 
@@ -55,8 +52,6 @@ SELECT
               LEFT JOIN `clusters` on `clusters`.`id` = `buildings`.`cluster_id`
 
 
-              GROUP BY `clusters`.`region_id`
-
        ) `urine_samples_per_cluster` on `urine_samples_per_cluster`.`region_id` = `clusters`.`region_id`
 
 
@@ -75,12 +70,10 @@ SELECT
               LEFT JOIN `clusters` on `clusters`.`id` = `buildings`.`cluster_id`
 
 
-              GROUP BY `clusters`.`region_id`
-
 
        ) `salt_samples_per_cluster` on `salt_samples_per_cluster`.`region_id` = `clusters`.`region_id`
 
-       GROUP BY `clusters`.`region_id`
+
 
 
 

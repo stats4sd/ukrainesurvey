@@ -3,6 +3,8 @@ SELECT
     `clusters`.`region_id`,
     `regions`.`name_en`,
     `regions`.`name_uk`,
+    count(`dwellings`.`id`) AS `dwelligns_listed`,
+    count(`buildings`.`structure_number`) AS `buildings_listed`,
     SUM(`dwellings`.`data_collected`) AS `dwellings_visited`,
     (8 - sum(`dwellings`.`survey_success`)) AS `interviews_attempted`,
     SUM(CASE WHEN `dwellings`.`replacement_order_number` > 0 THEN 1 ELSE 0 END) AS `replacements_number`,
