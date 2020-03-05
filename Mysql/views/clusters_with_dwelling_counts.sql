@@ -20,7 +20,6 @@ SELECT `clusters`.`id` AS `id`,
        sum(`dwellings_per_building`.`tot`) AS `tot_dwellings`,
        sum(`dwellings_per_building`.`tot_collected`) AS `tot_collected`,
        sum(`dwellings_per_building`.`tot_success`) AS `tot_success`,
-       sum(`dwellings_per_building`.`tot_failed`) AS `tot_failed`,
 
        -- has the cluster been completed?
        if((sum(`dwellings_per_building`.`tot_collected`) = 8),1,0) AS `cluster_completed`,
@@ -44,7 +43,6 @@ JOIN
     (SELECT
         `dwellings`.`building_id` AS `building_id`,
         sum(`dwellings`.`survey_success`) AS `tot_success`,
-        sum(case when (`survey_success` = 0 AND `data_collected` = 1) then 1 else 0) AS `tot_failed`,
         sum(`dwellings`.`data_collected`) AS `tot_collected`,
         count(`dwellings`.`id`) AS `tot`,
         `buildings`.`cluster_id` AS `cluster_id`
