@@ -46,8 +46,7 @@ SELECT
               LEFT JOIN `wra_data` on `wra_data`.`id` = `urine_samples`.`wra_id`
               LEFT JOIN `household_data` on `household_data`.`id` = `wra_data`.`hh_id`
               LEFT JOIN `dwellings` on `dwellings`.`id` = `household_data`.`dwelling_id`
-              LEFT JOIN `buildings` on `buildings`.`id` = `dwellings`.`building_id`
-              
+
               GROUP BY `dwellings`.`id`
 
       ) `urine_per_dwelling` on `urine_per_dwelling`.`dwelling_id` = `dwellings`.`id`
