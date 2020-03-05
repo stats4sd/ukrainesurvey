@@ -223,7 +223,7 @@ ui <- dashboardPage(
                                onInitialize = I('function() { this.setValue(""); }')
                              )
               ),
-              selectizeInput("filter_cluster_summary",
+              selectizeInput("filter_cluster_cs",
                              label = "Filter Cluster",
                              choices = clusters$id,
                              multiple = TRUE,
@@ -238,7 +238,15 @@ ui <- dashboardPage(
       ),
       tabItem(tabName = 'district_summary',
               h2("Discrict Summary"),
-              selectizeInput("filter_district_summary",
+              selectizeInput("filter_oblast_cs",
+                             label = "Select an Oblast",
+                             choices = regions_list,
+                             options = list(
+                               placeholder = "Select an Oblast",
+                               onInitialize = I('function() { this.setValue(""); }')
+                             )
+              ),
+              selectizeInput("filter_district_ds",
                              label = "Filter District",
                              choices = load_district_summary()$district_id,
                              multiple = TRUE,
@@ -252,7 +260,7 @@ ui <- dashboardPage(
       ),
       tabItem(tabName = 'oblast_summary',
               h2("Oblast Summary"),
-              selectizeInput("filter_oblast_summary",
+              selectizeInput("filter_oblast_os",
                              label = "Select an Oblast",
                              choices = load_oblast_summary()$oblast_en,
                              multiple = TRUE,

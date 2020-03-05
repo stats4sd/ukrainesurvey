@@ -14,7 +14,7 @@ SELECT `clusters`.`id` AS `id`,
        `clusters`.`boundaries_en` as `boundaries_en`,
        `clusters`.`replacement` as `replacement`,
       -- summaries at the building level
-       `buildings_per_cluster`.`tot` AS `tot_buildings`,
+       sum(`buildings_per_cluster`.`tot`) AS `tot_buildings`,
 
        -- summaries at the dwelling level
        sum(`dwellings_per_building`.`tot`) AS `tot_dwellings`,
@@ -41,7 +41,6 @@ JOIN
 -- join with data collected at dwellings level
 JOIN
     (SELECT
-        `dwellings`.`building_id` AS `building_id`,
         sum(`dwellings`.`survey_success`) AS `tot_success`,
         sum(`dwellings`.`data_collected`) AS `tot_collected`,
         count(`dwellings`.`id`) AS `tot`,

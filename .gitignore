@@ -8,6 +8,7 @@ packrat/src*/
 .Rproj.user
 desktop.ini
 XlsImporter/form_data.json
+Data/xls/
 config.yml
 .RData
 **/*.DS_Store

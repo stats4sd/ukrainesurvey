@@ -6,6 +6,16 @@ server <- function(input, output, session) {
   selected_cluster <- NULL
   buildings <- NULL
   dwellings <- NULL
+  cluster_summary <- load_cluster_summary()
+  district_summary <- load_district_summary()
+  oblast_summary <- load_oblast_summary()
+  national_summary <- load_national_summary()
+  
+  output$clustersTable <- make_datatable(cluster_summary)
+  output$districtsTable <- make_datatable(district_summary)
+  output$oblastsTable <- make_datatable(oblast_summary)
+  output$nationalTable <- make_datatable(national_summary)
+  
 
   shinyjs::hide('error_message')
   shinyjs::hide('replament_table')
@@ -369,15 +379,26 @@ server <- function(input, output, session) {
   # Cluster Summary
   #####################################
 
-  observe({
-    clus_summ <-replace(load_cluster_summary(),is.na(load_cluster_summary()),0)
+  observeEvent(input$filter_oblast_cs, {
+
+    region_clusters <- subset(clusters, region_id == input$filter_oblast_cs)
+    
+    req(input$filter_oblast_cs)
+    clus_summ <- replace(cluster_summary,is.na(cluster_summary),0)
+    clus_summ <- subset(clus_summ, region_id %in% input$filter_oblast_cs)
     output$clustersTable <- make_datatable(clus_summ)
+    
+    updateSelectInput(session,
+                      "filter_cluster_cs",
+                      choices = region_clusters$id
+    )
+    
   })
 
-  observe({
+  observeEvent(input$filter_cluster_summary, {
     req(input$filter_cluster_summary)
 
-    clus_summ <- replace(load_cluster_summary(),is.na(load_cluster_summary()),0)
+    clus_summ <- replace(cluster_summary,is.na(cluster_summary),0)
     clus_summ <- subset(clus_summ, cluster_id %in% input$filter_cluster_summary)
     output$clustersTable <- make_datatable(clus_summ)
   })
@@ -386,43 +407,45 @@ server <- function(input, output, session) {
   # Oblast Summary
   #####################################
 
-  observe({
-    oblast_summ<- replace(load_oblast_summary(),is.na(load_oblast_summary()),0)
+  observeEvent(input$filter_oblast_os, {
+    
+    oblast_summ <- replace(oblast_summary, is.na(oblast_summary),0)
+    oblast_summ <- subset(oblast_summ, region_id %in% input$filter_oblast_os)
     output$oblastsTable <- make_datatable(oblast_summ)
+    
   })
 
-  observe({
-    req(input$filter_oblast_summary)
-
-    oblast_summ <- replace(load_oblast_summary(),is.na(load_oblast_summary()),0)
-    oblast_summ <- filter(oblast_summ, oblast_en %in% input$filter_oblast_summary)
-    output$clustersTable <- make_datatable(oblast_summ)
-  })
   #####################################
   # District Summary
   #####################################
 
-  observe({
-    district_summ<- replace(load_district_summary(),is.na(load_district_summary()),0)
-    output$districtsTable <- make_datatable(district_summ)
+  observeEvent(input$filter_oblast_ds, {
+    
+    region_clusters <- subset(clusters, region_id == input$filter_oblast_cs)
+    
+    req(input$filter_oblast_cs)
+    clus_summ <- replace(cluster_summary,is.na(cluster_summary),0)
+    clus_summ <- subset(clus_summ, region_id %in% input$filter_oblast_cs)
+    output$districtsTable <- make_datatable(clus_summ)
+    
+    updateSelectInput(session,
+                      "filter_district_ds",
+                      choices = region_clusters$id
+    )
+    
   })
-
-  observe({
-    req(input$filter_district_summary)
-
-    district_summ<- replace(load_district_summary(),is.na(load_district_summary()),0)
-    district_summ <- subset(district_summ, district_id %in% input$filter_district_summary)
+  
+  observeEvent(input$filter_district_ds, {
+    
+    req(input$filter_district_ds)
+    district_summ<- replace(district_summary,is.na(district_summary),0)
+    district_summ <- subset(district_summ, district_id %in% input$filter_district_ds)
     output$districtsTable <- make_datatable(district_summ)
   })
 
   #####################################
   # National Summary
   #####################################
-
-  observe({
-    national_summ<- replace(load_national_summary(),is.na(load_national_summary()),0)
-    output$nationalTable <- make_datatable(national_summ)
-  })
 
   ####
 
