@@ -3,7 +3,7 @@
 SELECT 
     `buildings`.`cluster_id` AS `cluster_id`,
      COUNT(`dwellings`.`id`) AS `dwellings_listed`,
-     COUNT( DISTINCT `buildings.id`) AS `buildings_listed`,
+     COUNT( DISTINCT `buildings`.`id`) AS `buildings_listed`,
     (8 - sum(`dwellings`.`survey_success`)) AS `interviews_attempted`,
     SUM(CASE WHEN `dwellings`.`replacement_order_number` > 0 THEN 1 ELSE 0 END) AS `replacements_number`,
     `household_data_per_cluster`.`completed_interviews`,
@@ -46,8 +46,7 @@ SELECT
               LEFT JOIN `wra_data` on `wra_data`.`id` = `urine_samples`.`wra_id`
               LEFT JOIN `household_data` on `household_data`.`id` = `wra_data`.`hh_id`
               LEFT JOIN `dwellings` on `dwellings`.`id` = `household_data`.`dwelling_id`
-              LEFT JOIN `buildings` on `buildings`.`id` = `dwellings`.`building_id`
-              
+
               GROUP BY `dwellings`.`id`
 
       ) `urine_per_dwelling` on `urine_per_dwelling`.`dwelling_id` = `dwellings`.`id`
