@@ -77,9 +77,9 @@ generate_new_sample <- function(cluster_id, dwellings) {
 # @prop cluster_id - the id of the cluster to download sample for
 # @prop dwellings_sampled - only the sampled dwellings for the current cluster.
 #####################################
-download_sample <- function(cluster_id, dwellings_sampled){
+download_sample <- function(cluster_id, dwellings){
 
-  dwellings_sampled <- dwellings_sampled %>% 
+  dwellings_sampled <- dwellings %>% 
     filter(sampled == 1)
   
   dwellings_sampled$visited<-"[ ]"
