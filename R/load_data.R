@@ -15,7 +15,7 @@ get_sql_connection <- function() {
   )
 
   dbSendQuery(con,"set character set 'utf8mb4'")
-  dbSendQuery(con, "SET GLOBAL sql_mode = ''")
+
   return(con)
 }
 
