@@ -6,7 +6,6 @@ SELECT
       SUM(`cluster_summary`.`dwellings_listed`) AS `dwellings_listed`,
       SUM(`cluster_summary`.`buildings_listed`) AS `buildings_listed`,
       SUM(`cluster_summary`.`interviews_attempted`) AS `interviews_attempted`,
-      SUM(`cluster_summary`.`dwellings_visited`) AS `dwellings_visited`,
       SUM(`cluster_summary`.`replacements_number`) AS `replacements_number`,
       SUM(`cluster_summary`.`completed_interviews`) AS `completed_interviews`,
       SUM(`cluster_summary`.`unsuccessful_interviews`) AS `unsuccessful_interviews`,

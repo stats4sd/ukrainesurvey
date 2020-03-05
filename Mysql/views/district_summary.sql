@@ -6,7 +6,6 @@ SELECT
        `cluster_summary`.`dwellings_listed`,
        `cluster_summary`.`buildings_listed`,
        `cluster_summary`.`interviews_attempted`,
-       `cluster_summary`.`dwellings_visited`,
        `cluster_summary`.`replacements_number`,
        `cluster_summary`.`completed_interviews`,
        `cluster_summary`.`unsuccessful_interviews`,
