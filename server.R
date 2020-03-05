@@ -71,6 +71,13 @@ server <- function(input, output, session) {
   # Initial Map Render
   ####################################
 
+  cluster_filename <- reactive({
+    if(!is.na(input$cluster) & input$cluster != "") {
+      return(paste0("-cluster-", input$cluster))  
+    }
+    return("")
+  })
+  
   map_reactive <- reactive({
     leaflet() %>%
       addTiles() %>%
@@ -80,25 +87,20 @@ server <- function(input, output, session) {
 
       ) %>%
       onRender(
-        "function(el, x) {
-            L.easyPrint({
-              sizeModes: ['A4Landscape', 'A4Portrait'],
-              filename: 'mymap',
-              exportOnly: true,
-              hideControlContainer: true
-            }).addTo(this);
-            }"
+        paste0("function(el, x) {
+              L.easyPrint({
+                sizeModes: ['A4Landscape', 'A4Portrait'],
+                filename: 'iodine-survey-map",cluster_filename(),"',
+                exportOnly: true,
+                hideControlContainer: true
+              }).addTo(this);
+              }"
+        )
       )
     })
 
   output$mymap <- renderLeaflet({
-    leaflet() %>%
-      addTiles() %>%
-      addKML(country_shape, fillOpacity = 0) %>%
-      addMiniMap(
-        toggleDisplay = TRUE
-
-      )
+    map_reactive()
     })
 
   output$sampleTable<-make_datatable(NULL)
