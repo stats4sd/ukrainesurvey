@@ -20,6 +20,7 @@ get_sql_connection <- function() {
 }
 
 load_buildings <- function(cluster_id) {
+  options(warn=-1)
   con <- get_sql_connection()
 
   buildings<-dbGetQuery(con, paste(
@@ -30,12 +31,13 @@ load_buildings <- function(cluster_id) {
   buildings$cluster_id <- as.factor(buildings$cluster_id)
 
   drop_sql_connection(con)
+  options(warn=0)
   return(buildings)
 
 }
 
 load_dwellings <- function(cluster_id) {
-
+  options(warn=-1)
   con <- get_sql_connection()
 
   sql <- "SELECT
@@ -76,12 +78,13 @@ load_dwellings <- function(cluster_id) {
   }
 
   drop_sql_connection(con)
+  options(warn=0)
   return(dwellings)
 
 }
 
 load_clusters <- function(region_id = NULL) {
-
+  options(warn=-1)
   con <- get_sql_connection()
 
   sql <- "SELECT * FROM clusters_with_dwelling_counts where replacement = 0"
@@ -92,6 +95,7 @@ load_clusters <- function(region_id = NULL) {
 
   clusters <- dbGetQuery(con,sql)
   drop_sql_connection(con)
+  options(warn=0)
   return(clusters)
 }
 
@@ -99,7 +103,6 @@ load_clusters <- function(region_id = NULL) {
 #Update dwellings after the generate sample button has been clicked
 
 update_dwellings <- function(sampled_dwellings) {
-
   con <- get_sql_connection()
 
   # update sampled dwellings
@@ -127,7 +130,6 @@ update_dwellings <- function(sampled_dwellings) {
       results <- dbGetQuery(con, sql)
     }
   }
-
   drop_sql_connection(con)
 
 }
@@ -188,46 +190,50 @@ update_replacement <- function(replaced_dwellings) {
 
 
 load_cluster_summary <- function() {
-
+  options(warn=-1)
   con <- get_sql_connection()
 
   sql <- "SELECT * FROM cluster_summary"
 
   cluster_summary <- dbGetQuery(con,sql)
   drop_sql_connection(con)
+  options(warn=0)
   return(cluster_summary)
 }
 
 load_oblast_summary <- function() {
-
+  options(warn=-1)
   con <- get_sql_connection()
 
   sql <- "SELECT * FROM oblast_summary"
 
   oblast_summary <- dbGetQuery(con,sql)
   drop_sql_connection(con)
+  options(warn=0)
   return(oblast_summary)
 }
 
 load_district_summary <- function() {
-
+  options(warn=-1)
   con <- get_sql_connection()
 
   sql <- "SELECT * FROM district_summary"
 
   district_summary <- dbGetQuery(con,sql)
   drop_sql_connection(con)
+  options(warn=0)
   return(district_summary)
 }
 
 load_national_summary <- function() {
-
+  options(warn=-1)
   con <- get_sql_connection()
 
   sql <- "SELECT * FROM national_summary"
 
   national_summary <- dbGetQuery(con,sql)
   drop_sql_connection(con)
+  options(warn=0)
   return(national_summary)
 }
 
