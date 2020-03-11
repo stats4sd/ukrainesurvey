@@ -45,6 +45,7 @@ load_dwellings <- function(cluster_id) {
   dwellings.replacement_order_number,
   dwellings.data_collected,
   dwellings.building_id,
+  sampled_dwellings_csv.visual_address,
   buildings.cluster_id,
   buildings.structure_number,
   buildings.num_dwellings,
@@ -54,7 +55,8 @@ load_dwellings <- function(cluster_id) {
   buildings.precision,
   buildings.address
   FROM dwellings
-  LEFT JOIN buildings on dwellings.building_id = buildings.id"
+  LEFT JOIN buildings on dwellings.building_id = buildings.id
+  LEFT JOIN sampled_dwellings_csv on sampled_dwellings_csv.dwelling_id_key = dwellings.id"
 
   if(! is.null(cluster_id)) {
     sql <- paste(sql, "WHERE buildings.cluster_id = ", cluster_id)

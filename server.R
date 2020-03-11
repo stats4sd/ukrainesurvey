@@ -17,6 +17,31 @@ server <- function(input, output, session) {
   output$nationalTable <- make_datatable(national_summary)
   
 
+<<<<<<< Updated upstream
+=======
+  # prepare printable download
+  output$testdown <- downloadHandler(
+    filename = function() {
+      paste0("Testing Download.pdf")
+    },
+    
+    content = function(file) {
+      
+      tempReport <- file.path(tempdir(), "sampled_dwellings.Rmd")
+      file.copy("sampled_dwellings.Rmd", tempReport, overwrite = TRUE)
+      
+      params <- list(
+        clusters = clusters
+        )
+      
+      rmarkdown::render(tempReport, output_file = file,
+                        params = params,
+                        envir = new.env(parent = globalenv())
+      )
+    }
+  )
+  
+>>>>>>> Stashed changes
   shinyjs::hide('error_message')
   shinyjs::hide('replament_table')
   shinyjs::hide('show_replacement')
@@ -31,8 +56,8 @@ server <- function(input, output, session) {
       showModal(too_few_dwellings_modal())
     }
     else {
-      dwellings <- generate_new_sample(input$cluster, dwellings)
-      output$checklistTable <- download_sample(input$cluster, dwellings)
+      dwellings_sampled <- generate_new_sample(input$cluster, dwellings)
+      output$checklistTable <- download_sample(input$cluster, dwellings_sampled)
 
 
       ## manually update values to avoid need for reloading from database;
@@ -61,7 +86,34 @@ server <- function(input, output, session) {
                         selected=clusters$id[clusters$id == input$cluster]
       )
     }
+<<<<<<< Updated upstream
 
+=======
+    
+    showModal(dataTableModal(input$cluster))
+    
+    # prepare printable download
+    output$sample_downloader <- downloadHandler(
+      filename = function() {
+         paste0("Sampled Dwellings for cluster ", clusters$id, ".pdf")
+      },
+
+      content = function(file) {
+        
+        tempReport <- file.path(tempdir(), "sampled_dwellings.Rmd")
+        file.copy("sampled_dwellings.Rmd", tempReport, overwrite = TRUE)
+        
+        params <- list(
+          selected_cluster = input$cluster, 
+          sampled_dwellings = dwellings_sampled)
+        
+        rmarkdown::render(tempReport, output_file = file,
+                          params = params,
+                          envir = new.env(parent = globalenv())
+        )
+      }
+    )
+>>>>>>> Stashed changes
   })
 
   observeEvent(input$download_sample, {

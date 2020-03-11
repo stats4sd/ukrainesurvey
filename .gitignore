@@ -12,3 +12,4 @@ Data/xls/
 config.yml
 .RData
 **/*.DS_Store
+*.log

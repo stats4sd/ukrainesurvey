@@ -49,7 +49,8 @@ ui <- dashboardPage(
                   tags$li("The map will load the listed buildings for the chosen cluster, along with any sample information present."),
                   tags$li("You can then perform key actions for the cluster")
                 )
-            )
+            ),
+            downloadButton('testdown', "Test the knitting of RMarkdown...")
           ),
 
           # map
@@ -118,21 +119,14 @@ ui <- dashboardPage(
 
                 div(
                   id = "sample_taken",
-                  actionButton("download_sample", "Download Sample of dwellings sheet", class = "btn-primary")
+                  actionButton("download_sample", "Download Sample of dwellings sheet", class = "btn-primary"),
+                  downloadButton("sample_downloader", "Download Sample")
                 )
 
               )
             )
           ),
-
-          column(width = 12,
-
-                 DT::dataTableOutput("sampleTable"),
-                 DT::dataTableOutput("checklistTable")
-
-          )
         )
-
       ),
 
       tabItem(tabName = 'replacement_sample',
