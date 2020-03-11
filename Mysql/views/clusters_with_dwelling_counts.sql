@@ -29,7 +29,7 @@ FROM `clusters`
 LEFT JOIN `regions` on `regions`.`id` = `clusters`.`region_id`
 
 -- join with data collected at building level
-JOIN
+LEFT JOIN
     (SELECT
         `buildings`.`cluster_id` AS `cluster_id`,
         count(`buildings`.`id`) AS `tot`
@@ -39,7 +39,7 @@ JOIN
     `buildings_per_cluster` on `buildings_per_cluster`.`cluster_id` = `clusters`.`id`
 
 -- join with data collected at dwellings level
-JOIN
+LEFT JOIN
     (SELECT
         sum(`dwellings`.`survey_success`) AS `tot_success`,
         sum(`dwellings`.`data_collected`) AS `tot_collected`,

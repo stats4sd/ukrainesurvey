@@ -136,6 +136,8 @@ server <- function(input, output, session) {
       clearShapes() %>%
       clearMarkers()
 
+    
+    browser() 
     cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
     cluster_shapes <- merge(cluster_shapes, region_clusters, by.x = "name", by.y = "id")
 
