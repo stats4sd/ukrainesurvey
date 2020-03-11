@@ -293,7 +293,7 @@ ui <- dashboardPage(
               box(width=3,
                   status="success",
                   h4('Total number of 1st urine samples collected'),
-                  p(national_summar)$tot_1st_urine_samples_collected)
+                  p(national_summary$tot_1st_urine_samples_collected)
               ),
               box(width=3,
                   status="success",
@@ -323,17 +323,17 @@ ui <- dashboardPage(
               box(width=3,
                   status="success",
                   h4('Total number of interviews not completed'),
-                  p(load_national_summary()$interviews_not_completed)
+                  p(national_summary$interviews_not_completed)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of completed (and successful) interviews'),
-                  p(load_national_summary()$interviews_completed_successful)
+                  p(national_summary$interviews_completed_successful)
               ),
               box(width=3,
                   status="success",
                   h4('Number of replacements'),
-                  p(load_national_summary()$replacements_number)
+                  p(national_summary$replacements_number)
               )
       )
     )
