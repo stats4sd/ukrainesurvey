@@ -5,8 +5,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(id="tabs",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-      menuItem("QR Test", tabName = "qrtest", icon = icon("th")),
-      menuItem("Replacement Sample", tabName = "replacement_sample", icon = icon("fas fa-exchange-alt")),
+      menuItem("Replacement Generation", tabName = "replacement_sample", icon = icon("fas fa-exchange-alt")),
       menuItem("Cluster Summary", tabName = "cluster_summary", icon = icon("file")),
       menuItem("District Summary", tabName = "district_summary", icon = icon("file")),
       menuItem("Oblast Summary", tabName = "oblast_summary", icon = icon("file")),
