@@ -19,7 +19,7 @@ source('R/load_data.R')
 source('R/make_datatable.R')  
 source('R/sample_dwellings.R')
 
-
+# initialise some global variables
 clusters <- load_clusters()
 cluster_summary <- load_cluster_summary()
 district_summary <- load_district_summary()

@@ -1,22 +1,17 @@
 server <- function(input, output, session) {
 
-  # initialise some variables
+  # initialise some per-session variables
   selected_region <- NULL
   selected_cluster <- NULL
   buildings <- NULL
   dwellings <- NULL
   
-
-
-
   output$clustersTable <- make_datatable(cluster_summary)
   output$districtsTable <- make_datatable(district_summary)
   output$oblastsTable <- make_datatable(oblast_summary)
   output$nationalTable <- make_datatable(national_summary)
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-=======
+
   # prepare printable download
   output$testdown <- downloadHandler(
     filename = function() {
@@ -39,10 +34,7 @@ server <- function(input, output, session) {
     }
   )
   
->>>>>>> Stashed changes
-=======
-    
->>>>>>> dev
+
   shinyjs::hide('error_message')
   shinyjs::hide('replament_table')
   shinyjs::hide('show_replacement')
@@ -87,10 +79,7 @@ server <- function(input, output, session) {
                         selected=clusters$id[clusters$id == input$cluster]
       )
     }
-<<<<<<< HEAD
-<<<<<<< Updated upstream
 
-=======
     
     showModal(dataTableModal(input$cluster))
     
@@ -115,10 +104,6 @@ server <- function(input, output, session) {
         )
       }
     )
->>>>>>> Stashed changes
-=======
-    
->>>>>>> dev
   })
 
   observeEvent(input$download_sample, {
@@ -196,7 +181,6 @@ server <- function(input, output, session) {
       clearMarkers()
 
     
-    browser() 
     cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
     cluster_shapes <- merge(cluster_shapes, region_clusters, by.x = "name", by.y = "id")
 
