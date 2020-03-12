@@ -6,6 +6,8 @@ params:
   selected_cluster: NA
   sampled_dwellings: NA
 classoption: portrait
+header-includes:
+   - \usepackage{float}
 ---
 
 ```{r, include=FALSE}
@@ -18,34 +20,38 @@ library(kableExtra)
 # FOR TESTING ONLY
 #####################################
 
-  source("R/load_data.R")
-  clusters <- load_clusters()
-  selected_cluster <- subset(clusters, id == "140582")
-  dwellings <- load_dwellings(selected_cluster$id)
-  sampled_dwellings <- subset(dwellings, sampled == 1)
-
-  sampled_dwellings$visit1 <- "[    ]"
-  sampled_dwellings$visit2 <- "[    ]"
-  sampled_dwellings$visit3 <- "[    ]"
-
-  sampled_dwellings$success<-"[   ]"
-  sampled_dwellings$salt_collected<-"[   ]"
-  sampled_dwellings$urine_1<-"[   ]"
-  sampled_dwellings$urine_2<-"[   ]"
-  sampled_dwellings$comments<-""
-  
-  sampled_dwellings<-sampled_dwellings %>%
-    select(visual_address, visit1, visit2, visit3, success, salt_collected, urine_1, urine_2)
+  # source("R/load_data.R")
+  # clusters <- load_clusters()
+  # selected_cluster <- subset(clusters, id == "140582")
+  # dwellings <- load_dwellings(selected_cluster$id)
+  # sampled_dwellings <- subset(dwellings, sampled == 1)
+  # 
+  # sampled_dwellings$visit1 <- "[    ]"
+  # sampled_dwellings$visit2 <- "[    ]"
+  # sampled_dwellings$visit3 <- "[    ]"
+  # 
+  # sampled_dwellings$success<-"[   ]"
+  # sampled_dwellings$salt_collected<-"[   ]"
+  # sampled_dwellings$urine_1<-"[   ]"
+  # sampled_dwellings$urine_2<-"[   ]"
+  # sampled_dwellings$comments<-""
+  # 
+  # sampled_dwellings<-sampled_dwellings %>%
+  #   select(visual_address, visit1, visit2, visit3, success, salt_collected, urine_1, urine_2, comments)
 
 ```
 
 
-## Ukraine Iodine - Sampled Dwellings for Cluster: `r selected_cluster$id`
+```{r, include=FALSE}
+options(tinytex.verbose = TRUE)
+```
+
+
+## Ukraine Iodine - Sampled Dwellings for Cluster: `r params$selected_cluster$id`
 
 ```{r echo=FALSE}
-
 kable(
-  sampled_dwellings, 
+  params$sampled_dwellings, 
   booktabs = T,
   linesep  = "\\addlinespace",
   format = "latex",
