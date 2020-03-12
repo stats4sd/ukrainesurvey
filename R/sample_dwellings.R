@@ -1,7 +1,7 @@
 ####################################
 # Show Modal to confirm building listing is complete
 ####################################
-dataModal <- function() {
+confirm_listing_model <- function() {
   modalDialog(
     h4(class="text-warning", "WARNING"),
     p("You are about to generate the sample for this cluster. Once done, you will not be able to add additional buildings or dwellings to this cluster."),
@@ -16,11 +16,11 @@ dataModal <- function() {
 #####################################
 # Show sampled dwellings table for download / export
 #####################################
-dataTableModal <- function(cluster_id) {
+sampled_dwellings_model <- function(cluster_id) {
   modalDialog(
     size = 'l',
     h4(class="text-success", paste("Sampled Dwellings for Cluster - ", cluster_id)),
-    p("The table below shows the 8 sampled dwellings for this cluster, and 2 empty rows to be used for replacements if needed."),
+    p("The table below shows the 8 sampled dwellings for this cluster."),
     p("Please download this as a pdf file and print it for field use."),
     DT::dataTableOutput("checklistTable"),
     
@@ -52,7 +52,7 @@ too_few_dwellings_modal <- function() {
 #####################################
 generate_new_sample <- function(cluster_id, dwellings) {
 
-    SAMPLE_NUM<-8
+  SAMPLE_NUM<-8
   check_cluster<-load_clusters() %>% filter(id == cluster_id)
   
   if(check_cluster$sample_taken==0){
@@ -68,44 +68,32 @@ generate_new_sample <- function(cluster_id, dwellings) {
     update_cluster(cluster_id)
     
   }
-  dwellings_sampled <- dwellings %>% filter(sampled == 1)  
+  sampled_dwellings <- dwellings %>% filter(sampled == 1)  
   
-  dwellings_sampled$visited<-"[ ]"
-  dwellings_sampled$int_completed<-"[ ]"
-  dwellings_sampled$salt_collected<-"[ ]"
-  dwellings_sampled$urine_1<-"[ ]"
-  dwellings_sampled$urine_2<-"[ ]"
-  
-  dwellings_sampled<-dwellings_sampled %>%
-    select(structure_number, dwelling_number, address, visited, int_completed, salt_collected, urine_1, urine_2)
-  
-  return(dwellings_sampled)
+  return(sampled_dwellings)
 
 }
 
 #####################################
 # Function to build a downloadable datatable with the sampled dwellings
-# @prop cluster_id - the id of the cluster to download sample for
-# @prop dwellings_sampled - only the sampled dwellings for the current cluster.
+# @prop sampled_dwellings - only the sampled dwellings for the current cluster.
+# @returns sampled_dwellings with columns organised for display
 #####################################
-download_sample <- function(cluster_id, dwellings_sampled){
+make_printable_sample <- function(sampled_dwellings){
 
-  dwellings_sampled$visited<-"[ ]"
-  dwellings_sampled$int_completed<-"[ ]"
-  dwellings_sampled$salt_collected<-"[ ]"
-  dwellings_sampled$urine_1<-"[ ]"
-  dwellings_sampled$urine_2<-"[ ]"
+  sampled_dwellings$visit1 <- "[    ]"
+  sampled_dwellings$visit2 <- "[    ]"
+  sampled_dwellings$visit3 <- "[    ]"
   
+  sampled_dwellings$success<-"[   ]"
+  sampled_dwellings$salt_collected<-"[   ]"
+  sampled_dwellings$urine_1<-"[   ]"
+  sampled_dwellings$urine_2<-"[   ]"
   
-  dwellings_sampled<-dwellings_sampled %>%
-    select(structure_number, dwelling_number, address, visited, int_completed, salt_collected, urine_1, urine_2)
+  sampled_dwellings<-sampled_dwellings %>%
+    select(visual_address, visit1, visit2, visit3, success, salt_collected, urine_1, urine_2)
   
-  dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-  dwellings_sampled[nrow(dwellings_sampled) + 1,] = c(" "," "," ","[ ]", "[ ]", "[ ]", "[ ]", "[ ]")
-  
-  showModal(dataTableModal(cluster_id))
-
-  return(make_sample_datatable(dwellings_sampled))
+  return(sampled_dwellings)
   
 }
 
