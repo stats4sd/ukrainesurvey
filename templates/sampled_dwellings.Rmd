@@ -47,22 +47,17 @@ options(tinytex.verbose = TRUE)
 ```
 
 
-## Ukraine Iodine - Sampled Dwellings for Cluster: `r params$selected_cluster$id`
+## Ukraine Iodine - Sampled Dwellings for Cluster: `r params$selected_cluster`
 
 ```{r echo=FALSE}
 kable(
   params$sampled_dwellings, 
-  booktabs = T,
-  linesep  = "\\addlinespace",
   format = "latex",
   row.names = FALSE,
   col.names = c("Address", "Visit 1", "Visit 2", "Visit 3", "Success", "Salt", "Urine 1", "Urine 2")
   ) %>%
   kable_styling(
-      latex_options = c("scale_down", "striped")
-  #     ) %>%
-  # column_spec(
-  #   1, width=  "30em"
+      latex_options = c("scale_down")
   )
 
 ```

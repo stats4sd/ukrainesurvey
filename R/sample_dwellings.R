@@ -76,11 +76,13 @@ generate_new_sample <- function(cluster_id, dwellings) {
 
 #####################################
 # Function to build a downloadable datatable with the sampled dwellings
-# @prop sampled_dwellings - only the sampled dwellings for the current cluster.
+# @prop dwellings - the dwellings in the currently chosen cluster
 # @returns sampled_dwellings with columns organised for display
 #####################################
-make_printable_sample <- function(sampled_dwellings){
+make_printable_sample <- function(dwellings){
 
+  sampled_dwellings = subset(dwellings, sampled == 1 | replacement_order_number > 0)
+  
   sampled_dwellings$visit1 <- "[    ]"
   sampled_dwellings$visit2 <- "[    ]"
   sampled_dwellings$visit3 <- "[    ]"
@@ -132,7 +134,7 @@ generate_replacement <- function(cluster_id, repl_num) {
     #create replaced_dwellings for the return
     dwellings <- load_dwellings(cluster_id)
     replaced_dwellings<-dwellings%>%  filter(replacement_order_number <= last_repl_num + repl_num)
-    replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
+    replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, cluster_id, structure_number, address ,latitude,longitude)
     replaced_dwellings<-replaced_dwellings[order(replaced_dwellings$replacement_order_number),]
     return(replaced_dwellings)
   

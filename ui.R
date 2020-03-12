@@ -49,7 +49,6 @@ ui <- dashboardPage(
                   tags$li("You can then perform key actions for the cluster")
                 )
             ),
-            downloadButton('testdown', "Test the knitting of RMarkdown...")
           ),
 
           # map
@@ -118,7 +117,6 @@ ui <- dashboardPage(
 
                 div(
                   id = "sample_taken",
-                  actionButton("download_sample", "Download Sample of dwellings sheet", class = "btn-primary"),
                   downloadButton("sample_downloader", "Download Sample")
                 )
 

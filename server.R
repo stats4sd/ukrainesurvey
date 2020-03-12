@@ -12,29 +12,6 @@ server <- function(input, output, session) {
   output$nationalTable <- make_datatable(national_summary)
 
 
-  # prepare printable download
-  output$testdown <- downloadHandler(
-    filename = function() {
-      paste0("Testing Download.pdf")
-    },
-    
-    content = function(file) {
-      
-      tempReport <- file.path(tempdir(), "sampled_dwellings.Rmd")
-      file.copy("sampled_dwellings.Rmd", tempReport, overwrite = TRUE)
-      
-      params <- list(
-        clusters = clusters
-        )
-      
-      rmarkdown::render(tempReport, output_file = file,
-                        params = params,
-                        envir = new.env(parent = globalenv())
-      )
-    }
-  )
-  
-
   shinyjs::hide('error_message')
   shinyjs::hide('replament_table')
   shinyjs::hide('show_replacement')
@@ -83,36 +60,9 @@ server <- function(input, output, session) {
     
     showModal(dataTableModal(input$cluster))
     
-    # prepare printable download
-    output$sample_downloader <- downloadHandler(
-      filename = function() {
-         paste0("Sampled Dwellings for cluster ", clusters$id, ".pdf")
-      },
-
-      content = function(file) {
-        
-        tempReport <- file.path(tempdir(), "sampled_dwellings.Rmd")
-        file.copy("sampled_dwellings.Rmd", tempReport, overwrite = TRUE)
-        
-        params <- list(
-          selected_cluster = input$cluster, 
-          sampled_dwellings = dwellings_sampled)
-        
-        rmarkdown::render(tempReport, output_file = file,
-                          params = params,
-                          envir = new.env(parent = globalenv())
-        )
-      }
-    )
   })
 
-  observeEvent(input$download_sample, {
-    req(input$cluster)
-    dwellings<-load_dwellings(input$cluster)
-    output$checklistTable <- download_sample(input$cluster, dwellings)
-  })
-
-  observeEvent(input$generate_sample_button, {
+    observeEvent(input$generate_sample_button, {
     showModal(dataModal())
   })
 
@@ -334,31 +284,30 @@ server <- function(input, output, session) {
         ))
     })
 
+    # prepare printable download
+    output$sample_downloader <- downloadHandler(
+      filename = function() {
+        paste0("Sampled Dwellings for cluster ", clusters$id, ".pdf")
+      },
+      
+      content = function(file) {
+        
+        tempReport <- file.path(tempdir(), "sampled_dwellings.Rmd")
+        file.copy("templates/sampled_dwellings.Rmd", tempReport, overwrite = TRUE)
+        
+        params <- list(
+          selected_cluster = input$cluster, 
+          sampled_dwellings = make_printable_sample(dwellings)
+          )
+        
+        rmarkdown::render(tempReport, output_file = file,
+                          params = params,
+                          envir = new.env(parent = globalenv())
+        )
+      }
+    )
+    
   }) #endobserve
-
-  #####################################
-  # QR CODE STUFF
-  #####################################
-  # qrcode = reactive( t(qrcode_gen("https://stats4sd.org", plotQRcode= FALSE, dataOutput = TRUE)))
-  # nc = reactive( ncol(qrcode()))
-  # nr = reactive( nrow(qrcode()))
-  # scale = 10
-
-  # output$qrtest <- renderPlot({
-  #   par(mar=c(0,0,0,0))
-  #   image(
-  #     1L:nc(),
-  #     1L:nr(),
-  #     qrcode(),
-  #     xlim = 0.5 + c(0, nc()),
-  #     ylim = 0.5 + c(nr(), 0),
-  #     axes = FALSE,
-  #     xlab = "",
-  #     ylab = "",
-  #     col = c("white", "black"),
-  #     asp = 1
-  #     )
-  #   }, width = function() scale*nc(), height = function() scale*nr())
 
   #####################################
   # Generate replacement sample
