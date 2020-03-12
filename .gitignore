@@ -13,3 +13,7 @@ config.yml
 .RData
 **/*.DS_Store
 *.log
+
+# temporary files created by R markdown
+*.utf8.md
+*.knit.md
