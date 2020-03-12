@@ -5,8 +5,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(id="tabs",
       menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-      menuItem("QR Test", tabName = "qrtest", icon = icon("th")),
-      menuItem("Replacement Sample", tabName = "replacement_sample", icon = icon("fas fa-exchange-alt")),
+      menuItem("Replacement Generation", tabName = "replacement_sample", icon = icon("fas fa-exchange-alt")),
       menuItem("Cluster Summary", tabName = "cluster_summary", icon = icon("file")),
       menuItem("District Summary", tabName = "district_summary", icon = icon("file")),
       menuItem("Oblast Summary", tabName = "oblast_summary", icon = icon("file")),
@@ -242,7 +241,7 @@ ui <- dashboardPage(
               ),
               selectizeInput("filter_district_ds",
                              label = "Filter District",
-                             choices = load_district_summary()$district_id,
+                             choices = district_summary$district_id,
                              multiple = TRUE,
                              options = list(
                                placeholder = "Select a district",
@@ -256,7 +255,7 @@ ui <- dashboardPage(
               h2("Oblast Summary"),
               selectizeInput("filter_oblast_os",
                              label = "Select an Oblast",
-                             choices = load_oblast_summary()$oblast_en,
+                             choices = oblast_summary$oblast_en,
                              multiple = TRUE,
                              options = list(
                                placeholder = "Select an Oblast",
@@ -273,62 +272,62 @@ ui <- dashboardPage(
               box(width=3,
                   status="success",
                   h4('buildings listed'),
-                   p(load_national_summary()$buildings_listed)
+                   p(national_summary$buildings_listed)
               ),
               box(width=3,
                   status="success",
                   h4('dwelligns listed'),
-                  p(load_national_summary()$dwellings_listed)
+                  p(national_summary$dwellings_listed)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of salt samples collected'),
-                  p(load_national_summary()$tot_salt_samples)
+                  p(national_summary$tot_salt_samples)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of 1st urine samples collected'),
-                  p(load_national_summary()$tot_1st_urine_samples_collected)
+                  p(national_summary$tot_1st_urine_samples_collected)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of 2nd urine samples collected'),
-                  p(load_national_summary()$tot_2st_urine_samples_collected)
+                  p(national_summary$tot_2st_urine_samples_collected)
               ),
               box(width=3,
                   status="success",
                   h4('Number of completed interviews'),
-                  p(load_national_summary()$completed_interviews)
+                  p(national_summary$completed_interviews)
               ),
               box(width=3,
                   status="success",
                   h4('Number of unsuccessful interviews'),
-                  p(load_national_summary()$unsuccessful_interviews)
+                  p(national_summary$unsuccessful_interviews)
               ),
               box(width=3,
                   status="success",
                   h4('dwelligns visited uploaded to date'),
-                  p(load_national_summary()$dwellings_visited)
+                  p(national_summary$dwellings_visited)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of interviews attempted'),
-                  p(load_national_summary()$interviews_attempted)
+                  p(national_summary$interviews_attempted)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of interviews not completed'),
-                  p(load_national_summary()$interviews_not_completed)
+                  p(national_summary$interviews_not_completed)
               ),
               box(width=3,
                   status="success",
                   h4('Total number of completed (and successful) interviews'),
-                  p(load_national_summary()$interviews_completed_successful)
+                  p(national_summary$interviews_completed_successful)
               ),
               box(width=3,
                   status="success",
                   h4('Number of replacements'),
-                  p(load_national_summary()$replacements_number)
+                  p(national_summary$replacements_number)
               )
       )
     )

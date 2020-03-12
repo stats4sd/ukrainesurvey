@@ -1,22 +1,20 @@
 server <- function(input, output, session) {
 
   # initialise some variables
-  clusters <- load_clusters()
   selected_region <- NULL
   selected_cluster <- NULL
   buildings <- NULL
   dwellings <- NULL
-  cluster_summary <- load_cluster_summary()
-  district_summary <- load_district_summary()
-  oblast_summary <- load_oblast_summary()
-  national_summary <- load_national_summary()
   
+
+
+
   output$clustersTable <- make_datatable(cluster_summary)
   output$districtsTable <- make_datatable(district_summary)
   output$oblastsTable <- make_datatable(oblast_summary)
   output$nationalTable <- make_datatable(national_summary)
-  
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
   # prepare printable download
@@ -42,6 +40,9 @@ server <- function(input, output, session) {
   )
   
 >>>>>>> Stashed changes
+=======
+    
+>>>>>>> dev
   shinyjs::hide('error_message')
   shinyjs::hide('replament_table')
   shinyjs::hide('show_replacement')
@@ -86,6 +87,7 @@ server <- function(input, output, session) {
                         selected=clusters$id[clusters$id == input$cluster]
       )
     }
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 
 =======
@@ -114,6 +116,9 @@ server <- function(input, output, session) {
       }
     )
 >>>>>>> Stashed changes
+=======
+    
+>>>>>>> dev
   })
 
   observeEvent(input$download_sample, {
@@ -190,6 +195,8 @@ server <- function(input, output, session) {
       clearShapes() %>%
       clearMarkers()
 
+    
+    browser() 
     cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
     cluster_shapes <- merge(cluster_shapes, region_clusters, by.x = "name", by.y = "id")
 
@@ -434,17 +441,17 @@ server <- function(input, output, session) {
   observeEvent(input$filter_oblast_cs, {
 
     region_clusters <- subset(clusters, region_id == input$filter_oblast_cs)
-    
+
     req(input$filter_oblast_cs)
     clus_summ <- replace(cluster_summary,is.na(cluster_summary),0)
     clus_summ <- subset(clus_summ, region_id %in% input$filter_oblast_cs)
     output$clustersTable <- make_datatable(clus_summ)
-    
+
     updateSelectInput(session,
                       "filter_cluster_cs",
                       choices = region_clusters$id
     )
-    
+
   })
 
   observeEvent(input$filter_cluster_summary, {
@@ -460,11 +467,11 @@ server <- function(input, output, session) {
   #####################################
 
   observeEvent(input$filter_oblast_os, {
-    
+
     oblast_summ <- replace(oblast_summary, is.na(oblast_summary),0)
     oblast_summ <- subset(oblast_summ, region_id %in% input$filter_oblast_os)
     output$oblastsTable <- make_datatable(oblast_summ)
-    
+
   })
 
   #####################################
@@ -472,23 +479,23 @@ server <- function(input, output, session) {
   #####################################
 
   observeEvent(input$filter_oblast_ds, {
-    
+
     region_clusters <- subset(clusters, region_id == input$filter_oblast_cs)
-    
+
     req(input$filter_oblast_cs)
     clus_summ <- replace(cluster_summary,is.na(cluster_summary),0)
     clus_summ <- subset(clus_summ, region_id %in% input$filter_oblast_cs)
     output$districtsTable <- make_datatable(clus_summ)
-    
+
     updateSelectInput(session,
                       "filter_district_ds",
                       choices = region_clusters$id
     )
-    
+
   })
-  
+
   observeEvent(input$filter_district_ds, {
-    
+
     req(input$filter_district_ds)
     district_summ<- replace(district_summary,is.na(district_summary),0)
     district_summ <- subset(district_summ, district_id %in% input$filter_district_ds)
