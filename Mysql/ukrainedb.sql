@@ -152,9 +152,11 @@ CREATE TABLE `dwellings` (
   `building_id` bigint(11) DEFAULT NULL,
   `dwelling_number` int(11) DEFAULT NULL COMMENT 'Auto Increment per building',
   `sampled` int(1) DEFAULT '0' COMMENT 'Is the dwelling part of the sample frame',
+  `sample_order` int(11) DEFAULT NULL COMMENT 'Order in which the dwellings were sampled.',
   `replacement_order_number` int(11) DEFAULT NULL COMMENT 'Order the dwellings should be selected if replacements are needed',
   `data_collected` tinyint(1) DEFAULT '0' COMMENT 'Has a hh_form been submitted for this dwelling?',
   `survey_success` tinyint(1) DEFAULT '0' COMMENT 'Was the hh_form marked as a ''successful'' interview?',
+  `salt_needed` tinyint(1) DEFAULT '0' COMMENT 'If sampled, should a salt sample be collected?',
   PRIMARY KEY (`id`),
   KEY `link_buildings_dwellings` (`building_id`),
   KEY `sampled` (`sampled`) USING BTREE,
@@ -211,8 +213,8 @@ CREATE TABLE `household_data` (
   UNIQUE KEY `id` (`id`),
   KEY `dwelling_id` (`dwelling_id`),
   KEY `submission_id` (`submission_id`),
-  CONSTRAINT `household_data_ibfk_1` FOREIGN KEY (`dwelling_id`) REFERENCES `dwellings` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `household_data_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `submissions` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `household_data_ibfk_1` FOREIGN KEY (`dwelling_id`) REFERENCES `dwellings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `household_data_ibfk_2` FOREIGN KEY (`submission_id`) REFERENCES `submissions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -267,7 +269,7 @@ CREATE TABLE `salt_samples` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   KEY `hh_id` (`hh_id`),
-  CONSTRAINT `salt_samples_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `salt_samples_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -303,8 +305,8 @@ CREATE TABLE `submissions` (
   KEY `link_forms_submissions` (`form_id`),
   CONSTRAINT `link_forms_submissions` FOREIGN KEY (`form_id`) REFERENCES `forms` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   KEY `link_dwellings_submissions` (`dwelling_id`),
-  CONSTRAINT `link_dwellings_submissions` FOREIGN KEY (`dwelling_id`) REFERENCES `dwellings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  CONSTRAINT `link_dwellings_submissions` FOREIGN KEY (`dwelling_id`) REFERENCES `dwellings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -345,7 +347,7 @@ CREATE TABLE `urine_samples` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   KEY `wra_id` (`wra_id`),
-  CONSTRAINT `urine_samples_ibfk_1` FOREIGN KEY (`wra_id`) REFERENCES `wra_data` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `urine_samples_ibfk_1` FOREIGN KEY (`wra_id`) REFERENCES `wra_data` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -371,7 +373,7 @@ CREATE TABLE `wra_data` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   KEY `hh_id` (`hh_id`),
-  CONSTRAINT `wra_data_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `wra_data_ibfk_1` FOREIGN KEY (`hh_id`) REFERENCES `household_data` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

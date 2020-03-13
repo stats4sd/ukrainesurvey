@@ -35,7 +35,7 @@ sql_user = config['mysql']['user']
 sql_pass = config['mysql']['password']
 sql_db = config['mysql']['db']
 sql_host = config['mysql']['host']
-form_uid = config['kobo']['building_form_uid']
+form_uid = config['kobo']['hh_form_uid']
 
 data_url = 'https://kobo.humanitarianresponse.info/api/v2/assets'
 headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
@@ -72,13 +72,13 @@ response = requests.get('%s/%s/data?query={"_submission_time":%%20{"$gt":"%s"}}'
 
 if response.status_code == 200:
 
-    buildings = response.json()['results']
+    submissions = response.json()['results']
 
-    with open(os.path.join('Data','xls','form_data.json'), '+w') as outfile:
+    with open(os.path.join('Data','xls','hh_data.json'), '+w') as outfile:
 
-        json.dump(buildings, outfile)
+        json.dump(submissions, outfile)
 
-    print(len(buildings))
+    print(len(submissions))
 
     #####################################
     # Insert into Submissions table
@@ -87,20 +87,20 @@ if response.status_code == 200:
 
     val_submissions = []
 
-    for building in buildings:
+    for submission in submissions:
 
 
         entry = (
-                 building['_id'],
-                 building['_uuid'],
-                 building['_xform_id_string'],
-                 building['__version__'],
-                 to_mysql_date_time(building['start']),
-                 to_mysql_date_time(building['end']),
-                 building['today'],
-                 to_mysql_date_time(building['_submission_time']),
-                 building['_submitted_by'] or "not-set",
-                 json.dumps(building)
+                 submission['_id'],
+                 submission['_uuid'],
+                 submission['_xform_id_string'],
+                 submission['__version__'],
+                 to_mysql_date_time(submission['start']),
+                 to_mysql_date_time(submission['end']),
+                 submission['today'],
+                 to_mysql_date_time(submission['_submission_time']),
+                 submission['_submitted_by'] or "not-set",
+                 json.dumps(submission)
                  )
         val_submissions.append(entry)
 
@@ -112,57 +112,69 @@ if response.status_code == 200:
 
     mydb.commit()
 
-    # #####################################
-    # # Insert into Buildings table
-    # #####################################
-    sql_buildings = "INSERT INTO buildings (`id`, `cluster_id`, `structure_number`, `num_dwellings`, `latitude`, `longitude`, `altitude`, `precision`, `address`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE id=id"
 
-    for building in buildings:
+    ##IF the submission is not a duplicate:
+    if(mycursor.rowcount > 0):
 
-        try:
-            gps = building['gps'].split()
-
-        except KeyError:
-            ## FOR DEMO ONLY
-            gps = [building['cheat/latitude'], building['cheat/longitude'], 0, 0]
-
-        building_entry = (
-                 building['_id'],
-                 building['cluster_id'],
-                 building['structure_number'],
-                 building['number_dwellings'],
-                 gps[0],
-                 gps[1],
-                 gps[2],
-                 gps[3],
-                 building['address'])
-
-        mycursor.execute(sql_buildings, (building_entry))
-        mydb.commit()
-        print(mycursor.rowcount, "buildings were inserted")
         # #####################################
-        # # Generate Dwellings (Only if building was new)
+        # # Insert into household_data table
         # #####################################
 
-        if(mycursor.rowcount > 0):
-            val_dwellings = []
+        for submission in submissions:
 
-            for x in range(1, int(building['number_dwellings'])+1):
-                dwelling_entry = (
-                                  building['_id'],
-                                  x
-                                  )
+            sql_hh = "INSERT INTO household_data (`dwelling_id`, `submission_id`, `interview_status`) VALUES (%s, %s, %s)"
 
-                val_dwellings.append(dwelling_entry)
+            household_entry = (
+                     submission['location/dwelling_id'],
+                     submission['_id'],
+                     submission['cheat/survey_outcome'])
 
-            sql_dwellings = "INSERT INTO dwellings (`building_id`, `dwelling_number`) VALUES (%s, %s) ON DUPLICATE KEY UPDATE id=id"
-
-            mycursor.executemany(sql_dwellings, val_dwellings)
+            mycursor.execute(sql_hh, (household_entry))
             mydb.commit()
-            print(mycursor.rowcount, "dwellings were inserted")
 
-        ## End Dwellings insert
-    ## End For buildings loop
+            print(mycursor.rowcount, "hh_data record(s) was/were inserted")
+            hh_id = mycursor.lastrowid
+            # #####################################
+            # # wra_data - add dummy submission
+            # #####################################
+
+            sql_wra = "INSERT INTO wra_data (`hh_id`) VALUES (%s)"
+            wra_entry = (hh_id,)
+
+            mycursor.execute(sql_wra, (wra_entry))
+            mydb.commit()
+            print(mycursor.rowcount, "wra record(s) was/were inserted")
+            wra_id = mycursor.lastrowid
+
+            # #####################################
+            # # urine_samples - add dummy submission
+            # #####################################
+
+            sql_urine = "INSERT INTO urine_samples (`wra_id`) VALUES (%s)"
+            urine_entry = (wra_id,)
+
+            ## Add 2 samples if 2 are needed
+            for x in range(1, int(submission['cheat/urine_samples'])+1):
+
+                mycursor.execute(sql_urine, (urine_entry))
+                mydb.commit()
+                print(mycursor.rowcount, "urine sample record(s) was/were inserted")
+
+
+            # #####################################
+            # # salt_samples - add dummy submission
+            # #####################################
+
+            if(submission['cheat/salt_samples'] == 1):
+                sql_salt = "INSERT INTO salt_samples (`hh_id`) VALUES (%s)"
+                salt_entry = (wra_id,)
+
+                mycursor.execute(sql_salt, salt_entry)
+                mydb.commit()
+                print(mycursor.rowcount, "salt sample record(s) was/were inserted")
+            # End if submission includes salt sample
+        # End foreach submission loop
+    # End if submission is new
 ## End if response is success
 else:
     print('Call to Kobotools returned status: %s' % response.status_code)
