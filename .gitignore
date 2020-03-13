@@ -1,7 +1,19 @@
 # list of files ignored by git (neither pulled nor pushed)
+**/~$*
 *.yml
+Data/test
 packrat/lib*/
 packrat/src*/
 .Rhistory
 .Rproj.user
 desktop.ini
+XlsImporter/form_data.json
+Data/xls/
+config.yml
+.RData
+**/*.DS_Store
+*.log
+
+# temporary files created by R markdown
+*.utf8.md
+*.knit.md
