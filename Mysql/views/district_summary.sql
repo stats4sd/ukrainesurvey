@@ -2,7 +2,7 @@
 
 SELECT 
        `clusters`.`smd_id` AS `district_id`,
-       clusters.region_id as region_id,
+       `clusters`.`region_id` as `region_id`,
       SUM(`cluster_summary`.`dwellings_listed`) AS `dwellings_listed`,
       SUM(`cluster_summary`.`buildings_listed`) AS `buildings_listed`,
       SUM(`cluster_summary`.`replacements_number`) AS `replacements_number`,
