@@ -22,11 +22,12 @@ def to_mysql_date_time(string):
 
     return datetime.strftime(string, '%Y-%m-%d %H:%M:%S')
 
-#####################################
-# Get Config Details
-#####################################
 
 def import_hh():
+
+    #####################################
+    # Get Config Details
+    #####################################
     with open(os.path.join(wd, 'config.yml')) as config_file:
         config = yaml.full_load(config_file);
 
@@ -53,20 +54,28 @@ def import_hh():
 
     mycursor = mydb.cursor()
 
-    sql = "SELECT submission_time from submissions order by submission_time desc limit 1";
+    sql = 'SELECT submission_time from submissions where form_id = "%s" order by submission_time desc limit 1' % form_uid;
 
     mycursor.execute(sql)
-    latest_sub = mycursor.fetchone()[0]
+    latest_sub = mycursor.fetchone()
 
-    ## Minus 1 day as a quick way to ensure we are not missing any submissions with to-the-second identical timestamps.
-    date_to_filter = latest_sub - timedelta(days=1)
-    filter_string = date_to_filter.strftime("%Y-%m-%dT%H:%M:%S")
+    ## By default, the filter to use for the get request is empty
+    filter_string = ""
 
+    ##If there is a submission, find the most recent submission, then filter the main query to only pull submissions from that day onward...
+
+    if latest_sub is not None:
+        ## Minus 1 day as a quick way to ensure we are not missing any submissions with to-the-second identical timestamps.
+        date_to_filter = latest_sub - timedelta(days=1)
+        date_string = date_to_filter.strftime("%Y-%m-%dT%H:%M:%S")
+
+        # format the query as per instructions at https://kobo.humanitarianresponse.info/api/v2/assets
+        filter_string = '?query={"_submission_time":%%20{"$gt":"%s"}}' % (date_string)
 
     #####################################
     # GET data from Kobotools
     #####################################
-    response = requests.get('%s/%s/data?query={"_submission_time":%%20{"$gt":"%s"}}' % (data_url, form_uid, filter_string),
+    response = requests.get('%s/%s/data%s' % (data_url, form_uid, filter_string),
                             headers=headers,
                             auth=(kobo_user,kobo_pass)
                             );
@@ -74,12 +83,6 @@ def import_hh():
     if response.status_code == 200:
 
         submissions = response.json()['results']
-
-        with open(os.path.join('Data','xls','hh_data.json'), '+w') as outfile:
-
-            json.dump(submissions, outfile)
-
-        print(len(submissions))
 
         #####################################
         # Insert into Submissions table
