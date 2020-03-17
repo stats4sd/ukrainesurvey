@@ -54,7 +54,7 @@ kable(
   params$sampled_dwellings, 
   format = "latex",
   row.names = FALSE,
-  col.names = c("Address", "Visit 1", "Visit 2", "Visit 3", "Success", "Salt", "Urine 1", "Urine 2")
+  col.names = c("HH No.", "Address", "Visit 1", "Visit 2", "Visit 3", "Success", "Salt", "Urine 1", "Urine 2")
   ) %>%
   kable_styling(
       latex_options = c("scale_down")

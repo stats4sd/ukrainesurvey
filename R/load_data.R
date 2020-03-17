@@ -47,6 +47,7 @@ load_dwellings <- function(cluster_id) {
   dwellings.replacement_order_number,
   dwellings.data_collected,
   dwellings.building_id,
+  dwellings.sample_order,
   sampled_dwellings_csv.visual_address,
   buildings.cluster_id,
   buildings.structure_number,
@@ -125,6 +126,8 @@ update_dwellings <- function(sampled_dwellings) {
                    sampled_dwellings[row, "sampled"],
                    ", salt_needed = ",
                    sampled_dwellings[row, "salt_needed"],
+                   ", sample_order = ",
+                   sampled_dwellings[row, "sample_order"],
                    "WHERE dwellings.id = ",
                    sampled_dwellings[row, "dwelling_id"])
 
@@ -178,6 +181,8 @@ update_replacement <- function(replaced_dwellings) {
       sql <- paste("UPDATE dwellings
                    SET replacement_order_number = ",
                    replacement_number,
+                   ", sample_order = ",
+                   replaced_dwellings[row, "sample_order"],
                    "WHERE dwellings.id = ",
                    replaced_dwellings[row, "dwelling_id"])
 

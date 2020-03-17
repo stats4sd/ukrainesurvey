@@ -33,7 +33,7 @@ make_sample_datatable <- function(df) {
           #  render = JS('function(data, type, row, meta) { return "<input type=\'checkbox\'></input>" }')
           )
         ),
-        dom = 'Brt',
+        dom = 'rt',
         buttons = c('excel', 'pdf'),
         text = 'Download',
         br()

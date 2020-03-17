@@ -20,9 +20,8 @@ sampled_dwellings_model <- function(cluster_id) {
   modalDialog(
     size = 'l',
     h4(class="text-success", paste("Sampled Dwellings for Cluster - ", cluster_id)),
-    p("The table below shows the 8 sampled dwellings for this cluster."),
-    p("Please download this as a pdf file and print it for field use."),
-    DT::dataTableOutput("checklistTable"),
+    p("8 Dwellings have been randomly selected. You can download the details of the sample using the button in the Cluster Information Panel"),
+    # DT::dataTableOutput("checklistTable"),
 
     footer = tagList(
 
@@ -57,9 +56,9 @@ generate_new_sample <- function(cluster_id, dwellings) {
 
   if(check_cluster$sample_taken==0){
 
-    dwellings$sample.order<-sample(1:nrow(dwellings))
-    dwellings$sampled<-ifelse(dwellings$sample.order<=SAMPLE_NUM,TRUE,FALSE)
-    dwellings$salt_needed <- ifelse(dwellings$sample.order %in% list(1, 2, 4, 6, 8),TRUE,FALSE)
+    dwellings$sample_order<-sample(1:nrow(dwellings))
+    dwellings$sampled<-ifelse(dwellings$sample_order<=SAMPLE_NUM,TRUE,FALSE)
+    dwellings$salt_needed <- ifelse(dwellings$sample_order %in% list(1, 2, 4, 6, 8),TRUE,FALSE)
 
     #update Dwellings in database
     update_dwellings(dwellings)
@@ -96,7 +95,9 @@ make_printable_sample <- function(dwellings){
   sampled_dwellings$urine_2<-"[   ]"
 
   sampled_dwellings<-sampled_dwellings %>%
-    select(visual_address, visit1, visit2, visit3, success, salt_collected, urine_1, urine_2)
+    select(sample_order, visual_address, visit1, visit2, visit3, success, salt_collected, urine_1, urine_2)
+
+  sampled_dwellings <- sampled_dwellings[order(sampled_dwellings$sample_order),]
 
   return(sampled_dwellings)
 
@@ -130,7 +131,8 @@ generate_replacement <- function(cluster_id, repl_num) {
     dwellings_not_sampled <- dwellings %>%  subset(sampled==FALSE & is.na(replacement_order_number))
     selected_replacement <- sample_n(dwellings_not_sampled, size=repl_num, replace = FALSE)
     selected_replacement$replacement_order_number <- last_repl_num+1:nrow(selected_replacement)
-
+    selected_replacement$sample_order <- last_repl_num+9:nrow(selected_replacement)
+    
     #update Dwellings in database
     update_replacement(selected_replacement)
 
