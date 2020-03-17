@@ -27,7 +27,7 @@ server <- function(input, output, session) {
     }
     else {
       dwellings_sampled <- generate_new_sample(input$cluster, dwellings)
-      output$checklistTable <- download_sample(input$cluster, dwellings_sampled)
+      output$checklistTable <- make_sample_datatable(make_printable_sample(dwellings_sampled))
 
 
       ## manually update values to avoid need for reloading from database;
@@ -58,12 +58,12 @@ server <- function(input, output, session) {
     }
 
     
-    showModal(dataTableModal(input$cluster))
+    showModal(sampled_dwellings_model(input$cluster))
     
   })
 
     observeEvent(input$generate_sample_button, {
-    showModal(dataModal())
+    showModal(confirm_listing_model())
   })
 
   ## Something to do with the cluster summary tab...
