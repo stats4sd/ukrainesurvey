@@ -41,7 +41,7 @@ def import_buildings():
     sql_pass = config['mysql']['password']
     sql_db = config['mysql']['db']
     sql_host = config['mysql']['host']
-    form_uid = config['kobo']['building_form_uid']
+    form_uid = config['kobo']['building_form_demo_uid']
 
     data_url = 'https://kobo.humanitarianresponse.info/api/v2/assets'
     headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}

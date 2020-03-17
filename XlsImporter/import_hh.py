@@ -37,7 +37,9 @@ def import_hh():
     sql_pass = config['mysql']['password']
     sql_db = config['mysql']['db']
     sql_host = config['mysql']['host']
-    form_uid = config['kobo']['hh_form_uid']
+
+    ## Using the uid for the demo hh form
+    form_uid = config['kobo']['hh_form_demo_uid']
 
     data_url = 'https://kobo.humanitarianresponse.info/api/v2/assets'
     headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
