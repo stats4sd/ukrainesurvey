@@ -2,7 +2,6 @@
 **/~$*
 *.yml
 Data/test
-Data/sampled_dwellings.csv
 packrat/lib*/
 packrat/src*/
 .Rhistory
