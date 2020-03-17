@@ -23,9 +23,9 @@ sampled_dwellings_model <- function(cluster_id) {
     p("The table below shows the 8 sampled dwellings for this cluster."),
     p("Please download this as a pdf file and print it for field use."),
     DT::dataTableOutput("checklistTable"),
-    
+
     footer = tagList(
-      
+
       modalButton("Close")
     )
   )
@@ -47,29 +47,32 @@ too_few_dwellings_modal <- function() {
 #####################################
 # Function to generate a sample for a cluster
 # @prop cluster_id - the id of the cluster to sample
-# @prop dwellings - passing the global dwellings into the variable (probably not needed because globals... 
+# @prop dwellings - passing the global dwellings into the variable (probably not needed because globals...
 # @returns sampled dwellings
 #####################################
 generate_new_sample <- function(cluster_id, dwellings) {
 
   SAMPLE_NUM<-8
   check_cluster<-load_clusters() %>% filter(id == cluster_id)
-  
+
   if(check_cluster$sample_taken==0){
-   
+
     dwellings$sample.order<-sample(1:nrow(dwellings))
     dwellings$sampled<-ifelse(dwellings$sample.order<=SAMPLE_NUM,TRUE,FALSE)
     dwellings$salt_needed <- ifelse(dwellings$sample.order %in% list(1, 2, 4, 6, 8),TRUE,FALSE)
 
     #update Dwellings in database
     update_dwellings(dwellings)
-    
+
     #update cluster in database
     update_cluster(cluster_id)
-    
+
   }
-  sampled_dwellings <- dwellings %>% filter(sampled == 1)  
-  
+  sampled_dwellings <- dwellings %>% filter(sampled == 1)
+
+
+  save_dwellings_csv()
+
   return(sampled_dwellings)
 
 }
@@ -82,21 +85,21 @@ generate_new_sample <- function(cluster_id, dwellings) {
 make_printable_sample <- function(dwellings){
 
   sampled_dwellings = subset(dwellings, sampled == 1 | replacement_order_number > 0)
-  
+
   sampled_dwellings$visit1 <- "[    ]"
   sampled_dwellings$visit2 <- "[    ]"
   sampled_dwellings$visit3 <- "[    ]"
-  
+
   sampled_dwellings$success<-"[   ]"
   sampled_dwellings$salt_collected<-"[   ]"
   sampled_dwellings$urine_1<-"[   ]"
   sampled_dwellings$urine_2<-"[   ]"
-  
+
   sampled_dwellings<-sampled_dwellings %>%
     select(visual_address, visit1, visit2, visit3, success, salt_collected, urine_1, urine_2)
-  
+
   return(sampled_dwellings)
-  
+
 }
 
 #####################################
@@ -107,42 +110,42 @@ make_printable_sample <- function(dwellings){
 generate_replacement <- function(cluster_id, repl_num) {
 
   repl_num <-as.numeric(repl_num)
- 
+
   dwellings <- load_dwellings(cluster_id)
   check_cluster <- load_clusters() %>% filter(id == cluster_id)
   check_replacement <- dwellings %>%  filter(replacement_order_number == max(replacement_order_number, na.rm = TRUE))
-  
-  #Create the last replacement number 
+
+  #Create the last replacement number
   if(nrow(check_replacement)>0){
-    
+
     last_repl_num<-as.numeric(max(check_replacement$replacement_order_number,  na.rm = TRUE))
-    
+
   } else {
-    
+
     last_repl_num<-0
   }
-  
+
   if(check_cluster$sample_taken == 1){
 
     dwellings_not_sampled <- dwellings %>%  subset(sampled==FALSE & is.na(replacement_order_number))
     selected_replacement <- sample_n(dwellings_not_sampled, size=repl_num, replace = FALSE)
     selected_replacement$replacement_order_number <- last_repl_num+1:nrow(selected_replacement)
-    
+
     #update Dwellings in database
     update_replacement(selected_replacement)
-    
+
     #create replaced_dwellings for the return
     dwellings <- load_dwellings(cluster_id)
     replaced_dwellings<-dwellings%>%  filter(replacement_order_number <= last_repl_num + repl_num)
     replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, cluster_id, structure_number, address ,latitude,longitude)
     replaced_dwellings<-replaced_dwellings[order(replaced_dwellings$replacement_order_number),]
     return(replaced_dwellings)
-  
+
   } else {
-    
-    return(NULL) 
+
+    return(NULL)
   }
-  
+
 }
 
 #####################################
@@ -151,11 +154,11 @@ generate_replacement <- function(cluster_id, repl_num) {
 # @return a number of replacement for the cluster
 #####################################
 count_replacement <- function(cluster_id) {
-  
+
   dwellings_by_cluster<-load_dwellings(cluster_id)
   number_replacement<-length(which(dwellings_by_cluster$replacement_order_number>0))
   return(number_replacement)
-  
+
 }
 
 #####################################
@@ -164,13 +167,13 @@ count_replacement <- function(cluster_id) {
 # @return a number of replacement for the cluster
 #####################################
 replacement_list <- function(cluster_id) {
-  
+
   dwellings_by_cluster<-load_dwellings(cluster_id)
   replaced_dwellings <- dwellings_by_cluster %>%  filter(replacement_order_number > 0)
   replaced_dwellings <- replaced_dwellings %>% select(replacement_order_number, region_name_uk, region_name_en, cluster_id, structure_number, address ,latitude,longitude)
-  
+
   return(replaced_dwellings)
-  
+
 }
 
 

@@ -239,6 +239,20 @@ load_national_summary <- function() {
   return(national_summary)
 }
 
+save_dwellings_csv <- function() {
+    options(warn=-1)
+    con <- get_sql_connection()
+
+    sql <- "SELECT * FROM sampled_dwellings_csv"
+
+    sampled_dwellings_csv <- dbGetQuery(con,sql)
+    drop_sql_connection(con)
+    options(warn=0)
+
+    write.csv(sampled_dwellings_csv, file="Data/sampled_dwellings.csv", row.names=FALSE, fileEncoding = "utf8")
+}
+
+
 killDbConnections <- function () {
 
   all_cons <- dbListConnections(MySQL())
