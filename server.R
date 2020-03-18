@@ -1,11 +1,18 @@
 server <- function(input, output, session) {
 
+    # initialise some global variables
+    clusters <- load_clusters()
+    cluster_summary <- load_cluster_summary()
+    district_summary <- load_district_summary()
+    oblast_summary <- load_oblast_summary()
+    national_summary <- load_national_summary()
+
   # initialise some per-session variables
   selected_region <- NULL
   selected_cluster <- NULL
   buildings <- NULL
   dwellings <- NULL
-  
+
   output$clustersTable <- make_datatable(cluster_summary)
   output$districtsTable <- make_datatable(district_summary)
   output$oblastsTable <- make_datatable(oblast_summary)
@@ -57,9 +64,9 @@ server <- function(input, output, session) {
       )
     }
 
-    
+
     showModal(sampled_dwellings_model(input$cluster))
-    
+
   })
 
     observeEvent(input$generate_sample_button, {
@@ -75,11 +82,11 @@ server <- function(input, output, session) {
 
   cluster_filename <- reactive({
     if(!is.na(input$cluster) & input$cluster != "") {
-      return(paste0("-cluster-", input$cluster))  
+      return(paste0("-cluster-", input$cluster))
     }
     return("")
   })
-  
+
   map_reactive <- reactive({
     leaflet() %>%
       addTiles() %>%
@@ -130,7 +137,7 @@ server <- function(input, output, session) {
       clearShapes() %>%
       clearMarkers()
 
-    
+
     cluster_shapes <- subset(shape_json, name %in% region_clusters$id)
     cluster_shapes <- merge(cluster_shapes, region_clusters, by.x = "name", by.y = "id")
 
@@ -289,24 +296,24 @@ server <- function(input, output, session) {
       filename = function() {
         paste0("Sampled Dwellings for cluster ", clusters$id, ".pdf")
       },
-      
+
       content = function(file) {
-        
+
         tempReport <- file.path(tempdir(), "sampled_dwellings.Rmd")
         file.copy("templates/sampled_dwellings.Rmd", tempReport, overwrite = TRUE)
-        
+
         params <- list(
-          selected_cluster = input$cluster, 
+          selected_cluster = input$cluster,
           sampled_dwellings = make_printable_sample(dwellings)
           )
-        
+
         rmarkdown::render(tempReport, output_file = file,
                           params = params,
                           envir = new.env(parent = globalenv())
         )
       }
     )
-    
+
   }) #endobserve
 
   #####################################
