@@ -83,8 +83,10 @@ def import_buildings():
 
         buildings = response.json()['results']
 
-
-        print(len(buildings))
+        print("query submitted to Kobo: ")
+        print(filter_string)
+        print("~~~~~~BUILDINGS FOUND~~~~~~~")
+        print(buildings)
 
         #####################################
         # Insert into Submissions table
