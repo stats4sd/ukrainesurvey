@@ -130,7 +130,7 @@ def import_buildings():
 
             except KeyError:
                 ## FOR DEMO ONLY
-                gps = [building['cheat/latitude'], building['cheat/longitude'], 0, 0]
+                gps = [building['cheat/longitude'], building['cheat/latitude'], 0, 0]
 
             building_entry = (
                      building['_id'],

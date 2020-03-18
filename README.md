@@ -23,7 +23,7 @@ R also requires a "default" block, even though we don't reference it in the code
 4. You should then be able to run the app through RStudio!
 
 ## 4. Setup Python
-We use python to pull data from Kobotools into the database and to generate fake data for testing. 
+We use python to pull data from Kobotools into the database and to generate fake data for testing.
 
 1. Install Python3.7+
 2. Run `pip3 install -r requirements.txt` to make sure you have all the packages needed.
@@ -35,7 +35,7 @@ Restore the database in Mysql/ukrainedb.sql to the database specified in yøur c
 
 Then run the update_sql_views script to ensure you have the latest version of all MySQL Views:
 
-`python3 deployement/update_sql_views.py`
+`python3 deployment/update_sql_views.py`
 
 ## 6. Generate Fake Data for testing
 
@@ -43,5 +43,5 @@ Then run the update_sql_views script to ensure you have the latest version of al
 `python3 Data/building_generator.py`
 
 
-You should now have a working platform where each cluster has a set of buildings and dwellings ready for sampling. 
+You should now have a working platform where each cluster has a set of buildings and dwellings ready for sampling.
 
