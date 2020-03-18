@@ -112,10 +112,6 @@ def import_buildings():
                      )
             val_submissions.append(entry)
 
-
-        print(sql_submissions % val_submissions[0])
-        ##print(val_submissions)
-
         mycursor.executemany(sql_submissions, val_submissions)
 
         mydb.commit()
@@ -126,6 +122,11 @@ def import_buildings():
         sql_buildings = "INSERT INTO buildings (`id`, `cluster_id`, `structure_number`, `num_dwellings`, `latitude`, `longitude`, `altitude`, `precision`, `address`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE id=id"
 
         for building in buildings:
+
+            ## If the building is not residential, go no further...
+            if building['contains_dwellings'] == 'no':
+                continue
+
 
             try:
                 gps = building['gps'].split()
