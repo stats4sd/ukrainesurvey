@@ -58,7 +58,7 @@ def import_buildings():
 
     mycursor = mydb.cursor()
 
-    sql = 'SELECT submission_time from submissions where form_id = %s order by submission_time desc limit 1' % form_uid;
+    sql = 'SELECT submission_time from submissions where form_id = "%s" order by submission_time desc limit 1' % form_uid;
 
     mycursor.execute(sql)
     latest_sub = mycursor.fetchone()
