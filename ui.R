@@ -48,7 +48,7 @@ ui <- dashboardPage(
                   tags$li("The map will load the listed buildings for the chosen cluster, along with any sample information present."),
                   tags$li("You can then perform key actions for the cluster")
                 )
-            ),
+            )
           ),
 
           # map
@@ -83,7 +83,7 @@ ui <- dashboardPage(
 
               selectizeInput("cluster",
                              label = "Select Cluster",
-                             choices = clusters$id,
+                             choices = clusters_list,
                              options = list(
                                placeholder = "Select a cluster",
                                onInitialize = I('function() { this.setValue(""); }')
@@ -155,7 +155,7 @@ ui <- dashboardPage(
 
                     selectizeInput("repl_cluster",
                                    label = "Select Cluster",
-                                   choices = clusters$id,
+                                   choices = clusters_list,
                                    options = list(
                                      placeholder = "Select a cluster",
                                      onInitialize = I('function() { this.setValue(""); }')
@@ -216,7 +216,7 @@ ui <- dashboardPage(
               ),
               selectizeInput("filter_cluster_cs",
                              label = "Filter Cluster",
-                             choices = clusters$id,
+                             choices = clusters_list,
                              multiple = TRUE,
                              options = list(
                                placeholder = "Select a cluster",
@@ -228,21 +228,12 @@ ui <- dashboardPage(
 
       ),
       tabItem(tabName = 'district_summary',
-              h2("Discrict Summary"),
+              h2("District Summary"),
               selectizeInput("filter_oblast_cs",
                              label = "Select an Oblast",
                              choices = regions_list,
                              options = list(
                                placeholder = "Select an Oblast",
-                               onInitialize = I('function() { this.setValue(""); }')
-                             )
-              ),
-              selectizeInput("filter_district_ds",
-                             label = "Filter District",
-                             choices = district_summary$district_id,
-                             multiple = TRUE,
-                             options = list(
-                               placeholder = "Select a district",
                                onInitialize = I('function() { this.setValue(""); }')
                              )
               ),
@@ -253,7 +244,7 @@ ui <- dashboardPage(
               h2("Oblast Summary"),
               selectizeInput("filter_oblast_os",
                              label = "Select an Oblast",
-                             choices = oblast_summary$oblast_en,
+                             choices = regions_list,
                              multiple = TRUE,
                              options = list(
                                placeholder = "Select an Oblast",
@@ -266,67 +257,7 @@ ui <- dashboardPage(
       tabItem(tabName = 'national_summary',
               h2("National Summary"),
               br(),
-
-              box(width=3,
-                  status="success",
-                  h4('buildings listed'),
-                   p(national_summary$buildings_listed)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('dwelligns listed'),
-                  p(national_summary$dwellings_listed)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Total number of salt samples collected'),
-                  p(national_summary$tot_salt_samples)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Total number of 1st urine samples collected'),
-                  p(national_summary$tot_1st_urine_samples_collected)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Total number of 2nd urine samples collected'),
-                  p(national_summary$tot_2st_urine_samples_collected)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Number of completed interviews'),
-                  p(national_summary$completed_interviews)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Number of unsuccessful interviews'),
-                  p(national_summary$unsuccessful_interviews)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('dwelligns visited uploaded to date'),
-                  p(national_summary$dwellings_visited)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Total number of interviews attempted'),
-                  p(national_summary$interviews_attempted)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Total number of interviews not completed'),
-                  p(national_summary$interviews_not_completed)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Total number of completed (and successful) interviews'),
-                  p(national_summary$interviews_completed_successful)
-              ),
-              box(width=3,
-                  status="success",
-                  h4('Number of replacements'),
-                  p(national_summary$replacements_number)
-              )
+              uiOutput("national_summary")
       )
     )
   )

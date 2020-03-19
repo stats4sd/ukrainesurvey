@@ -19,3 +19,5 @@ source('R/load_data.R')
 source('R/make_datatable.R')
 source('R/sample_dwellings.R')
 
+clusters <- load_clusters()
+clusters_list <- clusters$id
